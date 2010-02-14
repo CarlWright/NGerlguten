@@ -5,4 +5,13 @@
    ./erlguten test1.xml
 
    This produces test1.pdf
+   
+   ------------------------------------------------------------------------------------------
+   
+If you don't have make to build the application, be aware that you need to run erlguten_mk_hyphen 
+to consume the file ukhyphen.tex to make a missing .erl module. It creates erlguten_hyphen_rules.erl.
+
+So if you aren't using make, you need to compile erlguten_mk_hyphen and run it to create the file
+erlguten_hyphen_rules.erl. You'll then need to compile this new module to make a working version 
+of erlguten.
 
