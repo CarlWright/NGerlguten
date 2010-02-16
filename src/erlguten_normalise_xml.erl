@@ -37,6 +37,8 @@
 
 -include("erlguten.hrl").
 
+-include_lib ("eunit/include/eunit.hrl").
+
 %%----------------------------------------------------------------------
 %% Normalise the XML
 %%   Input = XML parse tree
@@ -141,3 +143,23 @@ indexOf(Tag, []) ->
     io:format("Invalid fontmap:~p~n", [Tag]),
     exit(fatal).
 
+%%------------------------------------------------------------------------------
+%% Tests
+%%------------------------------------------------------------------------------
+
+skip_white_test_() ->
+  [?_assert(skip_white([]) =:= []),
+  ?_assert(skip_white([$\s]) =:= []),
+  ?_assert(skip_white([$a, $\s]) =:= [$a, $\s]),
+  ?_assert(skip_white([$\s, $a]) =:= [$a]) ].
+  
+collect_word_test_() ->
+  [?_assert(collect_word([],[]) =:= {[], []}),
+  ?_assert(collect_word([],"abc") =:= {"cba", []}),
+  ?_assert(collect_word(" a","abc") =:= {"cba", " a"}),
+  ?_assert(collect_word("abc ", "def") =:= {"fedabc", [$\s]}) ].
+  
+indexOf_test_() ->
+  [?_assert(indexOf("abc",[{"abc",5,2,3},6]) =:= 5),
+  ?_assert(indexOf("abc", [5,{"abc", 2,3,6},12.4]) =:= 2) ]. 
+  
