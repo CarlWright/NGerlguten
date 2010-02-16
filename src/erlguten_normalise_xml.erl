@@ -163,3 +163,14 @@ indexOf_test_() ->
   [?_assert(indexOf("abc",[{"abc",5,2,3},6]) =:= 5),
   ?_assert(indexOf("abc", [5,{"abc", 2,3,6},12.4]) =:= 2) ]. 
   
+normalise_str_test_() ->
+  [?_assert( normalise_str([], a, "abc") =:= "abc"),
+  ?_assert( normalise_str("abc",tag,[]) =:= [{wd1,tag,true,"abc"}]),
+  ?_assert( normalise_str("  abc",tag,[]) =:= [{wd1,tag,true,"abc"},{sp1,tag}]),
+  ?_assert( normalise_str("cde  abc",tag,[]) =:= [{wd1,tag,true,"abc"},{sp1,tag},{wd1,tag,true,"cde"}])   ].
+
+breakable_test_() ->
+  [?_assert(breakable(wd1,[{wd1,tag,true,"abc"}]) =:= true),
+   ?_assert(breakable(wd1,[{wd1,tag,true,"abc"},{sp1,tag}]) =:= true),
+   ?_assert(breakable(wd1,[{sp1,tag},{wd1,tag,true,"abc"},{sp1,tag}]) =:= true)  ].
+  
