@@ -172,5 +172,10 @@ normalise_str_test_() ->
 breakable_test_() ->
   [?_assert(breakable(wd1,[{wd1,tag,true,"abc"}]) =:= true),
    ?_assert(breakable(wd1,[{wd1,tag,true,"abc"},{sp1,tag}]) =:= true),
-   ?_assert(breakable(wd1,[{sp1,tag},{wd1,tag,true,"abc"},{sp1,tag}]) =:= true)  ].
+   ?_assert(breakable(wd1,[{sp1,tag},{wd1,tag,true,"abc"},{sp1,tag}]) =:= true),
+   ?_assert(breakable(raw,[{raw,tag,false,"abc"}]) =:= false)  ].
+
+normalisePara_item_test_() ->
+  [?_assert(normalise_para_item({raw, "abc"}, [{raw,tag,false,"abc"}],[]) =:= [{wd1, raw,false,"abc"}]),
+   ?_assert(normalise_para_item({raw, "abc"}, [{raw,tag,true,"abc"}],[]) =:= [{wd1, raw,true,"abc"}])].
   
