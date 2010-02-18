@@ -67,8 +67,9 @@ format(File) ->
 	    exit(1);
 	[{pi,_},{xml,{document,_, Flows}}] ->
 	    PDF  = pdf:new(),
+	    Root = filename:dirname(File),
 	    foreach(fun({flow,Args,Data}) ->
-			    Box = parse_flow(Args),
+			    Box = parse_flow(Args, Root),
 			    format_flow(PDF, Data, Box)
 		    end, Flows),
 	    Serialised = pdf:export(PDF),
@@ -160,8 +161,8 @@ get_tag_schema(Tag, [H|T]) ->
 get_tag_schema(Tag, []) ->
     exit({missing,tag,Tag}).
 
-parse_flow([{"galley",F},{"name",Tag}]) ->
-    case erlguten_xml_lite:parse_file(F) of
+parse_flow([{"galley",F},{"name",Tag}], Root) ->
+    case erlguten_xml_lite:parse_file(F, Root) of
 	{error, E} ->
 	    io:format("Error in galley(~p):~p~n",[F, E]),
 	    exit(1);

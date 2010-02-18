@@ -87,7 +87,7 @@ fonts_in() ->
     "/usr/share/fonts/afms/adobe".
 
 fonts_out() ->
-    this_dir() ++ "/fonts/efm".
+    this_dir() ++ "/../fonts/efm".
 
 this_dir() ->
     filename:dirname(code:which(?MODULE)).
@@ -106,7 +106,8 @@ all() ->
 
 read_font_info(FontName) ->
     %% io:format("Font map=~s~n",[font_map()]),
-    case file:read_file(font_map()) of
+    Map = font_map(),
+    case file:read_file(Map) of
 	{ok, Bin} ->
 	    T = binary_to_term(Bin),
 	    case keysearch(FontName, 1, T) of
