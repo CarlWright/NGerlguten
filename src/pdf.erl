@@ -45,9 +45,9 @@
 %% Set up Info, Catalog and Pages
 
 init_pdf_context()->
-    #pdfContext{info=#info{creator="Erlang", 
+    #pdfContext{info=#info{creator="NGerlguten", 
 			   creationDate="20030215152011",
-			   producer="erlguten-2.0", 
+			   producer="NGerlguten", 
 			   author="",
 			   title="",
 			   subject="",

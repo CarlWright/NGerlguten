@@ -56,6 +56,16 @@ batch([X]) ->
 
 test() ->
     format("test1.xml").
+%% 
+%% The basic flow of this module is the following:
+%% It opens the input XML file and parse it into a deep list of "flow"
+%% tuples. Each flow tuple is parsed into a "box" using parse_flow. This 
+%% parsing includes finding and parsing the galley for the "flow". The 
+%% parsed flow is then formatted into PDF output using format_flow. Then 
+%% it's done until given another set of inputfiles. 
+%%
+%% You need at least one inptu XML file and one galley file.
+%%
 
 format(File) ->
     V = erlguten_xml_lite:parse_file(File),
