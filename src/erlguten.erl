@@ -51,8 +51,10 @@
 	  paraIndent,    % {int,int} = {first,line,...}
 	  tags}).        % [#tag]
 
-batch([X]) ->
-    format(atom_to_list(X)).
+batch([X]) when is_atom(X) ->
+    format(atom_to_list(X));
+batch([X]) when is_list(X) ->
+    format(X).
 
 test() ->
     format("test1.xml").

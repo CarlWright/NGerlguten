@@ -154,10 +154,10 @@ kernedtext(PDF, Text)->
     append_stream(PDF, ["[ ",kernedtext(Text)," ] TJ\n"]).
 
 kernedtext([]) ->[];
-kernedtext([H|T]) when list(H)->  
+kernedtext([H|T]) when is_list(H)->  
     A = escapePdfText(H),
     ["(",A,") ",kernedtext(T)];
-kernedtext([H|T]) when integer(H) ->
+kernedtext([H|T]) when is_integer(H) ->
     [i2s(H)," ",kernedtext(T)].
 
 set_text_pos(PDF, X, Y)->
@@ -165,7 +165,7 @@ set_text_pos(PDF, X, Y)->
 set_text_leading(PDF, L)->
     append_stream( PDF, [n2s(L)," TL "]).
 
-set_text_rendering(PDF, MODE) when integer(MODE)->
+set_text_rendering(PDF, MODE) when is_integer(MODE)->
     append_stream(PDF, [i2s(MODE)," Tr\n"]);
 set_text_rendering(PDF, fill)->
     set_text_rendering(PDF,0);
@@ -296,7 +296,7 @@ transform(PDF, A, B, C, D, E, F)->
 translate(PDF, X, Y)->
     transform(PDF,1,0,0,1,X,Y).
 
-scale(PDF, ScaleX, ScaleY) when integer(ScaleX),integer(ScaleY)->
+scale(PDF, ScaleX, ScaleY) when is_integer(ScaleX),is_integer(ScaleY)->
     transform(PDF, ScaleX, 0, 0, ScaleY, 0, 0).
 
 rotate(PDF, 90)->
@@ -367,12 +367,12 @@ escapePdfText([C|Rest]) -> [ C | escapePdfText(Rest)].
 i2s(I) ->
     integer_to_list(I).
 
-n2s(A) when float(A)   -> f2s(A);
-n2s(A) when integer(A) -> i2s(A);
+n2s(A) when is_float(A)   -> f2s(A);
+n2s(A) when is_integer(A) -> i2s(A);
 n2s([])                -> [];
 n2s([H|T])             -> [n2s(H)," "|n2s(T)].
 
-f2s(I) when integer(I) ->
+f2s(I) when is_integer(I) ->
     i2s(I);
 f2s(F) ->    
     remove_leading_blanks(flatten(io_lib:format("~8.2f", [F]))).
