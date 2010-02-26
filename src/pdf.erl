@@ -60,7 +60,7 @@ init_pdf_context()->
 %% --------------------- User functions --------------
 
 new()->
-    erlguten_font_server:start(),
+   erlguten_font_server:start_link(),
     spawn_link(fun() -> pdfloop(init_pdf_context(), []) end).
 
 %% Export to PDF file format 

@@ -25,34 +25,95 @@
 %% Authors:   Joe Armstrong <joe@sics.se>
 %% Last Edit: 2003-03-11
 %% =====================================================================
-
+%%% Renovated : 19 Feb 2010 by  <wright@servicelevel.net>
+%%%-------------------------------------------------------------------
 -module(erlguten_font_server).
 
--include("erlguten.hrl").
+-behaviour(gen_server).
 
--compile(export_all).
+%% API
+-export([start_link/0, available_fonts/0, ensure_loaded/2, info/1, data/1, char_width/2, kern/2]).
+
+%% gen_server callbacks
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2,
+   terminate/2, code_change/3]).
 -import(lists, [member/2, foreach/2]).
 
-start() ->
-    case member(fonts, ets:all()) of
-	true ->
-	    true;
-	false ->
-	    fonts = ets:new(fonts, [named_table,set,public]),
-	    true
-    end.
+-define(SERVER, erlguten_font_server).
+   
+-include("erlguten.hrl").
+-record(state, {}).
 
-stop() ->
-    ets:delete(fonts).
 
 available_fonts() ->
-    erlguten_afm:available_fonts().
+  Fonts = gen_server:call({global,?SERVER}, {available_fonts}),
+  Fonts.
 
 ensure_loaded(Font, Index) ->
+  gen_server:call({global,?SERVER}, {ensure_loaded, Font, Index}).
+  
+info(Index) ->
+  gen_server:call({global,?SERVER}, {info, Index}).  
+  
+data(Fontname) ->
+  gen_server:call({global, ?SERVER}, {data, Fontname}).
+  
+char_width(N, Char) ->
+  gen_server:call({global, ?SERVER}, {char_width, N, Char}). 
+
+kern(N, KP) ->
+  gen_server:call({global, ?SERVER}, {kern, N, KP}).
+  
+%%====================================================================
+%% API
+%%====================================================================
+%%--------------------------------------------------------------------
+%% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
+%% Description: Starts the server
+%%--------------------------------------------------------------------
+start_link() ->
+    gen_server:start_link({global, ?SERVER}, ?MODULE, [], []).
+
+%%====================================================================
+%% gen_server callbacks
+%%====================================================================
+
+%%--------------------------------------------------------------------
+%% Function: init(Args) -> {ok, State} |
+%%                         {ok, State, Timeout} |
+%%                         ignore               |
+%%                         {stop, Reason}
+%% Description: Initiates the server
+%%--------------------------------------------------------------------
+init([]) ->
+    case member(fonts, ets:all()) of
+	true ->
+	    State = true;
+	false ->
+	    fonts = ets:new(fonts, [named_table,set,public]),
+	    State = true
+    end,
+    {ok, State}.
+
+%%--------------------------------------------------------------------
+%% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
+%%                                      {reply, Reply, State, Timeout} |
+%%                                      {noreply, State} |
+%%                                      {noreply, State, Timeout} |
+%%                                      {stop, Reason, Reply, State} |
+%%                                      {stop, Reason, State}
+%% Description: Handling call messages
+%%--------------------------------------------------------------------
+handle_call({available_fonts}, _From, State) ->
+    Fonts = erlguten_afm:available_fonts(),
+    {reply, Fonts, State};
+    
+handle_call({ensure_loaded, Font, Index}, _From, State) ->    
+   % ensure_loaded(Font, Index) ->
     %% io:format("Ensure_loaded font number=~p = ~s~n", [Index, Font]),
     case ets:lookup(fonts, {info, Index}) of
 	[_] ->
-	    true;
+		  {reply, true, State};
 	[] ->
 	    case erlguten_afm:read_font_info(Font) of
 		{ok, {afm_qdh1,Font,Widths,Kern,All}} ->
@@ -66,51 +127,84 @@ ensure_loaded(Font, Index) ->
 				    ets:insert(fonts,
 					       {{kern,Index,KP}, W})
 			    end, Kern),
-		    true;
+		    {reply, true, State};
 		{error, Why} ->
 		    exit({cannot_load_font, Why})
 	    end
-    end.
-
-info(Index) ->
+    end;
+    
+handle_call({info, Index}, _From, State) -> 
     case ets:lookup(fonts, {info, Index}) of
 	[{_,I}] ->
-	    I;
+	    {reply, I, State};
 	[] ->
 	    exit({font_server_info,Index})
-    end.
-
-data(Fontname) ->
+    end;
+    
+handle_call({data, Fontname}, _From, State) ->     
     case ets:lookup(fonts, {allData, Fontname}) of
 	[{_,I}] ->
-	    {ok, I};
+	    {reply, {ok, I}, State};
 	[] ->
-	    error
-    end.
+	    {reply, error, State}
+    end;
 
-char_width(N, Char) ->
+handle_call({char_width, N, Char}, _From, State) ->     
     case ets:lookup(fonts, {width,N,Char}) of
 	[{_,W}] ->
-	    W;
+	    {reply,W, State};
 	[] ->
 	    io:format("Cannot figure out width of:~p ~p~n",[N, Char]),
 	    io:format("Possible \n in code etc~n"),
-	    1000
-    end.
+	    {reply,1000, State}
+    end;
 
-kern(N, KP) ->
+handle_call({kern, N, KP}, _From, State) ->    
     case ets:lookup(fonts, {kern,N,KP}) of
 	[{_,W}] ->
-	    W;
+	    {reply,W, State};
 	[] ->
-	    0
+	    {reply,0, State}
     end.
 
+    
+%%--------------------------------------------------------------------
+%% Function: handle_cast(Msg, State) -> {noreply, State} |
+%%                                      {noreply, State, Timeout} |
+%%                                      {stop, Reason, State}
+%% Description: Handling cast messages
+%%--------------------------------------------------------------------
+handle_cast(_Msg, State) ->
+    {noreply, State}.
 
+%%--------------------------------------------------------------------
+%% Function: handle_info(Info, State) -> {noreply, State} |
+%%                                       {noreply, State, Timeout} |
+%%                                       {stop, Reason, State}
+%% Description: Handling all non call/cast messages
+%%--------------------------------------------------------------------
+handle_info(_Info, State) ->
+    {noreply, State}.
 
+%%--------------------------------------------------------------------
+%% Function: terminate(Reason, State) -> void()
+%% Description: This function is called by a gen_server when it is about to
+%% terminate. It should be the opposite of Module:init/1 and do any necessary
+%% cleaning up. When it returns, the gen_server terminates with Reason.
+%% The return value is ignored.
+%%--------------------------------------------------------------------
+terminate(_Reason, _State) ->
+  ets:delete(fonts),
+  ok.
 
+%%--------------------------------------------------------------------
+%% Func: code_change(OldVsn, State, Extra) -> {ok, NewState}
+%% Description: Convert process state when code is changed
+%%--------------------------------------------------------------------
+code_change(_OldVsn, State, _Extra) ->
+  {ok, State}.
 
-
-
-
+%%--------------------------------------------------------------------
+%%% Internal functions
+%%--------------------------------------------------------------------
 
