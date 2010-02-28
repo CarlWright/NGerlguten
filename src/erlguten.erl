@@ -33,7 +33,7 @@
 -behaviour(gen_server).
 
 %% API
--export([start_link/0, batch/1, test/0, format/1, format_string/2]).
+-export([start_link/0, batch/2, test/1, format/2, format_string/3]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -66,19 +66,19 @@
  
 -record(state, {}).
 
-batch([X]) when is_atom(X) ->
-    gen_server:call({global,?SERVER}, {format, atom_to_list(X)});
-batch([X]) when is_list(X) ->
-    gen_server:call({global,?SERVER}, {format, X}).
+batch(Pid,[X]) when is_atom(X) ->
+    gen_server:call(Pid, {format, atom_to_list(X)});
+batch(Pid, [X]) when is_list(X) ->
+    gen_server:call(Pid, {format, X}).
 
-test() ->
-      gen_server:call({global,?SERVER}, {format, "test1.xml"}).
+test(Pid) ->
+      gen_server:call(Pid, {format, "test1.xml"}).
 
-format(File) ->
-  gen_server:call({global, ?SERVER}, {format, File}).
+format(Pid, File) ->
+  gen_server:call(Pid, {format, File}).
 
-format_string(String, Root) ->
-  gen_server:call({global, ?SERVER}, {format_string, String, Root}).
+format_string(Pid, String, Root) ->
+  gen_server:call(Pid, {format_string, String, Root}).
 %%====================================================================
 %% API
 %%====================================================================
@@ -87,7 +87,7 @@ format_string(String, Root) ->
 %% Description: Starts the server
 %%--------------------------------------------------------------------
 start_link() ->
-    gen_server:start_link({global, ?SERVER}, ?MODULE, [], []).
+    gen_server:start_link( ?MODULE, [], []).
 
 %%====================================================================
 %% gen_server callbacks
