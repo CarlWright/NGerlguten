@@ -1,5 +1,5 @@
 %%======================================================================
-%% Main program
+%% erlguten server
 %%----------------------------------------------------------------------
 %% Copyright (C) 2003 Joe Armstrong
 %%
@@ -25,12 +25,24 @@
 %% Authors:   Joe Armstrong <joe@sics.se>
 %% Last Edit: 2003-03-12
 %% =====================================================================
-
+%%%
+%%% Renovated : 27 Feb 2010 by  <wright@>
+%%%-------------------------------------------------------------------
 -module(erlguten).
 
--compile(export_all).
+-behaviour(gen_server).
+
+%% API
+-export([start_link/0, batch/1, test/0, format/1, format_string/2]).
+
+%% gen_server callbacks
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2,
+   terminate/2, code_change/3]).
 -import(lists, [foreach/2, map/2]).
 -import(pdf, [flatten/1]).
+
+-define(SERVER, erlguten).
+
 
 -record(box, {continue,  % str()  = name of the continuation frame 
 	      free=1,    % int()  = first free line in the box
@@ -51,46 +63,140 @@
 	  paraIndent,    % {int,int} = {first,line,...}
 	  tags}).        % [#tag]
 
+ 
+-record(state, {}).
+
 batch([X]) when is_atom(X) ->
-    format(atom_to_list(X));
+    gen_server:call({global,?SERVER}, {format, atom_to_list(X)});
 batch([X]) when is_list(X) ->
-    format(X).
+    gen_server:call({global,?SERVER}, {format, X}).
 
 test() ->
-    format("test1.xml").
-%% 
-%% The basic flow of this module is the following:
-%% It opens the input XML file and parse it into a deep list of "flow"
-%% tuples. Each flow tuple is parsed into a "box" using parse_flow. This 
-%% parsing includes finding and parsing the galley for the "flow". The 
-%% parsed flow is then formatted into PDF output using format_flow. Then 
-%% it's done until given another set of inputfiles. 
-%%
-%% You need at least one inptu XML file and one galley file.
-%%
+      gen_server:call({global,?SERVER}, {format, "test1.xml"}).
 
 format(File) ->
-    V = erlguten_xml_lite:parse_file(File),
-    %% io:format("read:~p~n",[V]),
-    Out = filename:rootname(File) ++ ".pdf",
+  gen_server:call({global, ?SERVER}, {format, File}).
+
+format_string(String, Root) ->
+  gen_server:call({global, ?SERVER}, {format_string, String, Root}).
+%%====================================================================
+%% API
+%%====================================================================
+%%--------------------------------------------------------------------
+%% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
+%% Description: Starts the server
+%%--------------------------------------------------------------------
+start_link() ->
+    gen_server:start_link({global, ?SERVER}, ?MODULE, [], []).
+
+%%====================================================================
+%% gen_server callbacks
+%%====================================================================
+
+%%--------------------------------------------------------------------
+%% Function: init(Args) -> {ok, State} |
+%%                         {ok, State, Timeout} |
+%%                         ignore               |
+%%                         {stop, Reason}
+%% Description: Initiates the server
+%%--------------------------------------------------------------------
+init([]) ->
+    {ok, #state{}}.
+
+%%--------------------------------------------------------------------
+%% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
+%%                                      {reply, Reply, State, Timeout} |
+%%                                      {noreply, State} |
+%%                                      {noreply, State, Timeout} |
+%%                                      {stop, Reason, Reply, State} |
+%%                                      {stop, Reason, State}
+%% Description: Handling call messages
+%%--------------------------------------------------------------------
+handle_call({format_string, String, Root}, _From, State) ->
+  Serialised = convert_xml_to_pdf(String, Root),
+  {reply, Serialised, State};
+  
+handle_call({format, File}, _From, State) ->
+  Out = filename:rootname(File) ++ ".pdf",
+  case file:read_file(File) of
+	{ok, Bin} ->
+	  Root = filename:dirname(File),
+	  Serialised = convert_xml_to_pdf(Bin, Root),
+	  file:write_file(Out,[Serialised]),
+	  file:close(Out),
+    {reply, ok, State};
+	Error ->
+	    Error
+    end.
+
+
+
+%%--------------------------------------------------------------------
+%% Function: handle_cast(Msg, State) -> {noreply, State} |
+%%                                      {noreply, State, Timeout} |
+%%                                      {stop, Reason, State}
+%% Description: Handling cast messages
+%%--------------------------------------------------------------------
+handle_cast(_Msg, State) ->
+    {noreply, State}.
+
+%%--------------------------------------------------------------------
+%% Function: handle_info(Info, State) -> {noreply, State} |
+%%                                       {noreply, State, Timeout} |
+%%                                       {stop, Reason, State}
+%% Description: Handling all non call/cast messages
+%%--------------------------------------------------------------------
+handle_info(_Info, State) ->
+    {noreply, State}.
+
+%%--------------------------------------------------------------------
+%% Function: terminate(Reason, State) -> void()
+%% Description: This function is called by a gen_server when it is about to
+%% terminate. It should be the opposite of Module:init/1 and do any necessary
+%% cleaning up. When it returns, the gen_server terminates with Reason.
+%% The return value is ignored.
+%%--------------------------------------------------------------------
+terminate(_Reason, _State) ->
+    ok.
+
+%%--------------------------------------------------------------------
+%% Func: code_change(OldVsn, State, Extra) -> {ok, NewState}
+%% Description: Convert process state when code is changed
+%%--------------------------------------------------------------------
+code_change(_OldVsn, State, _Extra) ->
+    {ok, State}.
+
+%%--------------------------------------------------------------------
+%%% Internal functions
+%%--------------------------------------------------------------------
+
+%%--------------------------------------------------------------------
+%% Given an input string of XML we produce the contents of a PDF file
+%% in Serialised. We look up galley files in the location described by
+%% Root.
+%%--------------------------------------------------------------------
+
+convert_xml_to_pdf(XML, Root) ->
+    V = erlguten_xml_lite:parse_file(XML),
     case V of
 	{error, W} ->
 	    io:format("Error in source:~p~n",[V]),
 	    exit(1);
 	[{pi,_},{xml,{document,_, Flows}}] ->
-	    PDF  = pdf:new(),
-	    Root = filename:dirname(File),
+  	  PDF  = pdf:new(),
 	    foreach(fun({flow,Args,Data}) ->
 			    Box = parse_flow(Args, Root),
 			    format_flow(PDF, Data, Box)
 		    end, Flows),
 	    Serialised = pdf:export(PDF),
-	    file:write_file(Out,[Serialised]),
-	    pdf:delete(PDF);
+	    pdf:delete(PDF),
+	    Serialised;
 	_ ->
 	    io:format("bad XML - must begin \"<?xml ...\n<flow \n"),
 	    exit(1)
     end.
+
+
 
 format_flow(PDF, Chunks, Box) ->
     %% io:format("Flow Chunks:~p into box:~p~n", [Chunks, Box]),
@@ -113,6 +219,7 @@ format_flow(PDF, Chunks, Box) ->
 	false ->
 	    void
     end.
+
 
 format_flow1([Xml={Tag,Args,Data}|T], Box1, PDF) ->
     %% io:format("Flow Chunk:~n~p~n into box:~n~p~n", [Xml, Box1]),
@@ -169,18 +276,25 @@ get_tag_schema(Tag, [H|T]) ->
     case H#obj.name of
 	Tag -> H;
 	_   -> get_tag_schema(Tag, T)
-    end;
+    end; 
 get_tag_schema(Tag, []) ->
     exit({missing,tag,Tag}).
 
 parse_flow([{"galley",F},{"name",Tag}], Root) ->
-    case erlguten_xml_lite:parse_file(F, Root) of
-	{error, E} ->
-	    io:format("Error in galley(~p):~p~n",[F, E]),
-	    exit(1);
-	L ->
-	    G = parse_galley(F, L),
-	    get_box(Tag, G)
+  File = filename:join(Root, F),
+  case file:read_file(File) of
+	{ok, Bin} ->
+    file:close(File),
+    case erlguten_xml_lite:parse_file(Bin) of
+  	{error, E} ->
+  	    io:format("Error in galley(~p):~p~n",[F, E]),
+  	    exit(1);
+  	L ->
+  	    G = parse_galley(F, L),
+  	    get_box(Tag, G)
+      end;
+	Error ->
+	    Error
     end.
 
 get_box(Tag, {galley,_,Boxes}) ->
@@ -295,12 +409,5 @@ parse_float(S) ->
 
 zip1([H1|T1],[H2|T2]) -> [[H1," ",H2]|zip1(T1, T2)];
 zip1([], [])          -> [].
-
-
-
-
-
-
-
 
 

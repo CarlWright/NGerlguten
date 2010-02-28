@@ -28,8 +28,7 @@
 
 -module(erlguten_xml_lite).
 
--export([parse_all_forms/2, parse_single_form/2,
-	 parse_file/2, parse_file/1,
+-export([parse_all_forms/2, parse_single_form/2, parse_file/1,
 	 continue/2, pp/1, xml2bin/2, bin2xml/2, test/1]).
 -compile(export_all).
 
@@ -60,20 +59,10 @@ zip a doodly]]> aa </p>").
 
 %% parse_file(File) -> {error, What} | [Forms]
 
-parse_file(F, Root) ->  File = filename:join(Root, F),
-                        parse_file(File).
-parse_file(F) ->
-    case file:read_file(F) of
-	{ok, Bin} ->
-	    Result = parse_all_forms(binary_to_list(Bin), 1),
-	    %% case Result of
-	    %%   {error, E} -> true;
-	    %% Tree -> pp(Tree)
-	    %% end,
-	    Result;
-	Error ->
-	    Error
-    end.
+parse_file(Bin) ->
+  String = binary_to_list(Bin),
+	Result = parse_all_forms(String, 1),
+	Result.
 
 xml2bin(In, Out) ->
     case file:read_file(In) of
