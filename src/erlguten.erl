@@ -72,7 +72,7 @@ batch(Pid, [X]) when is_list(X) ->
     gen_server:call(Pid, {format, X}).
 
 test(Pid) ->
-      gen_server:call(Pid, {format, "test1.xml"}).
+      gen_server:call(Pid, {format, "../demos/test1.xml"}).
 
 format(Pid, File) ->
   gen_server:call(Pid, {format, File}).
@@ -266,8 +266,8 @@ format_flow1([Xml={Tag,Args,Data}|T], Box1, PDF) ->
 	    %% io:format("Oh dear~n")
 	    void
     end;
-format_flow1([H|T], Box, Pdf) ->
-    io:format("wot is this:~p~n",[H]),
+format_flow1([{raw,"\"\n"}|T], Box, Pdf) ->
+    %% This consumes the empty lines in the parsed results.
     format_flow1(T, Box, Pdf);
 format_flow1([], _, _) ->
     true.
