@@ -71,7 +71,7 @@ test(Pid) ->
       gen_server:call(Pid, {format, "../demos/test1.xml"}).
 
 format(Pid, File) ->
-  gen_server:call(Pid, {format, File},infinity).
+  gen_server:call(Pid, {format, File}).
 
 format_string(Pid, String, Root) ->
   gen_server:call(Pid, {format_string, String, Root}).
