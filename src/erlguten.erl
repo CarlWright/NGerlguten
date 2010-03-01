@@ -33,7 +33,7 @@
 -behaviour(gen_server).
 
 %% API
--export([start_link/0, batch/2, test/1, format/2, format_string/3]).
+-export([start_link/0, test/1, format/2, format_string/3]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -66,16 +66,12 @@
  
 -record(state, {}).
 
-batch(Pid,[X]) when is_atom(X) ->
-    gen_server:call(Pid, {format, atom_to_list(X)});
-batch(Pid, [X]) when is_list(X) ->
-    gen_server:call(Pid, {format, X}).
 
 test(Pid) ->
       gen_server:call(Pid, {format, "../demos/test1.xml"}).
 
 format(Pid, File) ->
-  gen_server:call(Pid, {format, File}).
+  gen_server:call(Pid, {format, File},infinity).
 
 format_string(Pid, String, Root) ->
   gen_server:call(Pid, {format_string, String, Root}).
@@ -121,7 +117,7 @@ handle_call({format, File}, _From, State) ->
   case file:read_file(File) of
 	{ok, Bin} ->
 	  Root = filename:dirname(File),
-	  Serialised = convert_xml_to_pdf(Bin, Root),
+	  Serialised = convert_xml_to_pdf(binary_to_list(Bin), Root),
 	  file:write_file(Out,[Serialised]),
 	  file:close(Out),
     {reply, ok, State};
@@ -285,7 +281,7 @@ parse_flow([{"galley",F},{"name",Tag}], Root) ->
   case file:read_file(File) of
 	{ok, Bin} ->
     file:close(File),
-    case erlguten_xml_lite:parse_file(Bin) of
+    case erlguten_xml_lite:parse_file(binary_to_list(Bin)) of
   	{error, E} ->
   	    io:format("Error in galley(~p):~p~n",[F, E]),
   	    exit(1);

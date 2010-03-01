@@ -59,8 +59,7 @@ zip a doodly]]> aa </p>").
 
 %% parse_file(File) -> {error, What} | [Forms]
 
-parse_file(Bin) ->
-  String = binary_to_list(Bin),
+parse_file(String) ->
 	Result = parse_all_forms(String, 1),
 	Result.
 
