@@ -173,16 +173,16 @@ code_change(_OldVsn, State, _Extra) ->
 %%--------------------------------------------------------------------
 
 convert_xml_to_pdf(XML, Root) ->
-    V = erlguten_xml_lite:parse_file(XML),
+    V = erlguten_xml_lite:parse_file(XML),  %% convert the XML into a parse tree
     case V of
 	{error, W} ->
 	    io:format("Error in source:~p~n",[V]),
 	    exit(1);
 	[{pi,_},{xml,{document,_, Flows}}] ->
-  	  PDF  = pdf:new(),
+  	  PDF  = pdf:new(),                   %% begin the PDF stream
 	    foreach(fun({flow,Args,Data}) ->
-			    Box = parse_flow(Args, Root),
-			    format_flow(PDF, Data, Box)
+			    Box = parse_flow(Args, Root),   %% parse one of the flows
+			    format_flow(PDF, Data, Box)     %% convert a parsed flow into PDF content
 		    end, Flows),
 	    Serialised = pdf:export(PDF),
 	    pdf:delete(PDF),
