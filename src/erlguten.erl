@@ -72,7 +72,7 @@ test(Pid) ->
       gen_server:call(Pid, {format, "../demos/test1.xml"}).
 
 format(Pid, File) ->
-  gen_server:call(Pid, {format, File}).
+  gen_server:call(Pid, {format, File},infinity).
 
 format_string(Pid, String, Root) ->
   gen_server:call(Pid, {format_string, String, Root}).
@@ -142,11 +142,11 @@ handle_call({format, File}, _From, State) ->
 %% Description: Handling cast messages
 %%--------------------------------------------------------------------
 
-handle_cast({format_string, String, Root, To}, State) ->
+handle_cast({format_string, String, Root, To}, _State) ->
   Serialised = convert_xml_to_pdf(String, Root),
   To ! Serialised;
   
-handle_cast({format, File, To}, State) ->
+handle_cast({format, File, To}, _State) ->
   Out = filename:rootname(File) ++ ".pdf",
   case file:read_file(File) of
 	{ok, Bin} ->
@@ -239,7 +239,7 @@ format_flow(PDF, Chunks, Box) ->
     end.
 
 
-format_flow1([Xml={Tag,Args,Data}|T], Box1, PDF) ->
+format_flow1([Xml={Tag,_Args,_Data}|T], Box1, PDF) ->
     %% io:format("Flow Chunk:~n~p~n into box:~n~p~n", [Xml, Box1]),
     CurrentObj = get_tag_schema(atom_to_list(Tag), Box1#box.objs),
     TagMap = CurrentObj#obj.tags,
@@ -399,8 +399,8 @@ parse_fontSize(S) ->
 
 parse_paraIndent(S) ->
     case string:tokens(S, ",") of
-	Toks ->
-	    map(fun(I) -> parse_int("paraIndent",  I) end, Toks);
+	[H|L] ->
+	    map(fun(I) -> parse_int("paraIndent",  I) end, [H|L]);
 	_ ->
 	    io:format("paraIndent must be of the form <int>,<int>, was:~s",
 		      [S]),
