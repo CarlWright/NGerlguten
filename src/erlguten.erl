@@ -142,11 +142,12 @@ handle_call({format, File}, _From, State) ->
 %% Description: Handling cast messages
 %%--------------------------------------------------------------------
 
-handle_cast({format_string, String, Root, To}, _State) ->
+handle_cast({format_string, String, Root, To}, State) ->
   Serialised = convert_xml_to_pdf(String, Root),
-  To ! Serialised;
+  To ! Serialised,
+  {noreply, State};
   
-handle_cast({format, File, To}, _State) ->
+handle_cast({format, File, To}, State) ->
   Out = filename:rootname(File) ++ ".pdf",
   case file:read_file(File) of
 	{ok, Bin} ->
@@ -157,7 +158,8 @@ handle_cast({format, File, To}, _State) ->
     To ! ok ;
 	Error ->
 	    To ! Error
-    end.
+    end,
+    {noreply, State}.
 %%--------------------------------------------------------------------
 %% Function: handle_info(Info, State) -> {noreply, State} |
 %%                                       {noreply, State, Timeout} |
