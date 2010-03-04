@@ -33,7 +33,7 @@
 -behaviour(gen_server).
 
 %% API
--export([start_link/0, test/1, format/2, format_string/3]).
+-export([start_link/0, test/1, format/2, format_string/3, dispatch/3, dispatch_string/4]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -43,7 +43,8 @@
 
 -define(SERVER, erlguten).
 
-
+%% this relates directly to the galley definition files
+%%
 -record(box, {continue,  % str()  = name of the continuation frame 
 	      free=1,    % int()  = first free line in the box
 	      grid,      % bool   = show a grid
@@ -75,6 +76,13 @@ format(Pid, File) ->
 
 format_string(Pid, String, Root) ->
   gen_server:call(Pid, {format_string, String, Root}).
+
+dispatch(Pid, File, To) ->
+  gen_server:cast(Pid, {format, File, To}).
+
+dispatch_string(Pid, String, Root, To) ->
+  gen_server:cast(Pid, {format_string, String, Root, To}).
+  
 %%====================================================================
 %% API
 %%====================================================================
@@ -133,9 +141,23 @@ handle_call({format, File}, _From, State) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling cast messages
 %%--------------------------------------------------------------------
-handle_cast(_Msg, State) ->
-    {noreply, State}.
 
+handle_cast({format_string, String, Root, To}, State) ->
+  Serialised = convert_xml_to_pdf(String, Root),
+  To ! Serialised;
+  
+handle_cast({format, File, To}, State) ->
+  Out = filename:rootname(File) ++ ".pdf",
+  case file:read_file(File) of
+	{ok, Bin} ->
+	  Root = filename:dirname(File),
+	  Serialised = convert_xml_to_pdf(binary_to_list(Bin), Root),
+	  file:write_file(Out,[Serialised]),
+	  file:close(Out),
+    To ! ok ;
+	Error ->
+	    To ! Error
+    end.
 %%--------------------------------------------------------------------
 %% Function: handle_info(Info, State) -> {noreply, State} |
 %%                                       {noreply, State, Timeout} |
@@ -175,7 +197,7 @@ code_change(_OldVsn, State, _Extra) ->
 convert_xml_to_pdf(XML, Root) ->
     V = erlguten_xml_lite:parse_file(XML),  %% convert the XML into a parse tree
     case V of
-	{error, W} ->
+	{error, _W} ->
 	    io:format("Error in source:~p~n",[V]),
 	    exit(1);
 	[{pi,_},{xml,{document,_, Flows}}] ->
@@ -201,7 +223,7 @@ format_flow(PDF, Chunks, Box) ->
     case Box1#box.bg of
 	no ->
 	    void;
-	{yes,{R,G,B}} ->
+	{yes,{_R,_G,_B}} ->
 	    pdf:save_state(PDF),
 	    pdf:set_fill_color_RGB(PDF,0.9,0.8,0.6),
 	    pdf:rectangle(PDF, X-5,Y-Leading-5,10+Measure*12,10+Leading, fill),
