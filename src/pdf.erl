@@ -33,7 +33,15 @@
 
 -include("eg.hrl").
 
--compile(export_all).
+-export ([new/0, set_pagesize/2, set_author/2, set_title/2,set_subject/2,
+  set_keywords/2,save_state/1,begin_text/1,set_font/3, get_page_no/1,inBuiltFonts/0,
+  get_string_width/4, set_text_pos/3, text/2, end_text/1, set_fill_gray/2,
+  rectangle/6, translate/3, mirror_yaxis/2,rotate/2, set_text_rendering/2,
+  textbr/2, restore_state/1, new_page/1, set_page/2, image/4, set_text_leading/2,
+  set_text_rise/2, kernedtext/2, break_text/1, line/5, bezier/9, path/2,
+  set_fill_color_RGB/4, set_fill_color/2, bezier/5, bezier_c/4, set_dash/2,
+  poly/2, set_stroke_color/2, circle/3, ellipse/3, grid/3, round_rect/4,
+  rectangle/4, rectangle/3, export/1, delete/1]).
 
 %% -export([new/0]).
 

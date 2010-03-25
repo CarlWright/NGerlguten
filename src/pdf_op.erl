@@ -31,8 +31,14 @@
 
 %% Purpose: PDF content stream operators
 
--compile(export_all).
 
+-export ([save_state/0,begin_text/0,i2s/1,n2s/1,a2s/1,set_font_by_alias/2,
+  set_text_pos/2, text/1, end_text/0, set_fill_gray/1, rectangle/5,
+  translate/2, mirror_yaxis/1, rotate/1, set_text_rendering/1, textbr/1,
+  restore_state/0, set_text_leading/1, set_text_rise/1, set_image/3,
+  kernedtext/1, break_text/0, line/1, bezier/4, path/1, set_fill_color_RGB/3,
+  set_fill_color/1, bezier_c/3, set_dash/1, poly/1, set_stroke_color/1,
+  circle/2, ellipse/2, grid/2, round_rect/3, rectangle/4, export/1]).
 
 %% Text commands
 

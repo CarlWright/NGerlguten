@@ -36,7 +36,7 @@
 
 -import(lists, [map/2, mapfoldl/3, member/2, reverse/1]).
 
--compile(export_all).
+-export ([get_head_info/1, read_image/1, mk_images/4]).
 
 
 mk_images([], I, Is, Os) -> 

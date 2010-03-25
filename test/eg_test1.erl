@@ -46,9 +46,9 @@ test()->
     draft(PDF),
 
     pdf:set_page(PDF,1),
-    pdf:image(PDF,'joenew.jpg',{390,440},{height,140}),
-    pdf:image(PDF,'joenew.jpg',{390,200},{width,140}),
-    pdf:image(PDF,'joenew.jpg',{190,300},{140,140}),
+    pdf:image(PDF,'../test/joenew.jpg',{390,440},{height,140}),
+    pdf:image(PDF,'../test/joenew.jpg',{390,200},{width,140}),
+    pdf:image(PDF,'../test/joenew.jpg',{190,300},{140,140}),
     pdf:begin_text(PDF),
     pdf:set_font(PDF, "Times-Italic", 240),
     pdf:set_text_pos(PDF, 60,600),

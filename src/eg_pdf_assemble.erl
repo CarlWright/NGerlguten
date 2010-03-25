@@ -30,8 +30,8 @@
 -module(eg_pdf_assemble).
 
 -include("eg.hrl").
+-export ([pdfloop/2,handle_setfont/2]).
 
--compile(export_all).
 
 -import(lists, [map/2, mapfoldl/3, member/2, reverse/1]).
 -import(pdf_op, [f2s/1, i2s/1]).
