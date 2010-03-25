@@ -57,7 +57,7 @@
              
 
 file() ->
-    file("../priv/process.xml").
+    file("../test/process.xml").
 
 file(File_name) ->
     Xml = eg_xml_lite:parse_file(File_name),
@@ -78,7 +78,7 @@ file(File_name) ->
     io:format("Main Content = done~n",[]),
     page_numbers(PDF, St5),
     Serialised = pdf:export(PDF),
-    file:write_file("eg_tmo_test.pdf",[Serialised]),
+    file:write_file("../test/eg_tmo_test.pdf",[Serialised]),
     pdf:delete(PDF).
 
 title_page(PDF, Doc_info, S) ->
@@ -510,7 +510,7 @@ image(PDF, Path, S0) ->
                     pdf:image(PDF, Path, {X, S#st.y-H1}, {width, W1}),
                     pdf:begin_text(PDF),
                     pdf:set_text_pos(PDF, X + W1/2, S#st.y-H1 - 8),
-                    pdf:text(PDF, "Figure " ++ pdf:n2s(S#st.fig)),
+                    pdf:text(PDF, "Figure " ++ pdf_op:n2s(S#st.fig)),
                     pdf:end_text(PDF),
                     S#st{y = S#st.y - H1 - 20,
                          fig = S#st.fig + 1}
@@ -558,7 +558,7 @@ header(PDF, #st{doc_info = I}) ->
     header(PDF, I#doc_info.system, I#doc_info.type).
 
 header(PDF, Title, Subtitle) ->
-    pdf:image(PDF,'tmobile.jpg',{50,790},{height,29}),
+    pdf:image(PDF,'../test/tmobile.jpg',{50,790},{height,29}),
 
 %     pdf:set_fill_gray(PDF,0.75),
 %     pdf:rectangle(PDF, 40,780,515,2, fill),
@@ -580,7 +580,7 @@ footer(PDF) ->
 
 
 page_numbers(PDF, S) ->
-    page_numbers(PDF, S#st.page, pdf:n2s(S#st.page)).
+    page_numbers(PDF, S#st.page, pdf_op:n2s(S#st.page)).
 
 page_numbers(PDF, 1, _) ->
     ok;
@@ -589,7 +589,7 @@ page_numbers(PDF, N, Tot) ->
     io:format("R = ~p~n",[R]),
     pdf:begin_text(PDF),
     pdf:set_font(PDF,"Helvetica", 12),
-    Str = "Page " ++ pdf:n2s(N) ++ " of " ++ Tot,
+    Str = "Page " ++ pdf_op:n2s(N) ++ " of " ++ Tot,
     Width = pdf:get_string_width(PDF,"Helvetica", 12, Str),
     pdf:set_text_pos(PDF, 555 - Width, 30),
     pdf:text(PDF, Str),
