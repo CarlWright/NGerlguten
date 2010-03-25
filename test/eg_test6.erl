@@ -41,7 +41,7 @@ test()->
     moveAndShow(PDF, 50, 700, "Hello Joe from Gutenburg"),
 
     Serialised = pdf:export(PDF),
-    file:write_file("eg_test6.pdf",[Serialised]),
+    file:write_file("../test/eg_test6.pdf",[Serialised]),
     pdf:delete(PDF).
 
 
