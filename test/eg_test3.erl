@@ -62,9 +62,9 @@ test() ->
     zap(PDF, 5, 60, 450, 35, 12, 14, 6),
     zap(PDF, azure, narrow, 280, 650, 16, 8,10, 38),
     %% pdf_lib:showGrid(PDF, a4),
-    pdf:image(PDF,'./joenew.jpg',{50, 650},{width,200}),
+    pdf:image(PDF,'../test/joenew.jpg',{50, 650},{width,200}),
     Serialised = pdf:export(PDF),
-    file:write_file("eg_test3.pdf",[Serialised]),
+    file:write_file("../test/eg_test3.pdf",[Serialised]),
     pdf:delete(PDF).
 
 ensure_fonts_are_loaded(PDF, {_,TagMap}) ->
