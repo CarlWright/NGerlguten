@@ -51,7 +51,7 @@ test(9) ->
     pdf:end_text(PDF),
     pdf_lib:showGrid(PDF, a4),
     Serialised = pdf:export(PDF),
-    file:write_file("eg_test5.pdf",[Serialised]),
+    file:write_file("../test/eg_test5.pdf",[Serialised]),
     pdf:delete(PDF).
 
 demo(PDF, Rot, X, Y, PointSize, Leading, Offset, Width) ->
