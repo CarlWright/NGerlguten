@@ -57,7 +57,7 @@ test() ->
     Pages1 = zap(Pages),
     MediaBox={0,0,595,842},
     Fonts1 = map(fun(I) -> egFontMap:handler(I) end, Fonts),
-    eg_pdf_assemble:make_pdf_file("eg_test2.pdf",
+    eg_pdf_assemble:make_pdf_file("../test/eg_test2.pdf",
 					Info, Fonts1, Pages1, MediaBox).
 
 zap(Pages) ->

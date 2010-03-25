@@ -123,7 +123,7 @@ test()->
     pdf:new_page(PDF),
     colortest(PDF),
     Serialised = pdf:export(PDF),
-    file:write_file("eg_test1.pdf",[Serialised]),
+    file:write_file("../test/eg_test1.pdf",[Serialised]),
     pdf:delete(PDF).
 
 %% Write a DRAFT text rotated in the background
