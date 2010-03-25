@@ -54,7 +54,7 @@ test()->
     Fonts = lists:sort(egFontMap:allFonts()),
     showem(PDF, 820, Fonts),
     Serialised = pdf:export(PDF),
-    file:write_file("eg_test4.pdf",[Serialised]),
+    file:write_file("../test/eg_test4.pdf",[Serialised]),
     pdf:delete(PDF).
 
 showem(PDF, Y, [H|T]) ->
