@@ -39,7 +39,7 @@
   kernedtext/1, break_text/0, line/1, bezier/4, path/1, set_fill_color_RGB/3,
   set_fill_color/1, bezier_c/3, set_dash/1, poly/1, set_stroke_color/1,
   circle/2, ellipse/2, grid/2, round_rect/3, rectangle/4, flatten/1,
-  f2s/1]).
+  f2s/1, set_line_width/1]).
 
 %% Text commands
 

@@ -36,9 +36,9 @@
 
 -include("eg.hrl").
 
-test() -> format("test1.map").
+test() -> format("../test/test1.map").
 
-bug() -> format("test2.map").
+bug() -> format("../test/test2.map").
     
 
 batch([X]) ->

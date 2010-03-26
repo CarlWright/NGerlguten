@@ -29,8 +29,7 @@
 -module(eg_xml_lite).
 
 -export([parse_all_forms/2, parse_all_forms/1, parse_single_form/2,
-	 parse_file/1,
-	 continue/2, pp/1, xml2bin/2, bin2xml/2, test/1]).
+	 parse_file/1, continue/2, pp/1, xml2bin/2, bin2xml/2, test/1]).
 
 
 -import(lists, [map/2, member/2, all/2, reverse/1, sort/1]).

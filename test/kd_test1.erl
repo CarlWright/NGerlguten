@@ -131,7 +131,7 @@ test(Address, Nr, Date, PNr, ONr, ODate, ByDate, Items,
     bg_avi_lastdate(PDF, X, 0, ByDate),
 
     Serialised = pdf:export(PDF),
-    file:write_file("kd_test1.pdf",[Serialised]),
+    file:write_file("../test/kd_test1.pdf",[Serialised]),
     pdf:delete(PDF).
 
 
@@ -144,7 +144,7 @@ grid(PDF) ->
 
 
 their_logo(PDF, X, Y) ->
-    pdf:image(PDF,'ebutik.jpg',{X,Y},{width, 150}).
+    pdf:image(PDF,'../test/ebutik.jpg',{X,Y},{width, 150}).
 
 
 our_logo(PDF, X, Y) ->
