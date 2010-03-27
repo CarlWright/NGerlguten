@@ -1,10 +1,10 @@
-
-=== ErlGuten
+ErlGuten
+========
 
 === Using Erlang in typography applications
 
-=== INTRODUCTION
-
+INTRODUCTION
+============
 
   ErlGuten.  is  a system  for  hiqh quality  typesetting,
 ErlGuten  is  free software.   ErlGuten  aims  to produce  typographic
