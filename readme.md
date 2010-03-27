@@ -1,4 +1,4 @@
-!{logo for NGerlguten] (/doc/NextGenErlguten_logo.png)
+![logo for NGerlguten](/doc/NextGenErlguten_logo.png)
   
 ErlGuten
 ========
