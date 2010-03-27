@@ -1,8 +1,10 @@
-!{logo for NGerlguten] [tfmenu]
+!{logo for NGerlguten] (/doc/NextGenErlguten_logo.png)
+  
 ErlGuten
 ========
 
-=== Using Erlang in typography applications
+Using Erlang in typography applications
+---------------------------------------
 
 INTRODUCTION
 ============
@@ -64,6 +66,6 @@ correctly kerned!  - line breaks  within a paragraph are selected by a
 sophisticated global optimization technique.
 
 
-[tfmenu]: /doc/NextGenErlguten_logo.png
+
 
 
