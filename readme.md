@@ -1,3 +1,4 @@
+!{logo for NGerlguten] [tfmenu]
 ErlGuten
 ========
 
@@ -63,6 +64,6 @@ correctly kerned!  - line breaks  within a paragraph are selected by a
 sophisticated global optimization technique.
 
 
-
+[tfmenu]: /doc/NextGenErlguten_logo.png
 
 
