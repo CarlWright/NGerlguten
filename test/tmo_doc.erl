@@ -59,10 +59,10 @@
              
 
 file() ->
-    file("process.xml").
+    file("../test/process.xml").
 
 file(File_name) ->
-    Outfile = filename:rootname(filename:basename(File_name)) ++ ".pdf",
+    Outfile = "../test/" ++ filename:rootname(filename:basename(File_name)) ++ ".pdf",
     Xml = eg_xml_lite:parse_file(File_name),
     {value, {xml, Doc}} = lists:keysearch(xml, 1, Xml),
     {Doc_info, History, ToC} = doc_meta(Doc),
@@ -604,7 +604,7 @@ image(PDF, Path, S0) ->
                          fig = S#st.fig + 1}
             end;
         Else ->
-            io:format("Error, image format not supprted or image not found: ~p~n",[Path]),
+            io:format("Error, image format not supported or image not found: ~p~n",[Path]),
             S
     end.
 
@@ -646,7 +646,7 @@ header(PDF, #st{doc_info = I}) ->
     header(PDF, I#doc_info.system, I#doc_info.type).
 
 header(PDF, Title, Subtitle) ->
-    pdf:image(PDF,'tmobile.jpg',{50,790},{height,29}),
+    pdf:image(PDF,'../test/tmobile.jpg',{50,790},{height,29}),
 
 %     pdf:set_fill_gray(PDF,0.75),
 %     pdf:rectangle(PDF, 40,780,515,2, fill),
