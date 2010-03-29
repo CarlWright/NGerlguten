@@ -42,7 +42,7 @@
   set_fill_color_RGB/4, set_fill_color/2, bezier/5, bezier_c/4, set_dash/2,
   poly/2, set_stroke_color/2, circle/3, ellipse/3, grid/3, round_rect/4,
   rectangle/4, rectangle/3, export/1, delete/1, ensure_font_gets_loaded/2,
-  append_stream/2, set_line_width/2]).
+  append_stream/2, set_line_width/2, pagesize/1]).
 
 %% -export([new/0]).
 

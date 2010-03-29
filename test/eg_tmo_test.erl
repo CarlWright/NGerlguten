@@ -632,7 +632,7 @@ page_numbers(PDF, N, Tot) ->
 %% 3. Convert the lext into RTF lines for each cell
 %% 4. For each row work out the number of lines required 
 %%    (largest number of lines).
-%% 5. Output the table, drwing lines as we go
+%% 5. Output the table, drawing lines as we go
 %%
 %% TODO - Parameterise by: Font size, Spacing around text, table width
 %%        Clever algorithm to arrange column widths

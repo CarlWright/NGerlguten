@@ -75,7 +75,7 @@ test()->
     FinalObjects = number_pages(4, 1, O6),
 
     ReadyToWrite = eg_pdf_lib:export(InfoRef, FinalObjects),
-    file:write_file("eg_test12.pdf",[ReadyToWrite]).
+    file:write_file("../test/eg_test12.pdf",[ReadyToWrite]).
 
 add_link({X0,Y0,X1,Y1}=R, FPNo, TPNo, Objects) ->
     Destination  = eg_pdf_obj:destination( eg_pdf_lib:get_ref(eg_pdf_page:get_page(TPNo,Objects)) ,{"XYZ",0,792,0}),
