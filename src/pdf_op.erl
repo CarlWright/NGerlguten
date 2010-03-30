@@ -24,7 +24,8 @@
 %%
 %% Authors:   Joe Armstrong <joe@sics.se>
 %%            Mikael Karlsson <mikael.karlsson@creado.com>
-%% Last Edit: 2004-07-13
+%%            Carl Wright <wright@servicelevel.net>
+%% Last Edit: 2010-03-29
 %% =====================================================================
 
 -module(pdf_op).
@@ -40,7 +41,11 @@
   set_fill_color/1, bezier_c/3, set_dash/1, poly/1, set_stroke_color/1,
   circle/2, ellipse/2, grid/2, round_rect/3, rectangle/4, flatten/1,
   f2s/1, set_line_width/1, set_font/2, line/4, bezier/8, rectangle/3,
-  rectangle/2, get_string_width/3]).
+  rectangle/2, get_string_width/3, set_char_space/1, set_word_space/1,
+  set_text_scale/1, line/2, bezier_v/2, bezier_y/2, arc/4, set_line_cap/1,
+  set_line_join/1, set_miter_limit/1, skew/2, mirror_xaxis/1, 
+  set_fill_color_CMYK/4, set_stroke_color_CMYK/4, set_stroke_gray/1,
+  image/1, image/2, image/3, image1/2]).
 
 %% Text commands
 
@@ -59,10 +64,10 @@ textbr(Text)-> [ text(Text), break_text() ].
 kernedtext(Text)-> ["[ ",kernedtext1(Text)," ] TJ\n"].
     
 kernedtext1([]) ->[];
-kernedtext1([H|T]) when list(H)->  
+kernedtext1([H|T]) when is_list(H)->  
     A = escapePdfText(H),
     ["(",A,") ",kernedtext1(T)];
-kernedtext1([H|T]) when integer(H) ->
+kernedtext1([H|T]) when is_integer(H) ->
     [i2s(H)," ",kernedtext1(T)].
 
 set_text_pos(X, Y) -> [ n2s([X,Y]), " Td " ].
@@ -76,7 +81,7 @@ set_text_rendering(stroke) ->
     set_text_rendering(1);
 set_text_rendering(fill_then_stroke) ->
     set_text_rendering(2);
-set_text_rendering(MODE) when integer(MODE)->
+set_text_rendering(MODE) when is_integer(MODE)->
     [i2s(MODE)," Tr\n"].
 
 set_char_space(CS)      -> [n2s(CS)," Tc "].
@@ -239,7 +244,7 @@ set_dash(solid)   -> set_dash([],0);
 set_dash(dash)    -> set_dash([6,2],0);
 set_dash(dot)     -> set_dash([2],0);
 set_dash(dashdot) -> set_dash([6,2,2,2],0);
-set_dash(A) when list(A) -> set_dash(A,0);
+set_dash(A) when is_list(A) -> set_dash(A,0);
 set_dash(_)       -> set_dash([],0).    %% Fall back to solid line
 
 
@@ -257,7 +262,7 @@ transform(A, B, C, D, E, F)->
 translate(X,Y)->
     transform(1,0,0,1,X,Y).
 
-scale(ScaleX, ScaleY) when integer(ScaleX),integer(ScaleY)->
+scale(ScaleX, ScaleY) when is_integer(ScaleX),is_integer(ScaleY)->
     transform(ScaleX, 0, 0, ScaleY, 0, 0).
 
 rotate(90)->  " 0 1 -1 0 0 0 cm\n";
@@ -511,7 +516,7 @@ image(FilePath,Size)->
     image1(FilePath, Size),
     restore_state().
     
-image(FilePath, {X,Y}, Size) when integer(X), integer(Y)->
+image(FilePath, {X,Y}, Size) when is_integer(X), is_integer(Y)->
     save_state(),
     translate(X,Y),
     image1(FilePath, Size),
@@ -521,7 +526,7 @@ image1(FilePath, {width, W})->
     image1(FilePath, {size,{W,undefined}});
 image1(FilePath, {height, H}) ->
     image1(FilePath, {size,{undefined,H}});
-image1(FilePath, {W, H}) when integer(W), integer(H)->
+image1(FilePath, {W, H}) when is_integer(W), is_integer(H)->
     image1(FilePath, {size,{W,H}});
 image1(FilePath, {size,Size})->
 %%    PID ! {image, FilePath, Size}.
@@ -541,12 +546,12 @@ i2s(I) ->
 a2s(A) ->
     atom_to_list(A).
 
-n2s(A) when float(A)   -> f2s(A);
-n2s(A) when integer(A) -> i2s(A);
+n2s(A) when is_float(A)   -> f2s(A);
+n2s(A) when is_integer(A) -> i2s(A);
 n2s([])                -> [];
 n2s([H|T])             -> [n2s(H)," "|n2s(T)].
 
-f2s(I) when integer(I) ->
+f2s(I) when is_integer(I) ->
     i2s(I);
 f2s(F) ->    
     remove_leading_blanks(flatten(io_lib:format("~8.2f", [F]))).

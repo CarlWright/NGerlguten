@@ -42,7 +42,13 @@
   set_fill_color_RGB/4, set_fill_color/2, bezier/5, bezier_c/4, set_dash/2,
   poly/2, set_stroke_color/2, circle/3, ellipse/3, grid/3, round_rect/4,
   rectangle/4, rectangle/3, export/1, delete/1, ensure_font_gets_loaded/2,
-  append_stream/2, set_line_width/2, pagesize/1]).
+  append_stream/2, set_line_width/2, pagesize/1, page_script/2, set_date/4,
+  set_pagesize/3, set_char_space/2, set_word_space/2, set_text_scale/2,
+   move_to/2, line/3, lines/2, bezier_v/3, bezier_y/3,arc/5, set_line_cap/2,
+   set_line_join/2, set_miter_limit/2, set_dash/3, transform/7, scale/3,
+   skew/3,  mirror_xaxis/2, set_fill_color_CMYK/5, set_stroke_color_CMYK/5,
+   set_stroke_color_RGB/4, set_stroke_gray/2, image/2, image/3, fontName/1,
+   default_face/0, allFonts/0]).
 
 %% -export([new/0]).
 
@@ -273,7 +279,7 @@ rectangle(PID,{X,Y},{WX,WY}) ->
 rectangle(PID,{X,Y},{WX,WY}, StrokeType) ->
     rectangle(PID,X,Y,WX,WY,StrokeType).
 
-rectangle(PID,X,Y,WX,WY) when pid(PID) ->
+rectangle(PID,X,Y,WX,WY) when is_pid(PID) ->
     append_stream(PID, pdf_op:rectangle(X,Y,WX,WY)).
 
 rectangle(PID,X,Y,WX,WY,Option) ->
@@ -317,7 +323,7 @@ transform(PID, A, B, C, D, E, F)->
 translate(PID, X, Y)->
     append_stream(PID, pdf_op:translate(X,Y)).
 
-scale(PID, ScaleX, ScaleY) when integer(ScaleX),integer(ScaleY)->
+scale(PID, ScaleX, ScaleY) when is_integer(ScaleX),is_integer(ScaleY)->
     append_stream(PID, pdf_op:scale(ScaleX, ScaleY)).
 
 rotate(PID, Angle)->
@@ -396,7 +402,7 @@ image1(PID, FilePath, {width, W})->
     image1(PID, FilePath, {size,{W,undefined}});
 image1(PID, FilePath, {height, H}) ->
     image1(PID, FilePath, {size,{undefined,H}});
-image1(PID, FilePath, {W, H}) when integer(W), integer(H)->
+image1(PID, FilePath, {W, H}) when is_integer(W), is_integer(H)->
     image1(PID, FilePath, {size,{W,H}});
 image1(PID, FilePath, {size,Size})->
     PID ! {image, FilePath, Size}.
