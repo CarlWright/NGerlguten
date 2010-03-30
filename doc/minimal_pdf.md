@@ -6,7 +6,7 @@ with calls to the pdf module.
 
 ###   PDF = pdf:new(),
 
-To create a pdf into which to put content
+    To create a pdf into which to put content
 
 
 ###    pdf:set_pagesize(PDF,a4),
