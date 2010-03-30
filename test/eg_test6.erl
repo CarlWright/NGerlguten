@@ -27,8 +27,8 @@
 %% =====================================================================
 
 -module(eg_test6).
--import(pdf_op, [n2s/1]).
--import(pdf_lib, [showGrid/2, moveAndShow/4]).
+
+-import(pdf_lib, [moveAndShow/4]).
 
 -export([test/0]).
 
