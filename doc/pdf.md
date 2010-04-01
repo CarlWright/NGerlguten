@@ -5,15 +5,22 @@ PDF modules functions reference
 
     This begins a text object in a PDF.
 
-## bezier/5 
+## bezier/5 (PID,{X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4})
+## bezier/9 (PID,X1,Y1,X2,Y2,X3,Y3,X4,Y4)
 
-## bezier/9 
+        This moves to X1,Y1 point as its start and then creates a cubic bezier curve to X4,Y4 using the points in between as the control points. Bezier paths should be stroked/closed/filled with a separate command.
 
-## bezier_c/4 
+## bezier_c/4 (PID,Point1,Point2,Point3)
 
-## bezier_v/3 
+    This takes the current point as its start and then creates a cubic bezier curve to Point3 using the points in between as the control points. Bezier paths should be stroked/closed/filled with a separate command.
 
-## bezier_y/3arc/5 
+## bezier_v/3 (PID, Point1, Point2 )
+
+    This takes the current point as its start and then creates a cubic bezier curve to Point2 using the current point and Point1 as the control points. Bezier paths should be stroked/closed/filled with a separate command.
+
+## bezier_y/3  (PID, Point1, Point3)
+
+    This takes the current point as its start and then creates a cubic bezier curve to Point3 using the Point1 and Point3 as the control points. Bezier paths should be stroked/closed/filled with a separate command.
 
 ## break_text/1 
 
@@ -73,17 +80,23 @@ PDF modules functions reference
 
     This allows precise kerning of the text in the TextList. It has a format like ["A", 120, "W", 120, "A", 95, "Y"]. The numbers between the letters adjust the distance between the letters. The unit of measure is thousandths of a unit of text space. You can have strings or single letters between the numbers.
 
-## line/3 
+## line/3 (PID, From, To)
+## line/5  (PID, X1, Y1, X2, Y2)
 
-## line/5 
+    This draws a lines from X1, Y1 to X2, Y2. The line shape, color, etc. is defined by the graphics state. From and To are tuples like {X1, Y2}.
 
-## lines/2
+## lines/2  (PID, LineList)
 
-## mirror_xaxis/2 
+    This draws a list of lines. The LineList has entries of values like those needed for the line function.
 
-## mirror_yaxis/2
+## mirror_xaxis/2 (PID, Ytranslate)
+## mirror_yaxis/2  (PID, Xtranslate)
 
-## move_to/2 
+    This calls the translate function to move the graphics coordinate systems as define dby the "translate" parameter and then calls "scale" to invert the selected coordinate axis with an appropriate -1 scaling.
+
+## move_to/2 (PID, {X, Y})
+
+    This begins a new subpath by moving to the X,Y coordinates with no connecting line segment.
 
 ## new/0 
 
@@ -101,7 +114,9 @@ PDF modules functions reference
 
     This indicates how to process the current path. StrokeType can be close, stroke, close_stroke, fill, fill_even_odd, fill_stroke, fill_then_stroke, fill_stroke_even_odd, close_fill_stroke, close_fill_stroke_even_odd, or endpath. If don't use the verson with StrokeType, you need to call path/2 to stroke the path.
 
-## poly/2 
+## poly/2 (PID,Points)
+
+    This creates a path starting at the first Point and then to each following Point. Each Point in the Points lis tis a tuple {X,Y}. Poly paths should be stroked/closed/filled with a separate command.
 
 ## rectangle/3  (PID,{X,Y}, {WX,WY})
 ## rectangle/4  (PID,{X,Y}, {WX,WY}, StrokeType)
@@ -142,15 +157,20 @@ PDF modules functions reference
 
     This changes the graphics state so that lines stroked are "solid", "dash", "dot" or "dashdot". You specify other patterns with a list of numbers expressing the pattern.
     
-## set_date/4
+## set_date/4  (PID,Year,Month,Day)
 
-## set_fill_color/2 
+    This sets the value in the Date attribute of the PDF file. 
 
-## set_fill_color_CMYK/5 
+## set_fill_color/2  (PID, Color)
+## set_fill_color_CMYK/5  (PID,C,M,Y,K)
+## set_fill_color_RGB/4  (PID,R,G,B)
 
-## set_fill_color_RGB/4 
+    This sets the fill color in the graphics state to the color value given. "Color" is a tuple like {16#FF,16#FF,16#FF} (this is white). You can also use pdf_op:color(darkturquoise) to select a color. pdf_op has long list of colors you can select this way.
 
-## set_fill_gray/2
+
+## set_fill_gray/2  (PID, Gray)
+
+    This sets the fill color of the graphics state to the value of "Gray" given in the call. For example,  0.0 = Black 1.0 = White.
 
 ## set_font/3 (PID, FontName, Size)
 
@@ -180,17 +200,20 @@ PDF modules functions reference
 
     This moves you to a page that already exists.
 
-## set_pagesize/2 
+## set_pagesize/2 (PID, Size)
+## set_pagesize/3 (PID, Width, Height)
 
-## set_pagesize/3 
+    This sets the page size. You can use pdf:pagesize(a1) for "Size". Substitute another term for "a1" to get other size. The available sizes include: a0 -> a9, b0 -> b10, c5e, comm10e, dle, executive, folio, ledger, legal, or tabloid.
 
-## set_stroke_color/2 
+## set_stroke_color/2 (PID, Color)
+## set_stroke_color_CMYK/5  (PID,C,M,Y,K)
+## set_stroke_color_RGB/4 (PID,R,G,B)
 
-## set_stroke_color_CMYK/5
+    This sets the stoke color in the graphics state to the color value given. "Color" is a tuple like {16#FF,16#FF,16#FF} (this is white). You can also use pdf_op:color(darkturquoise) to select a color. pdf_op has long list of colors you can select this way.
 
-## set_stroke_color_RGB/4 
+## set_stroke_gray/2 (PID, Gray)
 
-## set_stroke_gray/2 
+    This sets the stroke color of the graphics state to the value of "Gray" given in the call. For example,  0.0 = Black 1.0 = White.
 
 ## set_subject/2
 
@@ -236,7 +259,11 @@ PDF modules functions reference
 
     This inserts the content of the String into the text object using the graphics state and font information set at the time. It also ends the line (breaks) and starts a new one.
 
-## transform/7 
+## transform/7 (PID, A, B, C, D, E, F)
 
-## translate/3 
+    This A through F sequence of numbers represents any linear transformation from one coordinate system to another. You can "translate", "rotate", "scale" and "skew" all in one step. Hold on to your horses!
+
+## translate/3 (PID, X, Y)
+
+    This translates the origin of the coordinate systems in the horizon & vertical dimension respectively.
 
