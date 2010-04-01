@@ -1,4 +1,4 @@
-PDF modules functions reference
+PDF module functions reference
 ===============================
 
 ##### begin_text/1 (PID)
