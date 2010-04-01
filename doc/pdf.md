@@ -8,19 +8,19 @@ PDF modules functions reference
 ## bezier/5 (PID,{X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4})
 ## bezier/9 (PID,X1,Y1,X2,Y2,X3,Y3,X4,Y4)
 
-        This moves to X1,Y1 point as its start and then creates a cubic bezier curve to X4,Y4 using the points in between as the control points. Bezier paths should be stroked/closed/filled with a separate command.
+        This moves to X1,Y1 point as its start and then creates a cubic Bezier curve to X4,Y4 using the points in between as the control points. Bezier paths should be stroked/closed/filled with a separate command.
 
 ## bezier_c/4 (PID,Point1,Point2,Point3)
 
-    This takes the current point as its start and then creates a cubic bezier curve to Point3 using the points in between as the control points. Bezier paths should be stroked/closed/filled with a separate command.
+    This takes the current point as its start and then creates a cubic Bezier curve to Point3 using the points in between as the control points. Bezier paths should be stroked/closed/filled with a separate command.
 
 ## bezier_v/3 (PID, Point1, Point2 )
 
-    This takes the current point as its start and then creates a cubic bezier curve to Point2 using the current point and Point1 as the control points. Bezier paths should be stroked/closed/filled with a separate command.
+    This takes the current point as its start and then creates a cubic Bezier curve to Point2 using the current point and Point1 as the control points. Bezier paths should be stroked/closed/filled with a separate command.
 
 ## bezier_y/3  (PID, Point1, Point3)
 
-    This takes the current point as its start and then creates a cubic bezier curve to Point3 using the Point1 and Point3 as the control points. Bezier paths should be stroked/closed/filled with a separate command.
+    This takes the current point as its start and then creates a cubic Bezier curve to Point3 using the Point1 and Point3 as the control points. Bezier paths should be stroked/closed/filled with a separate command.
 
 ## break_text/1 
 
@@ -126,7 +126,7 @@ PDF modules functions reference
 
 ## restore_state/1 
 
-    This restore the graphics state off the graphics state stack.
+    This restores the graphics state off the graphics state stack.
 
 ## rotate/2 
 
