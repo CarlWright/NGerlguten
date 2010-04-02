@@ -72,7 +72,6 @@
 
 -module(eg_pdf_annot).
 
--include("eg.hrl").
 
 -import(lists, [map/2, mapfoldl/3, member/2, reverse/1]).
 

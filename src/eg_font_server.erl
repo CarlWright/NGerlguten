@@ -28,7 +28,6 @@
 
 -module(eg_font_server).
 
--include("eg.hrl").
 
 -compile(export_all).
 -import(lists, [member/2, foreach/2]).
