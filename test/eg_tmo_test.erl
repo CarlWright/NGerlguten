@@ -60,26 +60,33 @@ file() ->
     file("../test/process.xml").
 
 file(File_name) ->
-    Xml = eg_xml_lite:parse_file(File_name),
-    {value, {xml, Doc}} = lists:keysearch(xml, 1, Xml),
-    {Doc_info, History, ToC} = doc_meta(Doc),
-    io:format("Doc Info = ~p~n",[Doc_info]),
-    PDF = pdf:new(),
-    St = #st{doc_info = Doc_info,
-             toc = ToC,
-             y = 700,
-             page = 1},
-
-    St1 = title_page(PDF, Doc_info, St),
-    St2 = revision_pages(PDF, History, Doc_info, St1),
-    St3 = toc_pages(PDF, ToC, Doc_info, St2),
-    St4 = St3#st{y = St#st.max_y},
-    St5 = main_content(PDF, Doc, St4),
-    io:format("Main Content = done~n",[]),
-    page_numbers(PDF, St5),
-    Serialised = pdf:export(PDF),
-    file:write_file("../test/eg_tmo_test.pdf",[Serialised]),
-    pdf:delete(PDF).
+  Out = filename:rootname(File_name) ++ ".pdf",
+  case file:read_file(File_name) of
+  	{ok, Bin} ->
+  	  file:close(File_name),
+      XML = eg_xml_lite:parse_file(binary_to_list(Bin)),
+      {value, {xml, Doc}} = lists:keysearch(xml, 1, XML),
+      {Doc_info, History, ToC} = doc_meta(Doc),
+      io:format("Doc Info = ~p~n",[Doc_info]),
+      PDF = pdf:new(),
+      St = #st{doc_info = Doc_info,
+               toc = ToC,
+               y = 700,
+               page = 1},
+  
+      St1 = title_page(PDF, Doc_info, St),
+      St2 = revision_pages(PDF, History, Doc_info, St1),
+      St3 = toc_pages(PDF, ToC, Doc_info, St2),
+      St4 = St3#st{y = St#st.max_y},
+      St5 = main_content(PDF, Doc, St4),
+      io:format("Main Content = done~n",[]),
+      page_numbers(PDF, St5),
+      Serialised = pdf:export(PDF),
+      file:write_file("../test/eg_tmo_test.pdf",[Serialised]),
+      pdf:delete(PDF);
+    Error ->
+  	    error
+      end.
 
 title_page(PDF, Doc_info, S) ->
     pdf:set_author(PDF, Doc_info#doc_info.author),

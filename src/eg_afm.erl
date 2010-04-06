@@ -236,7 +236,7 @@ read_font_info(FontName) ->
 %% this produces a Makefile to build all the egFont# files and the egFontMap.erl file    
 %%
 mkMk(FontMap) ->
-    Str = ["# this makefile is created by the mkMk function in eg_afm.erl",
+    Str = ["# this makefile is created by the mkMk function in eg_afm.erl\n",
     "ERLC_FLAGS=+nowarn_unused_vars +nowarn_unused_function\n"
 	   "include ../../../conf/include.mk\n\n"
 	   "../../../ebin/%.beam: %.erl\n"
@@ -256,7 +256,7 @@ mkMk(FontMap) ->
 mkegFontMap(FontMap) ->
     All = map(fun(I) -> element(2, I) end, FontMap),
     Str = ["-module(egFontMap).\n",
-    "% This module is created by the mkegFontMap function in module eg_afm",
+    "% This module is created by the mkegFontMap function in module eg_afm\n",
 	   "-export([handler/1,allFonts/0]).\n",
 	   map(fun({Mod,Font,I}) ->
 		       ["handler(\"",Font,"\")-> ", Mod,";\n"]
@@ -327,7 +327,7 @@ copy_pdf(File, Mod) ->
 mk_program(Mod, T) ->
     %% io:format("Mod=~p T=~p~n",[Mod,T]),
     ["-module(", Mod, ").\n",
-    "% This module is formatted by the mk_program function of the eg_afm module",
+    "% This module is formatted by the mk_program function of the eg_afm module\n",
      "-export([width/1, kern/2, fontName/0, firstChar/0,lastChar/0]).\n",
      "-export([index/0,ascender/0,capHeight/0,descender/0,italicAngle/0]).\n", 
      "-export([xHeight/0, flags/0, type/0, stemV/0,fontBBox/0,widths/0]).\n",
