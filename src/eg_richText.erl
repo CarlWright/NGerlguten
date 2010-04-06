@@ -51,7 +51,7 @@
 
 -import(pdf_op, [flatten/1]).
 
--include("eg.hrl").
+-include("../include/eg.hrl").
 
 
 %% -define(DEBUG, true).

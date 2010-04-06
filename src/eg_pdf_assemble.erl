@@ -29,7 +29,7 @@
 
 -module(eg_pdf_assemble).
 
--include("eg.hrl").
+-include("../include/eg.hrl").
 -export ([pdfloop/2, handle_setfont/2, make_pdf_file/5]).
 
 
@@ -84,12 +84,12 @@ mk_fonts([], I, Fs, Os) ->
 		      {Alias, {ptr,FontObj,0}}
 	      end, lists:reverse(Fs))}},
     {I+1, {ptr,I,0}, reverse([A|Os])};
-mk_fonts([Handler|T], I, Fs, E) ->
+mk_fonts([Handler|T], I, Fs, E) ->    %Handler links to a font module, egfont# where # is a number.
     %% io:format("I need the font:~p~n",[Handler]),
-    Index = Handler:index(),
-    Alias = "F" ++ i2s(Index),
+    Index = Handler:index(),          % This returns the font name.
+    Alias = "F" ++ i2s(Index),        % the index is used as th epdf alias for the font
     case Handler:type() of
-	internal ->
+	internal ->                         % the built-in fonts are internal.
 	    O = {{obj,I,0},mkFont(Handler)},
 	    mk_fonts(T, I+1, [{Alias,I}|Fs], [O|E]);
 	{Index, pdf_builtin} ->
@@ -243,7 +243,7 @@ get_font_program(Handler) ->
     P = eg_embed:parse_pfb(File),
     case P of
 	[{_,L1,B1},{_,L2,B2},{_,L3,B3}|_] ->
-	    {L1+L2+L3,L1,L2,L3,concat_binary([B1,B2,B3])};
+	    {L1+L2+L3,L1,L2,L3,list_to_binary([B1,B2,B3])};
 	_ ->
 	    error
     end.
@@ -360,7 +360,14 @@ add_start_xref(F, XrefStartPos) ->
 %% %%EOF
 
 pdfloop(PDFC, Stream)->
-    receive
+    receive	
+  {get_font_alias, Pid, Fontname} ->
+	    {F,FA,_} = handle_setfont(PDFC#pdfContext.fonts, Fontname),
+	    "F" ++ Str = FA,
+	    Index = list_to_integer(Str),
+	    eg_font_server:ensure_loaded(Fontname, Index),
+	    Pid ! {self(), font_alias, Index},
+	    pdfloop(PDFC#pdfContext{fonts=F}, Stream);
 	{ensure_font, Fontname} ->
 	    {F,_,_} = handle_setfont(PDFC#pdfContext.fonts, Fontname),
 	    pdfloop(PDFC#pdfContext{fonts=F}, Stream);

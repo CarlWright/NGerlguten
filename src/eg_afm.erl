@@ -97,19 +97,19 @@
 
 %-compile(export_all).
 
--export([make/0]).
+-export([make/0, read_font_info/1]).
 
 -import(lists, [foreach/2, keysearch/3, mapfoldl/3,
 		map/2, member/2, foldl/3,reverse/1]).
 -import(pdf_op, [i2s/1, a2s/1, n2s/1]).
 -include_lib("kernel/include/file.hrl").    
 
-
+%%
+%% this makes all the egFont# modules and the egFontMap module
+%%
 make() ->
     F = all_afms(),
-    {F1,_} = mapfoldl(fun(File,I) ->
-			      {{File,I}, I+1}
-		      end, 1, F),
+    {F1,_} = mapfoldl(fun(File,I) -> {{File,I}, I+1}  end, 1, F),
     io:format("Found:~p~n",[F1]),
     F2 = map(fun({File, Index}) -> 
 		     {Mod,FontName,Type} = parse(File, Index),
@@ -121,17 +121,28 @@ make() ->
     io:format("External=~p~n",[External]),
     foreach(fun({File,Mod}) -> copy_pdf(File,Mod) end, External).
 
+%%
+%% this returns the location of the afm files
+%%
+font_map() ->
+    fonts_out() ++ "/font_locations".
+%%
+%% this defines where the egFont# modules and the egFontMap module   
 fonts_out() ->
 %%    this_dir() ++ "../priv/fonts/bin".
     "../priv/fonts/bin".
 
 %% Just run pdf_afm_qdh:all() to build the font tables
+%% this returns a list of strings. Each string is the location of an afm file.
+%%
 all_afms() ->
-    {ok, F} = file:open("../priv/fonts/font_locations", read),
-    L= read_locations(F, []),
+    {ok, F} = file:open("../priv/fonts/font_locations", read),  %% this file should not have any blank lines;
+    L= read_locations(F, []),                                   %% the line(s) must end in a LF char.
     file:close(F),
     find_atms(L, []).
-
+%%
+%% this returns a list of afm filename strings.
+%%
 find_atms([H|T], L) ->
     case is_dir(H) of
 	true ->
@@ -142,13 +153,15 @@ find_atms([H|T], L) ->
 		true ->
 		    find_atms(T, [H|L]);
 		false ->
-		    io:format("~s is not a file~n",[H]),
+		    %% io:format("~s is not a file~n",[H]),
 		    find_atms(T, L)
 	    end
     end;
 find_atms([], L) ->
     L.
-
+%%
+%% returns a value like ["../priv/fonts/builtIn"] from the content of the font locations file.
+%%
 read_locations(F, L) ->
     case io:get_line(F, '>') of
 	eof ->
@@ -157,7 +170,10 @@ read_locations(F, L) ->
 	    read_locations(F, [first(Str)|L])
     end.
 
-
+%%
+%% this looks into the file system to determine the kind of file is named by the passed in parameter
+%% It uses the record definition in "kernel/include/file.hrl" to extract the file type
+%%
 file_type(File) ->
     case file:read_file_info(File) of
 	{ok, Info} -> Info#file_info.type;
@@ -168,7 +184,9 @@ file_type(File) ->
 is_dir(X) ->
     file_type(X) == directory.
 
-
+%% 
+%% this returns a boolean value indicating if the file indicated by File exists.
+%%
 exists(File) ->
     case file:read_file_info(File) of
 	{ok, _} ->
@@ -185,8 +203,41 @@ first([H|T]) ->
 this_dir() ->
     filename:dirname(code:which(?MODULE)).
 
+
+read_font_info(FontName) ->
+    %% io:format("Font map=~s~n",[font_map()]),
+    Map = font_map(),
+    case file:read_file(Map) of
+	{ok, Bin} ->
+	    T = binary_to_term(Bin),
+	    case keysearch(FontName, 1, T) of
+		{value, {_,File}} ->
+		    FontFile = fonts_out() ++ "/" ++ File ++ ".efm",
+		    case file:read_file(FontFile) of
+			{ok, Bin1} ->
+			    All = binary_to_term(Bin1),
+			    Char_widths=mk_widths(All),
+			    {ok, {afm_qdh1, 
+				  All#afm2.baseFont,
+				  Char_widths,
+				  All#afm2.kernPairs,
+				  All}};
+			_ ->
+			    {error, {misssing_font_file, FontFile}}
+		    end;
+		_ ->
+		    {error, no_such_font}
+	    end;
+	_ ->
+	    {error, no_font_map}
+    end.
+    
+%%
+%% this produces a Makefile to build all the egFont# files and the egFontMap.erl file    
+%%
 mkMk(FontMap) ->
-    Str = ["ERLC_FLAGS=+nowarn_unused_vars +nowarn_unused_function\n"
+    Str = ["# this makefile is created by the mkMk function in eg_afm.erl",
+    "ERLC_FLAGS=+nowarn_unused_vars +nowarn_unused_function\n"
 	   "include ../../../conf/include.mk\n\n"
 	   "../../../ebin/%.beam: %.erl\n"
 	   "\t$(ERLC) $(ERLC_FLAGS) -o ../../../ebin $<\n\n"
@@ -198,11 +249,14 @@ mkMk(FontMap) ->
 	   "\trm -f ${EBIN_FILES}\n\n"],
     %% io:format("Makefile(~s)=~s~n",[Makefile,Str]),
     file:write_file(fonts_out() ++ "/Makefile", [Str]).
-    
+%%    
 %% [{Mod,Fname,Index}]
+%% this produces an egFont# file where # is a font alias number.
+%%
 mkegFontMap(FontMap) ->
     All = map(fun(I) -> element(2, I) end, FontMap),
     Str = ["-module(egFontMap).\n",
+    "% This module is created by the mkegFontMap function in module eg_afm",
 	   "-export([handler/1,allFonts/0]).\n",
 	   map(fun({Mod,Font,I}) ->
 		       ["handler(\"",Font,"\")-> ", Mod,";\n"]
@@ -210,7 +264,9 @@ mkegFontMap(FontMap) ->
 	   "handler(_) -> undefined.\n",
 	   "allFonts() -> ",io_lib:format("~p.~n", [All])],
     file:write_file(fonts_out() ++ "/egFontMap.erl", [Str]).
-
+%% 
+%% this parses an afm file and produces an egFont#.erl module to encapsulate info on a built-in font.
+%%
 parse(F,Index) ->
     %% io:format("Parsing:~p~n",[F]),
     Mod = "egFont" ++ i2s(Index),
@@ -247,6 +303,7 @@ parse(F,Index) ->
 	      stemV=stemV(Fn),
 	      fontBBox=get_fontBBox(L)},
     file:write_file(Out, mk_program(Mod, T)),
+    file:close(Out),
     %% io:format("Font ~s ~w entries ~w entries in kerning table~n",
     %% [Fn, length(Cw1), length(Kern1)]),
     {Mod, Fn, Type}.
@@ -265,9 +322,12 @@ copy_pdf(File, Mod) ->
 	    exit(enofile)
     end.
 
+% This formats an egFont# module where # is a font alias number.
+%
 mk_program(Mod, T) ->
     %% io:format("Mod=~p T=~p~n",[Mod,T]),
     ["-module(", Mod, ").\n",
+    "% This module is formatted by the mk_program function of the eg_afm module",
      "-export([width/1, kern/2, fontName/0, firstChar/0,lastChar/0]).\n",
      "-export([index/0,ascender/0,capHeight/0,descender/0,italicAngle/0]).\n", 
      "-export([xHeight/0, flags/0, type/0, stemV/0,fontBBox/0,widths/0]).\n",
@@ -289,7 +349,9 @@ mk_program(Mod, T) ->
      "widths() ->", io_lib:format("~p.\n", [T#afm2.widths]),
      widths_2_erl(T#afm2.firstChar, T#afm2.widths),
      mk_kern(T#afm2.kernPairs)].
-
+%%
+%% this creates lines in the output egFont#.erl module like "kern(84,65)->-90;"
+%%
 mk_kern([{{I,J},K}|T]) ->
     ["kern(",n2s(I),",",n2s(J),")->",n2s(K),";\n"|mk_kern(T)];
 mk_kern([]) ->

@@ -26,40 +26,26 @@
 %% Last Edit: 2003-03-11
 %% =====================================================================
 
--module(eg_xml_lite).
+-module(erlguten_xml_lite).
 
--export([parse_all_forms/2, parse_all_forms/1, parse_single_form/2,
-	 parse_file/1, continue/2, pp/1, xml2bin/2, bin2xml/2, test/1]).
-
+-export([parse_all_forms/2, parse_single_form/2, parse_file/1,
+	 continue/2, pp/1, xml2bin/2, bin2xml/2, test/1]).
+-compile(export_all).
 
 -import(lists, [map/2, member/2, all/2, reverse/1, sort/1]).
 
 %% Test cases
 
-test(1) ->
-    parse_all_forms("<a>aa<b>aaa</b></a>");
+
 test(2) ->
     {more, C} = parse_single_form("<", 0),
     continue(C, "abc>");
 test(3) ->
     reent_test("<a def=\"ads\"   ghi  = 'abc'  >aa<b>aaa</b>gg<ab/>aa<abc a='bb' /></a>");
-test(4) ->
-    parse_all_forms("<a>bc</i>");
-test(5) ->
-    parse_all_forms("<?xml version=\"1.0\"?>
-<!DOCTYPE report SYSTEM \"report-xml.dtd\">
-<report>
-  <header>a</header></report>");
-test(6) ->
-    parse_all_forms("<p>aaa<br/>aaa</p>");
+
 test(7) ->
     parse_all_forms("<p>aaaa<![CDATA[
-zip a doodly]]> aa </p>");
-test(8) ->
-    parse_all_forms("<?xml version=\"1.0\"?>
-<!DOCTYPE fooy doody>
-<!-- this is just a ball of fun -->
-<p>aaa</p>").
+zip a doodly]]> aa </p>").
 
 %% This is a reentrant parser for XML streams
 
@@ -101,7 +87,7 @@ bin2xml(In, Out) ->
 	    Error
     end.
 
-atomize(A={Atom,_}) when is_atom(Atom) ->
+atomize(A={Atom,_}) when atom(Atom) ->
     A;
 atomize({Str,Args,List}) -> 
     {list_to_atom(Str), Args, map(fun atomize/1, List)}.
@@ -136,10 +122,10 @@ continue(Cont, Str) ->
     Cont(Str).
 
 parse(State, Str, Line) ->
-    tokenise_result(eg_xml_tokenise:get_next_token(Str, Line), State).
+    tokenise_result(erlguten_xml_tokenise:get_next_token(Str, Line), State).
 
 parse_cont(State, Cont, Str) ->
-    tokenise_result(eg_xml_tokenise:continue(Cont, Str), State).
+    tokenise_result(erlguten_xml_tokenise:continue(Cont, Str), State).
 
 tokenise_result({error, Line, What}, State) ->
     {error,{errorInLine,Line,What}};
@@ -262,6 +248,11 @@ indent(N) -> [$ |indent(N-1)].
 reent_test(O)->a.
 
     
+
+
+%%------------------------------------------------------------------------------
+%% Tests
+%%------------------------------------------------------------------------------
 
 
 

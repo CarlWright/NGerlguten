@@ -31,7 +31,7 @@
 
 %% Purpose: Generate PDF documents main api
 
--include("eg.hrl").
+-include("../include/eg.hrl").
 
 -export ([new/0, set_pagesize/2, set_author/2, set_title/2,set_subject/2,
   set_keywords/2,save_state/1,begin_text/1,set_font/3, get_page_no/1,inBuiltFonts/0,
@@ -48,7 +48,7 @@
    set_line_join/2, set_miter_limit/2, set_dash/3, transform/7, scale/3,
    skew/3,  mirror_xaxis/2, set_fill_color_CMYK/5, set_stroke_color_CMYK/5,
    set_stroke_color_RGB/4, set_stroke_gray/2, image/2, image/3, fontName/1,
-   default_face/0, allFonts/0]).
+   default_face/0, allFonts/0, get_font_alias/2]).
 
 %% -export([new/0]).
 
@@ -184,6 +184,15 @@ set_font(PID, Fontname, Size)->
 
 ensure_font_gets_loaded(PID, FontName) ->
     PID ! {ensure_font, FontName}.
+    
+    
+get_font_alias(PID, FontName) ->
+    PID ! {get_font_alias, self(), FontName},
+    receive
+	{Pid, font_alias, I} ->
+	    I
+    end.
+
 
 
 %% -- This function is a bit expensive, but will stick to the public interface.
