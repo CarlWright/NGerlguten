@@ -36,7 +36,7 @@
 
 -module(eg_test2).
 
--include("../src/eg.hrl").
+-include("../include/eg.hrl").
 
 -export([test/0]).
 

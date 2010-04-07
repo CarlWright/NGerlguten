@@ -73,18 +73,9 @@ test(8) ->
 
 %% parse_file(File) -> {error, What} | [Forms]
 
-parse_file(F) ->
-    case file:read_file(F) of
-	{ok, Bin} ->
-	    Result = parse_all_forms(binary_to_list(Bin), 1),
-	    %% case Result of
-	    %%   {error, E} -> true;
-	    %% Tree -> pp(Tree)
-	    %% end,
-	    Result;
-	Error ->
-	    Error
-    end.
+parse_file(String) ->
+	Result = parse_all_forms(String, 1),
+	Result.
 
 xml2bin(In, Out) ->
     case file:read_file(In) of
@@ -110,7 +101,7 @@ bin2xml(In, Out) ->
 	    Error
     end.
 
-atomize(A={Atom,_}) when atom(Atom) ->
+atomize(A={Atom,_}) when is_atom(Atom) ->
     A;
 atomize({Str,Args,List}) -> 
     {list_to_atom(Str), Args, map(fun atomize/1, List)}.

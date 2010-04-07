@@ -1,5 +1,5 @@
 %%======================================================================
-%% Main program
+%% erlguten server
 %%----------------------------------------------------------------------
 %% Copyright (C) 2003 Joe Armstrong
 %%
@@ -25,182 +25,409 @@
 %% Authors:   Joe Armstrong <joe@sics.se>
 %% Last Edit: 2003-03-12
 %% =====================================================================
-
+%%%
+%%% Renovated : 27 Feb 2010 by  <wright@>
+%%%-------------------------------------------------------------------
 -module(erlguten).
 
--compile(export_all).
+-behaviour(gen_server).
 
+%% API
+-export([start_link/0, test/1, format/2, format_string/3, dispatch/3, dispatch_string/4]).
+
+%% gen_server callbacks
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2,
+   terminate/2, code_change/3]).
 -import(lists, [foreach/2, map/2]).
 -import(pdf, [flatten/1]).
--import(eg_line_break, [break_richText/2]).
 
--include("eg.hrl").
+-define(SERVER, erlguten).
 
-test() -> format("../test/test1.map").
-
-bug() -> format("../test/test2.map").
-    
-
-batch([X]) ->
-    format(atom_to_list(X)).
-
-%% A map file has the following structure
-%% <data page="1">
-%% <template name="template1">
-%% <intro>
-%%   <p>...</p>
-%%   <q>...</q>
-%% </intro>
-%% <body>
-%%  ...
-%% </body>
-%% </template>
+%% this relates directly to the galley definition files
 %%
-%%  Logic:
-%%    in Env
-%%    set template=template1
-%%    set current page=1
-%%    enter intro
-%%      set currentBox = intro
-%%      set dict entry {initialised, Page, one}
-%%      set dict entry {free, Page, intro} = 1
-%%      set tagMap for template1:tagMap(one, intro)
-%%      call template1:handler(p, Args, Data, Env)  -> Env1
-%%      call template2:handler(q, Args, Data, Env1) -> Env2
-%%      etc.
+-record(box, {continue,  % str()  = name of the continuation frame 
+	      free=1,    % int()  = first free line in the box
+	      grid,      % bool   = show a grid
+	      bg,        % no | {yes,R,G,B} background color
+	      pointSize, % int()  = size in points of the main text in
+	                 %          the box
+	      leading,   % int()  = gap between lines in points
+	      maxLines,  % int()  = max lines in the box
+	      measure,   % int()  = width of box in picos (1 pico=12 points)
+	      name,      % str()  = name of box
+	      objs,      % [#obj] = objects
+	      x,         % int()  = X coord of top left hand corner of box
+	      y}).       % int()  = Y coord of top left hand corner of box
 
-format(File) ->
-    V = eg_xml_lite:parse_file(File),
-    io:format("read:~p~n",[V]),
-    Out = filename:rootname(File) ++ ".pdf",
+-record(obj,{
+	  name,          % atom() = tag name
+	  paraIndent,    % {int,int} = {first,line,...}
+	  tags}).        % [#tag]
+
+ 
+-record(state, {}).
+
+
+test(Pid) ->
+      gen_server:call(Pid, {format, "../demos/test1.xml"}, infinity).
+
+format(Pid, File) ->
+  gen_server:call(Pid, {format, File},infinity).
+
+format_string(Pid, String, Root) ->
+  gen_server:call(Pid, {format_string, String, Root}).
+
+dispatch(Pid, File, To) ->
+  gen_server:cast(Pid, {format, File, To}).
+
+dispatch_string(Pid, String, Root, To) ->
+  gen_server:cast(Pid, {format_string, String, Root, To}).
+  
+%%====================================================================
+%% API
+%%====================================================================
+%%--------------------------------------------------------------------
+%% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
+%% Description: Starts the server
+%%--------------------------------------------------------------------
+start_link() ->
+    gen_server:start_link( ?MODULE, [], []).
+
+%%====================================================================
+%% gen_server callbacks
+%%====================================================================
+
+%%--------------------------------------------------------------------
+%% Function: init(Args) -> {ok, State} |
+%%                         {ok, State, Timeout} |
+%%                         ignore               |
+%%                         {stop, Reason}
+%% Description: Initiates the server
+%%--------------------------------------------------------------------
+init([]) ->
+    {ok, #state{}}.
+
+%%--------------------------------------------------------------------
+%% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
+%%                                      {reply, Reply, State, Timeout} |
+%%                                      {noreply, State} |
+%%                                      {noreply, State, Timeout} |
+%%                                      {stop, Reason, Reply, State} |
+%%                                      {stop, Reason, State}
+%% Description: Handling call messages
+%%--------------------------------------------------------------------
+handle_call({format_string, String, Root}, _From, State) ->
+  Serialised = convert_xml_to_pdf(String, Root),
+  {reply, Serialised, State};
+  
+handle_call({format, File}, _From, State) ->
+  Out = filename:rootname(File) ++ ".pdf",
+  case file:read_file(File) of
+	{ok, Bin} ->
+	  Root = filename:dirname(File),
+	  Serialised = convert_xml_to_pdf(binary_to_list(Bin), Root),
+	  file:write_file(Out,[Serialised]),
+	  file:close(Out),
+    {reply, ok, State};
+	Error ->
+	    Error
+    end.
+
+
+
+%%--------------------------------------------------------------------
+%% Function: handle_cast(Msg, State) -> {noreply, State} |
+%%                                      {noreply, State, Timeout} |
+%%                                      {stop, Reason, State}
+%% Description: Handling cast messages
+%%--------------------------------------------------------------------
+
+handle_cast({format_string, String, Root, To}, State) ->
+  Serialised = convert_xml_to_pdf(String, Root),
+  To ! Serialised,
+  {noreply, State};
+  
+handle_cast({format, File, To}, State) ->
+  Out = filename:rootname(File) ++ ".pdf",
+  case file:read_file(File) of
+	{ok, Bin} ->
+	  Root = filename:dirname(File),
+	  Serialised = convert_xml_to_pdf(binary_to_list(Bin), Root),
+	  file:write_file(Out,[Serialised]),
+	  file:close(Out),
+    To ! ok ;
+	Error ->
+	    To ! Error
+    end,
+    {noreply, State}.
+%%--------------------------------------------------------------------
+%% Function: handle_info(Info, State) -> {noreply, State} |
+%%                                       {noreply, State, Timeout} |
+%%                                       {stop, Reason, State}
+%% Description: Handling all non call/cast messages
+%%--------------------------------------------------------------------
+handle_info(_Info, State) ->
+    {noreply, State}.
+
+%%--------------------------------------------------------------------
+%% Function: terminate(Reason, State) -> void()
+%% Description: This function is called by a gen_server when it is about to
+%% terminate. It should be the opposite of Module:init/1 and do any necessary
+%% cleaning up. When it returns, the gen_server terminates with Reason.
+%% The return value is ignored.
+%%--------------------------------------------------------------------
+terminate(_Reason, _State) ->
+    ok.
+
+%%--------------------------------------------------------------------
+%% Func: code_change(OldVsn, State, Extra) -> {ok, NewState}
+%% Description: Convert process state when code is changed
+%%--------------------------------------------------------------------
+code_change(_OldVsn, State, _Extra) ->
+    {ok, State}.
+
+%%--------------------------------------------------------------------
+%%% Internal functions
+%%--------------------------------------------------------------------
+
+%%--------------------------------------------------------------------
+%% Given an input string of XML we produce the contents of a PDF file
+%% in Serialised. We look up galley files in the location described by
+%% Root.
+%%--------------------------------------------------------------------
+
+convert_xml_to_pdf(XML, Root) ->
+    V = eg_xml_lite:parse_file(XML),  %% convert the XML into a parse tree
     case V of
-	{error, W} ->
-	    io:format("Error in source(~s):~p~n",[File, V]),
+	{error, _W} ->
+	    io:format("Error in source:~p~n",[V]),
 	    exit(1);
-	[{pi,_},{xml,{data, [{"page", N}], Templates}}] ->
-	    Page = list_to_integer(N),
-	    io:format("Data starts on page:~p~n",[Page]),
-	    PDF  = pdf:new(),
-	    Env = #env{page=Page, pdf=PDF, dict=dict:new()},
-	    loop(Templates, Env),
+	[{pi,_},{xml,{document,_, Flows}}] ->
+  	  PDF  = pdf:new(),                   %% begin the PDF stream
+	    foreach(fun({flow,Args,Data}) ->
+			    Box = parse_flow(Args, Root),   %% parse one of the flows
+			    format_flow(PDF, Data, Box)     %% convert a parsed flow into PDF content
+		    end, Flows),
 	    Serialised = pdf:export(PDF),
-	    file:write_file(Out,[Serialised]),
-	    io:format("Created a file called:~p~n",[Out]),
-	    pdf:delete(PDF);
+	    pdf:delete(PDF),
+	    Serialised;
 	_ ->
 	    io:format("bad XML - must begin \"<?xml ...\n<flow \n"),
 	    exit(1)
     end.
 
-loop([{template,Args,Data}|T], Env) ->
-    io:format("tempate Args=~p~n",[Args]),
-    Template= get_template_name(Args),
-    io:format("Template:~p~n",[Template]),
-    Env1 = Env#env{template=Template},
-    io:format("tempate data=~p~n",[Data]),
-    Env2 = instanciate_template(Template, Env1),
-    Env3 = format_boxes(Data, Env2),
-    loop(T, Env3);
-loop([], Env) ->
-    Env.
 
-format_boxes([{Box,Args,Data}|T], Env) ->
-    Env1 = initialise_box(Box, Env),
-    %% loop over the paragraphs in the Box
-    Env2 = format_paragraphs(Data, Box, Env1),
-    format_boxes(T, Env2);
-format_boxes([], E) ->
-    E.
 
-initialise_box(Box, E) ->
-    #env{dict=Dict, page=Page, pdf=PDF, template=Template}=E,
-    Dict1 = dict:store({free,Page,Box}, 1, Dict),
-    B = Template:box(Box),
-    #box{x=XX,y=YY,leading=Lead, width=Width, lines=Lines} = B,
-    pdf_lib:draw_box(PDF, XX, YY,Width, Lead,Lines),
-    Env1 = E#env{dict=Dict1, currentBox=Box},
-    %% initialse the tagMap
-    initialise_tagMap(Template, Box, Env1).
+format_flow(PDF, Chunks, Box) ->
+    %% io:format("Flow Chunks:~p into box:~p~n", [Chunks, Box]),
+    Box1 = Box#box{free=1},
+    #box{x=X,y=Y,leading=Leading,measure=Measure,maxLines=Max} = Box1,
+    case Box1#box.bg of
+	no ->
+	    void;
+	{yes,{_R,_G,_B}} ->
+	    pdf:save_state(PDF),
+	    pdf:set_fill_color_RGB(PDF,0.9,0.8,0.6),
+	    pdf:rectangle(PDF, X-5,Y-Leading-5,10+Measure*12,10+Leading, fill),
+	    pdf:restore_state(PDF)
+    end,
+    format_flow1(Chunks, Box1, PDF),
+    case Box1#box.grid of
+	true ->
+	    P = erlguten_geometry:draw_box(X,Y,Measure,Leading,Max),
+	    pdf:append_stream(PDF, P);
+	false ->
+	    void
+    end.
 
-format_paragraphs([{ParaTag,Args,Data}|T], Box, Env) ->
-    Template = Env#env.template,
-    case (catch Template:handler(Box, ParaTag, Args, Data, Env)) of
-	{'EXIT', Why} ->
-	    io:format("oops ~w: ~w ~w Args=~p Data=~p~n",[Template,Box, 
-							 ParaTag,
-						      Args,Data]),
-	    io:format("Why=~p~n",[Why]),
-	    exit(1);
-	Env1 ->
-	    format_paragraphs(T, Box, Env1)
+
+format_flow1([Xml={Tag,_Args,_Data}|T], Box1, PDF) ->
+    %% io:format("Flow Chunk:~n~p~n into box:~n~p~n", [Xml, Box1]),
+    CurrentObj = get_tag_schema(atom_to_list(Tag), Box1#box.objs),
+    TagMap = CurrentObj#obj.tags,
+    %% io:format("Tag schema=~p~n", [CurrentObj]),
+    %% io:format("Tag map=~p~n", [TagMap]),
+    %% make a font_map
+    %% Something like ..
+    %% [{raw,1,true,"Times-Roman"},{em,2,true,"Times-Italic"},..]
+    FontMap = map(fun({Tg,Name,Bool}) ->
+			  {Tg,pdf:get_font_alias(PDF, Name),Bool,Name}
+		  end, TagMap),
+    %% io:format("FontMap=~p~n", [FontMap]),
+    P1 = CurrentObj#obj.paraIndent,
+    Measure = Box1#box.measure, 
+    %% io:format("ParaIndent=~p Measure=~p~n", [P1, Measure]),
+    ParaShape = map(fun(I) -> Measure-I end, P1),
+    %% io:format("ParaShape=~p~n", [ParaShape]),
+    PointSize = Box1#box.pointSize,
+    %% io:format("PointSize=~p~n", [PointSize]),
+    Toks  = erlguten_normalise_xml:normalise_xml(Xml, FontMap),
+    Lines = erlguten_para_break:break_para(Toks, PointSize, ParaShape, FontMap),
+    PdfLines = erlguten_lines2pdf:lines2pdf(Lines, PointSize, ParaShape, FontMap),
+    %% Now figure out if we can fit the paragraph in this page
+    Need = length(Lines),
+    Free = Box1#box.free,
+    Max  = Box1#box.maxLines,
+    Available = Max - Free + 1,
+    %% io:format("I need ~p lines there are ~p~n", [Need, Available]),
+    case Need =< Available of 
+	true ->
+	    %% io:format("Good no worries~n"),
+	    #box{x=X,y=Y,leading=Leading,measure=Measure} = Box1,
+	    Y1 = Y-Leading - (Free-1)*Leading,
+	    Geom = erlguten_geometry:mk_line_headers(X, Y1, Measure, 
+						Leading, ParaShape, Need),
+	    Pdf1 = ["BT\n", zip1(Geom, PdfLines), "ET\n"],
+	    Pdf2 = flatten(Pdf1),
+	    pdf:append_stream(PDF, Pdf2),
+	    Box2 = Box1#box{free=Free+Need},
+	    format_flow1(T, Box2, PDF);
+	false ->
+	    %% io:format("Oh dear~n")
+	    void
     end;
-format_paragraphs([], Box, E) ->
-    E.
-
-initialise_tagMap(Template, Box, E) ->
-    Ts = case (catch Template:tagMap(Box)) of
-	    {'EXIT', Why} ->
-		 io:format("error in tagmap for ~p:~p~n",
-			   [Template,Box]),
-		 io:format("using defualt~n"),
-		 default_tagmap();
-	     L -> L
-	 end,
-    PDF = E#env.pdf,
-    TagMap = map(fun(I) ->
-			 io:format("Tagmap entry=~p~n",[I]),
-			 pdf:ensure_font_gets_loaded(PDF, I#tagMap.font),
-			 #tagMap{font=F, size=Psize, color=Color, 
-				 voff=V, break=Break, name=N} = I,
-			 {N, eg_richText:mk_face(F, Psize, Break, Color, V)} 
-		 end, Ts),
-    E#env{tagMap=TagMap}.
-
-    
-default_tagmap() ->
-    [#tagMap{name=defult,font="Times-Roman",size=11},
-     #tagMap{name=em,font="Times-Italic", size=11},
-     #tagMap{name=code,font="Courier",size=11,break=false}].
-
-instanciate_template(Template, E) ->
-    #env{dict=Dict,page=Page,pdf=PDF} = E,
-    E1 = case dict:find(Key={initialised, Page, Template}, Dict) of
-	     error ->
-		 io:format("calling first instanciation Page:~p "
-			   "Template: ~p ~n", [Page, Template]),
-		 Template:on_instanciation(Page, PDF),
-		 Dict1 = dict:store(Key, true, Dict),
-		 E#env{dict=Dict1};
-	     _ ->
-		 E
-	 end.
+format_flow1([{raw,"\"\n"}|T], Box, Pdf) ->
+    %% This consumes the empty lines in the parsed results.
+    format_flow1(T, Box, Pdf);
+format_flow1([], _, _) ->
+    true.
     
 get_tag_schema(Tag, [H|T]) ->
-    case H of
+    case H#obj.name of
 	Tag -> H;
 	_   -> get_tag_schema(Tag, T)
-    end;
+    end; 
 get_tag_schema(Tag, []) ->
     exit({missing,tag,Tag}).
 
-parse_flow([{"galley",F},{"name",Tag}]) ->
-    case eg_xml_lite:parse_file(F) of
-	{error, E} ->
-	    io:format("Error in galley(~p):~p~n",[F, E]),
-	    exit(1);
-	L ->
-	    %G = parse_galley(F, L),
-	    %get_box(Tag, G)
-	    true
+parse_flow([{"galley",F},{"name",Tag}], Root) ->
+  File = filename:join(Root, F),
+  case file:read_file(File) of
+	{ok, Bin} ->
+    file:close(File),
+    case eg_xml_lite:parse_file(binary_to_list(Bin)) of
+  	{error, E} ->
+  	    io:format("Error in galley(~p):~p~n",[F, E]),
+  	    exit(1);
+  	L ->
+  	    G = parse_galley(F, L),
+  	    get_box(Tag, G)
+      end;
+	Error ->
+	    Error
     end.
 
-get_template_name([{"name", N}]) ->
-    list_to_atom(N).
+get_box(Tag, {galley,_,Boxes}) ->
+    %% io:format("Here:~p ~p~n",[Tag, Boxes]),
+    get_box1(Tag, Boxes).
 
+get_box1(Tag, [H|T]) ->
+    case H#box.name of
+	Tag -> H;
+	_   -> get_box1(Tag, T)
+    end;
+get_box1(Tag, []) ->
+    exit({missing,box,Tag}).
 
+parse_galley(F, [{pi,_},{xml, {galley,[],Boxes}}]) ->
+    {galley, F, map(fun parse_box/1, Boxes)}.
 
+parse_box({box, [{"bg", Col},
+		 {"continue",C},
+		 {"fontSize",F},
+		 {"grid", Grid},
+		 {"lines",L},
+		 {"measure",M},
+		 {"name",Name},
+		 {"x",X},
+		 {"y",Y}], Objs}) ->
+    {Pt,Leading} = parse_fontSize(F),
+    Lines = parse_int("lines", L),
+    Measure = parse_int("measure", M),
+    XX = parse_int("x", X),
+    YY = parse_int("y", Y),
+    Os  = map(fun parse_obj/1, Objs),
+    Bg = parse_color(Col),
+    Box = #box{continue=C,
+	       grid=to_bool(Grid),
+	       bg=Bg,
+	       pointSize=Pt,
+	       leading=Leading,
+	       maxLines=Lines,
+	       measure=Measure,
+	       name=Name,
+	       objs=Os,
+	       x=XX,
+	       y=YY},
+    %% io:format("Box=~p~n",[Box]),
+    Box;
+parse_box(B) ->
+    io:format("Invalid box:~p~n",[B]).
 
+parse_obj({obj, [{"name",Name},{"paraIndent",P}], Tags}) ->
+    P1 = parse_paraIndent(P),
+    PTags = map(fun parse_tag/1, Tags),
+    #obj{name=Name,paraIndent=P1,tags=PTags}.
 
+parse_tag({tag, [{"break", B},{"font",F},{"name",N}], []}) ->
+    {list_to_atom(N),F,to_bool(B)};
+parse_tag(Tag) ->
+    io:format("Tag=~p~n",[Tag]),
+    exit('EXIT bad_tag').
 
+parse_color("default") -> no;
+parse_color(Str) ->
+    [R,G,B] = string:tokens(Str,","),
+    {yes, {parse_float(R), parse_float(G), parse_float(B)}}.
+
+to_bool("true") ->
+    true;
+to_bool("false") ->
+    false;
+to_bool(X) ->
+    io:format("expecting true or false got:~s~n",[X]),
+    exit(1).
+
+parse_fontSize(S) ->
+    case string:tokens(S, "/") of
+	[A, B] ->
+	    I = parse_int("fontSize",  A),
+	    J = parse_int("fontSize",  B),
+	    {I, J};
+	_ ->
+	    io:format("fontSize must be of the form <int>/<int> was:~s",[S]),
+	    exit(1)
+    end.
+
+parse_paraIndent(S) ->
+    case string:tokens(S, ",") of
+	[H|L] ->
+	    map(fun(I) -> parse_int("paraIndent",  I) end, [H|L]);
+	_ ->
+	    io:format("paraIndent must be of the form <int>,<int>, was:~s",
+		      [S]),
+	    exit(1)
+    end.
+
+parse_int(Txt, S) ->
+    case (catch list_to_integer(S)) of
+	{'EXIT', _} ->
+	    io:format("invalid integer:~s expecting:~s~n", [S, Txt]),
+	    exit(1);
+	I ->
+	    I
+    end.
+
+parse_float(S) ->
+    case (catch list_to_float(S)) of
+	{'EXIT', _} ->
+	    io:format("invalid float:~s ~n", [S]),
+	    exit(1);
+	I ->
+	    I
+    end.
+
+zip1([H1|T1],[H2|T2]) -> [[H1," ",H2]|zip1(T1, T2)];
+zip1([], [])          -> [].
 
 

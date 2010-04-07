@@ -40,7 +40,6 @@
 		      mk_fixedStr/2, mk_nl/1,
 		      mk_space/1, mk_word/2, mk_face/5, is_face_breakable/1]).
 
--include("eg.hrl").
 
 %% -define(DEBUG, true).
 

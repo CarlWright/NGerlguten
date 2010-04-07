@@ -1,3 +1,4 @@
+# this makefile is created by the mkMk function in eg_afm.erl
 ERLC_FLAGS=+nowarn_unused_vars +nowarn_unused_function
 include ../../../conf/include.mk
 

@@ -21,6 +21,7 @@
 	 cloan_space/1,
 	 cloan_word/2,
 	 font/1,
+	 fontHandler/1,
 	 fontFromFace/1,
 	 classify_inline/1,
 	 widthExcludingSpaces/1,
@@ -51,7 +52,7 @@
 
 -import(pdf_op, [flatten/1]).
 
--include("eg.hrl").
+-include("../include/eg.hrl").
 
 
 %% -define(DEBUG, true).

@@ -1,4 +1,5 @@
 -module(egFont12).
+% This module is formatted by the mk_program function of the eg_afm module
 -export([width/1, kern/2, fontName/0, firstChar/0,lastChar/0]).
 -export([index/0,ascender/0,capHeight/0,descender/0,italicAngle/0]).
 -export([xHeight/0, flags/0, type/0, stemV/0,fontBBox/0,widths/0]).

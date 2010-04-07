@@ -1,4 +1,5 @@
 -module(egFontMap).
+% This module is created by the mkegFontMap function in module eg_afm
 -export([handler/1,allFonts/0]).
 handler("Times-Roman")-> egFont1;
 handler("Times-Bold")-> egFont2;
