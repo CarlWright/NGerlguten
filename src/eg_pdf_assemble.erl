@@ -365,7 +365,7 @@ pdfloop(PDFC, Stream)->
 	    {F,FA,_} = handle_setfont(PDFC#pdfContext.fonts, Fontname),
 	    "F" ++ Str = FA,
 	    Index = list_to_integer(Str),
-	    eg_font_server:ensure_loaded(Fontname, Index),
+	    %% eg_font_server:ensure_loaded(Fontname, Index),    -- try without this
 	    Pid ! {self(), font_alias, Index},
 	    pdfloop(PDFC#pdfContext{fonts=F}, Stream);
 	{ensure_font, Fontname} ->

@@ -33,7 +33,7 @@
 	 mk_line_headers/6, paraShape_measure/1, paraShape_next/1]).
 
 -import(lists, [reverse/1, reverse/2]).
--import(pdf,  [i2s/1]).
+-import(pdf_op,  [i2s/1]).
 
 %%--------------------------------------------------------------------
 %% Code generation examples:

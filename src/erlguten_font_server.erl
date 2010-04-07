@@ -41,7 +41,7 @@
 
 -define(SERVER, erlguten_font_server).
    
--include("erlguten.hrl").
+-include("../include/erlguten.hrl").
 -record(state, {}).
 
 
@@ -62,7 +62,7 @@ char_width(N, Char) ->
   gen_server:call({global, ?SERVER}, {char_width, N, Char}). 
 
 kern(N, KP) ->
-  gen_server:call({global, ?SERVER}, {kern, N, KP}).
+  gen_server:call({global, ?SERVER}, {kern, N, KP}, infinity).
   
 %%====================================================================
 %% API
@@ -149,23 +149,34 @@ handle_call({data, Fontname}, _From, State) ->
 	    {reply, error, State}
     end;
 
-handle_call({char_width, N, Char}, _From, State) ->     
-    case ets:lookup(fonts, {width,N,Char}) of
-	[{_,W}] ->
-	    {reply,W, State};
-	[] ->
-	    io:format("Cannot figure out width of:~p ~p~n",[N, Char]),
-	    io:format("Possible \n in code etc~n"),
-	    {reply,1000, State}
-    end;
+handle_call({char_width, N, Char}, _From, State) ->  
 
-handle_call({kern, N, KP}, _From, State) ->    
-    case ets:lookup(fonts, {kern,N,KP}) of
-	[{_,W}] ->
-	    {reply,W, State};
-	[] ->
-	    {reply,0, State}
-    end.
+ Module = list_to_atom("egFont" ++ pdf_op:i2s(N)),
+ W = Module:width(Char),
+ {reply,W, State};
+
+   
+%    case ets:lookup(fonts, {width,N,Char}) of
+%	[{_,W}] ->
+%	    {reply,W, State};
+%	[] ->
+%	    io:format("Cannot figure out width of:~p ~p~n",[N, Char]),
+%	    io:format("Possible \n in code etc~n"),
+%	    {reply,1000, State}
+%    end;
+
+handle_call({kern, N, KP}, _From, State) -> 
+ Module = list_to_atom("egFont" ++ pdf_op:i2s(N)),
+ {Char1, Char2} = KP,
+ W = Module:kern(Char1, Char2),
+ {reply,W, State}.
+    
+%    case ets:lookup(fonts, {kern,N,KP}) of
+%	[{_,W}] ->
+%	    {reply,W, State};
+%	[] ->
+%	    {reply,0, State}
+%   end.
 
     
 %%--------------------------------------------------------------------

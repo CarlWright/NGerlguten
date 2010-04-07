@@ -37,7 +37,7 @@
 -import(lists, [map/2,reverse/1, reverse/2]).
 
 -import(erlguten_geometry, [paraShape_measure/1, paraShape_next/1]).
--import(pdf, [i2s/1, f2s/1, flatten/1]).
+-import(pdf_op, [i2s/1, f2s/1, flatten/1]).
 
 %% line_to_pdf(X, Y, Measure, Toks) -> PDF.
 

@@ -110,7 +110,7 @@ test() ->
 					Info, F2, [Page1], MediaBox).
 
 parse_xml_para_str(Str) ->
-    [{xml, XmlPara}] = erlguten_xml_lite:parse_all_forms(Str),
+    [{xml, XmlPara}] = eg_xml_lite:parse_all_forms(Str),
     XmlPara.
 
 flatten(L) ->

@@ -29,12 +29,12 @@
 
 -module(erlguten_pdf_assemble).
 
--include("erlguten.hrl").
+-include("../include/erlguten.hrl").
 
 -compile(export_all).
 
 -import(lists, [map/2, mapfoldl/3, member/2, reverse/1]).
--import(pdf, [f2s/1, i2s/1]).
+-import(pdf_op, [f2s/1, i2s/1]).
 
 make_pdf_file(OutFile, Info, Fonts, Pages, MediaBox) ->
     {Root, Ninfo, Os} = build_pdf(Info, Fonts, Pages, MediaBox),
@@ -201,9 +201,9 @@ serialise({ptr, I, J}) ->
     [" ",i2s(I)," ",i2s(J)," R "];
 serialise({array, L}) ->
     [" [ ", map(fun(I) -> serialise(I) end, L), " ] "];
-serialise(N) when integer(N) ->
+serialise(N) when is_integer(N) ->
     [" ",i2s(N), " "];
-serialise(F) when float(F)->
+serialise(F) when is_float(F)->
       [" ",f2s(F), " "];
 serialise(X) ->
     io:format("I cannot serialise:~p~n", [X]),

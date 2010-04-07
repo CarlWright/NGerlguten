@@ -48,7 +48,7 @@
    set_line_join/2, set_miter_limit/2, set_dash/3, transform/7, scale/3,
    skew/3,  mirror_xaxis/2, set_fill_color_CMYK/5, set_stroke_color_CMYK/5,
    set_stroke_color_RGB/4, set_stroke_gray/2, image/2, image/3, fontName/1,
-   default_face/0, allFonts/0, get_font_alias/2]).
+   default_face/0, allFonts/0, get_font_alias/2, flatten/1]).
 
 %% -export([new/0]).
 
@@ -416,7 +416,8 @@ image1(PID, FilePath, {W, H}) when is_integer(W), is_integer(H)->
 image1(PID, FilePath, {size,Size})->
     PID ! {image, FilePath, Size}.
 
-
+flatten(L) ->
+    binary_to_list(list_to_binary(L)).
 
 %% Internals
 append_stream(PID, String)->
