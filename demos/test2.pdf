@@ -1,104 +1,27 @@
 %PDF-1.4
 1 0 obj
 <<
-/Type  /Font 
-/Subtype  /Type1 
-/Name  /F4 
-/BaseFont  /NewCenturySchlbk-Roman 
-/Encoding  /MacRomanEncoding 
-/FirstChar  32 
-/LastChar  251 
-/Widths  [  278  296  389  556  556  833  815  204  333  333  500  606  278  333  278  278  556  556  556  556  556  556  556  556  556  556  278  278  606  606  606  444  737  722  722  722  778  722  667  778  833  407  556  778  667  944  815  778  667  778  722  630  667  815  722  981  704  704  611  333  606  333  606  500  204  556  556  444  574  500  333  537  611  315  296  593  315  889  611  500  574  556  444  463  389  611  537  778  537  537  481  333  606  333  606  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  296  556  556  167  556  556  500  556  204  389  426  259  259  611  611  0  556  500  500  278  0  606  606  204  389  389  426  1000  1000  0  444  0  333  333  333  333  333  333  333  333  0  333  333  0  333  333  333  1000  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1000  0  334  0  0  0  0  667  778  1000  300  0  0  0  0  0  796  0  0  0  315  0  0  315  500  833  574  ] 
-/FontDescriptor  2 0 R 
 >>
 endobj
 2 0 obj
 <<
-/Type  /FontDescriptor 
-/Ascent  737 
-/CapHeight  722 
-/Descent  -205 
-/Flags  98 
-/FontBBox  [  -195  -250  1000  1000  ] 
-/FontName  /NewCenturySchlbk-Roman 
-/ItalicAngle  0 
-/StemV  92 
-/XHeight  464 
+/Type  /Font 
+/Subtype  /Type1 
+/Name  /F10 
+/BaseFont  /Courier 
+/Encoding  /MacRomanEncoding 
 >>
 endobj
 3 0 obj
 <<
 /Type  /Font 
 /Subtype  /Type1 
-/Name  /F3 
-/BaseFont  /ZapfChancery-MediumItalic 
-/Encoding  /MacRomanEncoding 
-/FirstChar  32 
-/LastChar  251 
-/Widths  [  220  280  220  440  440  680  780  240  260  220  420  520  220  280  220  340  440  440  440  440  440  440  440  440  440  440  260  240  520  520  520  380  700  620  600  520  700  620  580  620  680  380  400  660  580  840  700  600  540  600  600  460  500  740  640  880  560  560  620  240  480  320  520  500  240  420  420  340  440  340  320  400  440  240  220  440  240  620  460  400  440  400  300  320  320  460  440  680  420  400  440  240  520  240  520  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  280  440  440  60  440  440  420  440  160  340  340  240  260  520  520  0  500  460  480  220  0  500  600  180  280  360  380  1000  960  0  400  0  220  300  340  440  440  440  220  360  0  300  300  0  400  280  340  1000  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  740  0  260  0  0  0  0  580  660  820  260  0  0  0  0  0  540  0  0  0  240  0  0  300  440  560  420  ] 
-/FontDescriptor  4 0 R 
->>
-endobj
-4 0 obj
-<<
-/Type  /FontDescriptor 
-/Ascent  714 
-/CapHeight  708 
-/Descent  -314 
-/Flags  98 
-/FontBBox  [  -181  -314  1065  1065  ] 
-/FontName  /ZapfChancery-MediumItalic 
-/ItalicAngle  -14 
-/StemV  70 
-/XHeight  438 
->>
-endobj
-5 0 obj
-<<
-/Type  /Font 
-/Subtype  /Type1 
-/Name  /F6 
-/BaseFont  /Courier 
-/Encoding  /MacRomanEncoding 
->>
-endobj
-6 0 obj
-<<
-/Type  /Font 
-/Subtype  /Type1 
-/Name  /F5 
-/BaseFont  /NewCenturySchlbk-Italic 
-/Encoding  /MacRomanEncoding 
-/FirstChar  32 
-/LastChar  251 
-/Widths  [  278  333  400  556  556  833  852  204  333  333  500  606  278  333  278  606  556  556  556  556  556  556  556  556  556  556  278  278  606  606  606  444  747  704  722  722  778  722  667  778  833  407  611  741  667  944  815  778  667  778  741  667  685  815  704  926  704  685  667  333  606  333  606  500  204  574  556  444  611  444  333  537  611  333  315  556  333  889  611  500  574  556  444  444  352  611  519  778  500  500  463  333  606  333  606  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  333  556  556  167  556  556  500  556  278  389  426  333  333  611  611  0  500  500  500  278  0  650  606  204  389  389  426  1000  1000  0  444  0  333  333  333  333  333  333  333  333  0  333  333  0  333  333  333  1000  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  870  0  422  0  0  0  0  667  778  981  372  0  0  0  0  0  722  0  0  0  333  0  0  333  500  778  556  ] 
-/FontDescriptor  7 0 R 
->>
-endobj
-7 0 obj
-<<
-/Type  /FontDescriptor 
-/Ascent  737 
-/CapHeight  722 
-/Descent  -205 
-/Flags  98 
-/FontBBox  [  -166  -250  994  994  ] 
-/FontName  /NewCenturySchlbk-Italic 
-/ItalicAngle  -16 
-/StemV  80 
-/XHeight  466 
->>
-endobj
-8 0 obj
-<<
-/Type  /Font 
-/Subtype  /Type1 
-/Name  /F2 
+/Name  /F7 
 /BaseFont  /Times-Italic 
 /Encoding  /MacRomanEncoding 
 >>
 endobj
-9 0 obj
+4 0 obj
 <<
 /Type  /Font 
 /Subtype  /Type1 
@@ -107,185 +30,134 @@ endobj
 /Encoding  /MacRomanEncoding 
 >>
 endobj
-10 0 obj
+5 0 obj
 <<
-/F4  1 0 R 
-/F3  3 0 R 
-/F6  5 0 R 
-/F5  6 0 R 
-/F2  8 0 R 
-/F1  9 0 R 
+/F10  2 0 R 
+/F7  3 0 R 
+/F1  4 0 R 
 >>
 endobj
-11 0 obj
+6 0 obj
 <<
 /Type  /Pages 
 /Count  1 
 /MediaBox  [  0  0  595  842  ] 
-/Kids  [  13 0 R  ] 
+/Kids  [  8 0 R  ] 
 /Resources <<
-/Font  10 0 R 
+/Font  5 0 R 
+/XObject  1 0 R 
 /ProcSet  [  /PDF  /Text  ] 
 >>
 
 >>
 endobj
-12 0 obj
-<</Length 5533>>
+7 0 obj
+<<
+/Length  4928 
+>>
+
 stream
 BT
 1 0 0 1 200 768 Tm  0 Tw /F1 32 Tf
 0 Tw [ (Erlguten)0 ] TJ
 ET
  BT
-1 0 0 1 100 192 Tm  0 Tw /F2 6 Tf
+1 0 0 1 100 192 Tm  0 Tw /F7 6 Tf
 0 Tw [ (This is a small footnote set in 6/8 T)55 (imes Italic. Note that the or)37 (der of lines in the output has nothing to do with the or)37 (der on the pa)10 (g)10 (e)15 (.)0 ] TJ
 ET
  BT
-1 0 0 1 100 737 Tm 12 0 Td  -1.00 Tw /F4 11 Tf
--1.00 Tw [ (W)60 (elcome to )0 ] TJ
-/F5 11 Tf
--1.00 Tw [ (ErlGuten.)0 ] TJ
-/F4 11 Tf
--1.00 Tw [ ( ErlGuten is a system for typesetting)25 (. The aim of)0 ] TJ
--12 -13 Td  -0.65 Tw [ (ErlGuten is to produce high quality PDF from a la)10 (yout language or from)0 ] TJ
-0 -13 Td  0.13 Tw [ (a program. The ErlGuten distribution inc)7 (ludes a programming API, so)0 ] TJ
-0 -13 Td  -0.09 Tw [ (that programs can produce PDF - and a typesetting system for typeset-)0 ] TJ
-0 -13 Td  0 Tw [ (ting documents written in XML.)0 ] TJ
+1 0 0 1 100 737 Tm 12 0 Td  -0.66 Tw /F1 11 Tf
+-0.66 Tw [ (W)80 (elcome to ErlGuten. ErlGuten is a system for typesetting. The aim of ErlGuten)0 ] TJ
+-12 -13 Td  0.99 Tw [ (is to produce high quality PDF from a layout language or from a program. The)0 ] TJ
+0 -13 Td  0.12 Tw [ (ErlGuten distrib)20 (ution includes a programming API, so that programs can produce)0 ] TJ
+0 -13 Td  0 Tw [ (PDF - and a typesetting system for typesetting documents written in XML.)0 ] TJ
 ET
  BT
-1 0 0 1 100 672 Tm 12 0 Td  0.37 Tw /F4 11 Tf
-0.37 Tw [ (The document that you are reading w)18 (as authored in XML and type-)0 ] TJ
--12 -13 Td  0.12 Tw [ (set by ErlGuten. The name ErlGuten is c)7 (hosen because the program is)0 ] TJ
-0 -13 Td  -0.01 Tw [ (written in Erlang - the )0 ] TJ
-/F5 11 Tf
--0.01 Tw [ (Guten)0 ] TJ
-/F4 11 Tf
--0.01 Tw [ ( part is a reference to )0 ] TJ
-/F5 11 Tf
--0.01 Tw [ (Gutenberg)0 ] TJ
-/F4 11 Tf
--0.01 Tw [ ( the fath-)0 ] TJ
-0 -13 Td  0 Tw [ (er of printing)25 (.)0 ] TJ
+1 0 0 1 100 685 Tm 12 0 Td  2.38 Tw /F1 11 Tf
+2.38 Tw [ (The document that you are reading w)10 (as authored in XML and typeset by)0 ] TJ
+-12 -13 Td  -0.27 Tw [ (ErlGuten. The name ErlGuten is chosen because the program is written in Erlang -)0 ] TJ
+0 -13 Td  0 Tw [ (the Guten part is a reference to Gutenber)18 (g the f)10 (ather of printing.)0 ] TJ
 ET
  BT
-1 0 0 1 100 620 Tm 12 0 Td  0.96 Tw /F3 11 Tf
-0.96 Tw [ (ErlGuten is a system for high quality typesetting)20 (, so we tak)20 (e a great deal of care w)-20 (hen)0 ] TJ
--12 -13 Td  -0.77 Tw [ (formatting text, a larg)-10 (e number of optimizations are performed w)-20 (hich improve the quality of the)0 ] TJ
-0 -13 Td  -0.56 Tw [ (pr)-10 (inted text. Man)-20 (y of these optimizations are only found in expensive prof)10 (essional type-setting)0 ] TJ
-0 -13 Td  0.45 Tw [ (programs)20 (. W)20 (e believe that WYSIWYG programs have destroyed the fine art of typesetting -)0 ] TJ
-0 -13 Td  0 Tw [ (ErlGuten is a modest attempt to improve the situation.)0 ] TJ
+1 0 0 1 100 646 Tm 12 0 Td  -0.25 Tw /F1 11 Tf
+-0.25 Tw [ (ErlGuten is a system for high quality typesetting, so we tak)10 (e a great deal of care)0 ] TJ
+-12 -13 Td  0.88 Tw [ (when formatting te)15 (xt, a lar)18 (ge number of optimizations are performed which im-)0 ] TJ
+0 -13 Td  0.53 Tw [ (pro)15 (v)15 (e the quality of the printed te)15 (xt. Man)15 (y of these optimizations are only found)0 ] TJ
+0 -13 Td  -0.18 Tw [ (in e)15 (xpensi)25 (v)15 (e professional type-setting programs. W)80 (e belie)25 (v)15 (e that WYSIWYG pro-)0 ] TJ
+0 -13 Td  0.19 Tw [ (grams ha)20 (v)15 (e destro)10 (yed the f)20 (ine art of typesetting - ErlGuten is a modest attempt to)0 ] TJ
+0 -13 Td  0 Tw [ (impro)15 (v)15 (e the situation.)0 ] TJ
 ET
  BT
-1 0 0 1 100 555 Tm 12 0 Td  0.03 Tw /F4 11 Tf
-0.03 Tw [ (W)60 (e ha)10 (ve c)7 (hosen XML as the input language for it')25 (s wide appeal - not)0 ] TJ
--12 -13 Td  -1.19 Tw [ (because of any intrinsic advantages that XML might ha)10 (ve)18 (. XML provides)0 ] TJ
-0 -13 Td  -0.41 Tw [ (only a thin abstraction la)10 (yer over the typesetting system - so the adven-)0 ] TJ
-0 -13 Td  -0.27 Tw [ (turous can use the programming interface to ErlGuten - to directly pro-)0 ] TJ
-0 -13 Td  -0.05 Tw [ (duce typographic quality PDF in real-time)18 (. W)60 (e expect this facility to be)0 ] TJ
-0 -13 Td  0 Tw [ (useful for the dynamic generation of documents from web-servers)25 (.)0 ] TJ
+1 0 0 1 100 568 Tm 12 0 Td  -0.33 Tw /F1 11 Tf
+-0.33 Tw [ (W)80 (e ha)20 (v)15 (e chosen XML as the input language for it's wide appeal - not because of)0 ] TJ
+-12 -13 Td  -0.14 Tw [ (an)15 (y intrinsic adv)25 (antages that XML might ha)20 (v)15 (e. XML pro)15 (vides only a thin abstrac-)0 ] TJ
+0 -13 Td  -0.78 Tw [ (tion layer o)15 (v)15 (er the typesetting system - so the adv)15 (enturous can use the programming)0 ] TJ
+0 -13 Td  0.63 Tw [ (interf)10 (ace to ErlGuten - to directly produce typographic quality PDF in real-time.)0 ] TJ
+0 -13 Td  -0.02 Tw [ (W)80 (e e)15 (xpect this f)10 (acility to be useful for the dynamic generation of documents from)0 ] TJ
+0 -13 Td  0 Tw [ (web-serv)15 (ers.)0 ] TJ
 ET
  BT
-1 0 0 1 100 477 Tm 12 0 Td  0.09 Tw /F4 11 Tf
-0.09 Tw [ (In ErlGuten we take the view that the highest level of abstraction is)0 ] TJ
--12 -13 Td  -1.13 Tw [ (the )0 ] TJ
-/F5 11 Tf
--1.13 Tw [ (layout)0 ] TJ
-/F4 11 Tf
--1.13 Tw [ ( of a document - we are very concerned that the user can specify)0 ] TJ
-0 -13 Td  -0.89 Tw [ (the )0 ] TJ
-/F5 11 Tf
--0.89 Tw [ (exact)0 ] TJ
-/F4 11 Tf
--0.89 Tw [ ( position of text on the printed page)18 (. At the next level of abstrac-)0 ] TJ
-0 -13 Td  -0.10 Tw [ (tion we are concerned with the typefaces that are used to format differ)37 (-)0 ] TJ
-0 -13 Td  0.68 Tw [ (ent regions of the document - our system makes use of the 14 in-built)0 ] TJ
-0 -13 Td  0.41 Tw [ (PDF fonts - for specialist work type 1 postscript fonts can be used and)0 ] TJ
-0 -13 Td  -0.51 Tw [ (embedded in the resulting output. The ErlGuten distribution inc)7 (ludes a)0 ] TJ
-0 -13 Td  0.46 Tw [ (number of public domain Type 1 postscript fonts that can be freely in-)0 ] TJ
-0 -13 Td  0 Tw [ (c)7 (luded in any document produced by ErlGuten.)0 ] TJ
+1 0 0 1 100 490 Tm 12 0 Td  0.43 Tw /F1 11 Tf
+0.43 Tw [ (In ErlGuten we tak)10 (e the vie)25 (w that the highest le)25 (v)15 (el of abstraction is the layout)0 ] TJ
+-12 -13 Td  -0.03 Tw [ (of a document - we are v)15 (ery concerned that the user can specify the e)15 (xact position)0 ] TJ
+0 -13 Td  0.10 Tw [ (of te)15 (xt on the printed page. At the ne)15 (xt le)25 (v)15 (el of abstraction we are concerned with)0 ] TJ
+0 -13 Td  0.49 Tw [ (the typef)10 (aces that are used to format dif)25 (ferent re)15 (gions of the document - our sys-)0 ] TJ
+0 -13 Td  0.30 Tw [ (tem mak)10 (es use of the 14 in-b)20 (uilt PDF fonts - for specialist w)10 (ork type 1 postscript)0 ] TJ
+0 -13 Td  -0.10 Tw [ (fonts can be used and embedded in the resulting output. The ErlGuten distrib)20 (ution)0 ] TJ
+0 -13 Td  0.33 Tw [ (includes a number of public domain T)80 (ype 1 postscript fonts that can be freely in-)0 ] TJ
+0 -13 Td  0 Tw [ (cluded in an)15 (y document produced by ErlGuten.)0 ] TJ
 ET
  BT
-1 0 0 1 100 360 Tm 12 0 Td  0.59 Tw /F4 11 Tf
-0.59 Tw [ (Here)18 (, paragraphs are composed of 11/13 )0 ] TJ
-/F5 11 Tf
-0.59 Tw [ (NewCenturySc)18 (hlbk-Roman)0 ] TJ
--12 -13 Td  10.47 Tw /F4 11 Tf
-10.47 Tw [ (set in a 30 pica measure)18 (. )0 ] TJ
-/F5 11 Tf
-10.47 Tw [ (Emphasized text)0 ] TJ
-/F4 11 Tf
-10.47 Tw [ ( is set in)0 ] TJ
-0 -13 Td  -0.28 Tw [ (NewCentrySc)7 (hlbk-Italic)18 (. The T)55 (eX hyphenation algorithm is also imple-)0 ] TJ
-0 -13 Td  -0.64 Tw [ (mented. I ha)10 (ve also some )0 ] TJ
-/F5 11 Tf
--0.64 Tw [ (cur)10 (sive text)0 ] TJ
-/F4 11 Tf
--0.64 Tw [ ( and an example of an Erlang term.)0 ] TJ
+1 0 0 1 100 386 Tm 12 0 Td  -0.27 Tw /F1 11 Tf
+-0.27 Tw [ (Here, paragraphs are composed of 11/13 Ne)25 (wCenturySchlbk-Roman set in a 30)0 ] TJ
+-12 -13 Td  -1.02 Tw [ (pica measure. Emphasized te)15 (xt is set in Ne)25 (wCentrySchlbk-Italic. The T)70 (eX h)5 (yphena-)0 ] TJ
+0 -13 Td  0.24 Tw [ (tion algorithm is also implemented. I ha)20 (v)15 (e also some cursi)25 (v)15 (e te)15 (xt and an e)15 (xample)0 ] TJ
+0 -13 Td  0 Tw [ (of an Erlang term.)0 ] TJ
 ET
  BT
-1 0 0 1 100 308 Tm 12 0 Td  0.33 Tw /F4 11 Tf
-0.33 Tw [ ( The term )0 ] TJ
-/F6 11 Tf
+1 0 0 1 100 334 Tm 12 0 Td  -0.04 Tw /F1 11 Tf
+-0.04 Tw [ ( The term )0 ] TJ
+/F10 11 Tf
 0 Tw [ ({person,"Joe"})0 ] TJ
-/F4 11 Tf
-0.33 Tw [ ( is an Erlang term. The variable )0 ] TJ
-/F6 11 Tf
+/F1 11 Tf
+-0.04 Tw [ ( is an Erlang term. The v)25 (ariable )0 ] TJ
+/F10 11 Tf
 0 Tw [ (X)0 ] TJ
-/F4 11 Tf
-0.33 Tw [ (, w)18 (as)0 ] TJ
--12 -13 Td  -1.11 Tw [ (immediately followed by a comma. The justification algorithm does prop-)0 ] TJ
-0 -13 Td  0.58 Tw [ (er )0 ] TJ
-/F5 11 Tf
-0.58 Tw [ (kerning)0 ] TJ
-/F4 11 Tf
-0.58 Tw [ (, whic)7 (h is more than )0 ] TJ
-/F5 11 Tf
-0.58 Tw [ (Microsoft W)55 (ord)0 ] TJ
-/F4 11 Tf
-0.58 Tw [ ( can do)18 (. A)50 (W)50 (A)75 (Y again is)0 ] TJ
-0 -13 Td  0 Tw [ (correctly kerned! Erlang terms )0 ] TJ
-/F6 11 Tf
+/F1 11 Tf
+-0.04 Tw [ (, w)10 (as immedi-)0 ] TJ
+-12 -13 Td  -0.52 Tw [ (ately follo)25 (wed by a comma. The justif)20 (ication algorithm does proper k)10 (erning, which)0 ] TJ
+0 -13 Td  -0.72 Tw [ (is more than Microsoft W)80 (ord can do. A)90 (W)120 (A)105 (Y ag)5 (ain is correctly k)10 (erned! Erlang terms)0 ] TJ
+0 -13 Td  0 Tw /F10 11 Tf
 0 Tw [ ({like,this})0 ] TJ
-/F4 11 Tf
-0 Tw [ ( are typeset in )0 ] TJ
-/F5 11 Tf
-0 Tw [ (courier)125 (.)0 ] TJ
+/F1 11 Tf
+0 Tw [ ( are typeset in courier)55 (.)0 ] TJ
 ET
  BT
-1 0 0 1 100 256 Tm 12 0 Td  1.64 Tw /F4 11 Tf
-1.64 Tw [ (Note)18 (, if punctuation is used, it must be attac)7 (hed to the preceding)0 ] TJ
--12 -13 Td  0 Tw [ (tagged bloc)7 (k, )0 ] TJ
-/F5 11 Tf
-0 Tw [ (like this)50 (,)0 ] TJ
-/F4 11 Tf
-0 Tw [ ( but never )0 ] TJ
-/F5 11 Tf
-0 Tw [ (like this)0 ] TJ
-/F4 11 Tf
-0 Tw [ (, whic)7 (h is incorrect.)0 ] TJ
+1 0 0 1 100 282 Tm 12 0 Td  0.21 Tw /F1 11 Tf
+0.21 Tw [ (Note, if punctuation is used, it must be attached to the preceding tagged block,)0 ] TJ
+-12 -13 Td  0 Tw [ (lik)10 (e this, b)20 (ut ne)25 (v)15 (er lik)10 (e this, which is incorrect.)0 ] TJ
 ET
  
 endstream
 endobj
-13 0 obj
+8 0 obj
 <<
 /Type  /Page 
-/Parent  11 0 R 
-/Contents  12 0 R 
+/Parent  6 0 R 
+/Contents  7 0 R 
 >>
 endobj
-14 0 obj
+9 0 obj
 <<
 /Type  /Catalog 
-/Pages  11 0 R 
+/Pages  6 0 R 
 >>
 endobj
-15 0 obj
+10 0 obj
 <<
-/Creator  (NGerlguten) 
-/CreationDate  (D:20030215152011) 
-/Producer  (NGerlguten) 
+/Creator  (Erlang) 
+/CreationDate (D:20100407111557)
+/Producer  (erlguten-3.1) 
 /Author  () 
 /Title  () 
 /Subject  () 
@@ -293,29 +165,24 @@ endobj
 >>
 endobj
 xref
-0 16
+0 11
 0000000000 65535 f 
 0000000009 00000 n 
-0000001174 00000 n 
-0000001399 00000 n 
-0000002563 00000 n 
-0000002793 00000 n 
-0000002909 00000 n 
-0000004073 00000 n 
-0000004299 00000 n 
-0000004420 00000 n 
-0000004540 00000 n 
-0000004634 00000 n 
-0000004798 00000 n 
-0000010382 00000 n 
-0000010454 00000 n 
-0000010509 00000 n 
+0000000030 00000 n 
+0000000147 00000 n 
+0000000268 00000 n 
+0000000388 00000 n 
+0000000446 00000 n 
+0000000624 00000 n 
+0000005607 00000 n 
+0000005676 00000 n 
+0000005729 00000 n 
 trailer
 <<
-/Size 16
-/Root 14 0 R
-/Info 15 0 R
+/Size 11
+/Root 9 0 R
+/Info 10 0 R
 >>
 startxref
-10682
+5898
 %%EOF

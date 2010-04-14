@@ -26,7 +26,7 @@
 %% Last Edit: 2003-03-12
 %% =====================================================================
 %%%
-%%% Renovated : 27 Feb 2010 by  <wright@>
+%%% Renovated : 27 Feb 2010 by  <wright@servicelevel.net>
 %%%-------------------------------------------------------------------
 -module(erlguten).
 
@@ -75,7 +75,7 @@ format(Pid, File) ->
   gen_server:call(Pid, {format, File},infinity).
 
 format_string(Pid, String, Root) ->
-  gen_server:call(Pid, {format_string, String, Root}).
+  gen_server:call(Pid, {format_string, String, Root}, infinity).
 
 dispatch(Pid, File, To) ->
   gen_server:cast(Pid, {format, File, To}).

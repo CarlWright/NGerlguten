@@ -1,5 +1,5 @@
 
-9 March 2010
+7 April 2010
 
 To run the demos, I do the following:
 
@@ -7,13 +7,15 @@ To run the demos, I do the following:
 
 2. Start up "erl".
 
-3. Do "application:start(erlguten).". This loads erlguten and starts the font_server and its 
+3. Do "application:start(sasl).".
+
+4. Do "application:start(erlguten).". This loads erlguten and starts the font_server and its 
    supervisor.
 
-4. Do "{ok, PID} = erlguten:start_link()." to get an erlguten server and its PID.
+5. Do "{ok, PID} = erlguten:start_link()." to get an erlguten server and its PID.
 
-5. Do "erlguten:format(PID, "../demos/test1.xml"). " to process the first example PDF input file. 
+6. Do "erlguten:format(PID, "../demos/test1.xml"). " to process the first example PDF input file. 
    It produces test1.pdf.
 
-6. Do "erlguten:format(PID, "../demos/test3.xml"). " to process the second example PDF input file. 
+7. Do "erlguten:format(PID, "../demos/test2.xml"). " to process the second example PDF input file. 
    It produces test2.pdf.

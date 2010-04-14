@@ -480,8 +480,8 @@ handle_export(PDFC)->
 handle_setfont(FontList, FontName)->
     case handler(FontName) of
 	undefined ->
-	    io:format("There is no font called:~s~n", [FontName]),
-	    io:format("Using Times-Roman"),
+	    io:format("There is no font called: ~s... ", [FontName]),
+	    io:format("Using Times-Roman~n"),
 	    handle_setfont(FontList, "Times-Roman");
 	Handler ->
 	    Index = Handler:index(),

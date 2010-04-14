@@ -1,7 +1,7 @@
 %%======================================================================
 %% Purpose: PDF library routines
 %%----------------------------------------------------------------------
-%% Copyright (C) 2003 Joe Armstrong
+%% Copyright (C) 2003 Joe Armstrong, 2010 Carl Wright
 %%
 %%   General Terms
 %%
@@ -23,7 +23,8 @@
 %% damages arising in any way out of the use of this software.
 %%
 %% Authors:   Joe Armstrong <joe@sics.se>
-%% Last Edit: 2003-03-19
+%%            Carl Wright (wright@servicelevel.net)
+%% Last Edit: 2010-04-14
 %% =====================================================================
 
 -module(pdf_lib).
@@ -32,22 +33,17 @@
 	 moveAndShowRot/5, code128/1]).
 -import(pdf_op, [i2s/1, n2s/1]).
 
-%% showGrid(PDF, a4 | usLetter) 
+
+%% showGrid(PDF, pagesize atom from pdf.erl) 
 %%   adds a grid to the current page page
 
-sizeOfPaper(a4) ->
-    {595, 842};
-sizeOfPaper(usLetter) ->
-    {612, 792}.
 
 showGrid(PDF, Paper) ->
-    {PaperWidth, PaperHeight} = sizeOfPaper(Paper),
-    %% Top = PaperHeight - 10,
-    Top = 825, % hack
+    {_,_,PaperWidth, PaperHeight} = pdf:pagesize(Paper),
+    Top = PaperHeight - 17, % hack
     Bottom = 10,
     Left = 10,
-    %% Right = PaperWidth - 10,
-    Right = 575,
+    Right = round((PaperWidth - 20) / 25) * 25,
     pdf:set_font(PDF,"Helvetica", 8),
     vlines(PDF, Left, Right, Top, Bottom),
     hlines(PDF, Left, Right, Top, Bottom).
@@ -55,10 +51,10 @@ showGrid(PDF, Paper) ->
 hlines(PDF, Left, Right, Top, Bottom) ->
     diter(Top,25,10,
 	  fun(Y) ->
-		  %% pdf:set_fill_gray(PDF,1.0),
+		  pdf:set_fill_gray(PDF,1.0),
 		  pdf:line(PDF, Left, Y, Left+20, Y),
 		  pdf:line(PDF, Right, Y, Right-20, Y),
-		  %% pdf:set_fill_gray(PDF,0.8),
+		  pdf:set_fill_gray(PDF,0.8),
 		  pdf:line(PDF, Left+20,Y,Right-20,Y),
 		  moveAndShow(PDF, Left, Y+2, n2s(Y)),
 		  moveAndShow(PDF, Right-20, Y+2, n2s(Y)),

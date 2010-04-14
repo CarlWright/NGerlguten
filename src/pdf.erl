@@ -63,7 +63,7 @@ init_pdf_context()->
     {{Year,Month,Day},{Hrs,Min,Sec}} = calendar:local_time(),
     #pdfContext{info=#info{creator="Erlang", 
 			   creationDate= {{Year,Month,Day},{Hrs,Min,Sec}},
-			   producer="erlguten-3.1", 
+			   producer="NGerlguten", 
 			   author="",
 			   title="",
 			   subject="",
