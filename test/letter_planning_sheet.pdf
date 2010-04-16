@@ -43,7 +43,7 @@ endobj
 endobj
 6 0 obj
 <<
-/Length  8215 
+/Length  8403 
 >>
 
 stream
@@ -824,6 +824,10 @@ BT
  580 27  Td  (25) Tj
  
 ET
+ 710 360  m 775 360  l 777.76 360 780 362.76 780 365  c
+780 565  l 780 567.76 777.76 570 775 570  c
+710 570  l 707.76 570 705 567.76 705 565  c
+705 365  l 705 362.76 707.76 360 710 360  c
   /F1 36 Tf 
 BT
  50 575  Td  (Letter template planning sheet-) Tj
@@ -848,7 +852,7 @@ endobj
 9 0 obj
 <<
 /Creator  (Erlang) 
-/CreationDate (D:20100414173238)
+/CreationDate (D:20100414184227)
 /Producer  (NGerlguten) 
 /Author  () 
 /Title  () 
@@ -865,9 +869,9 @@ xref
 0000000268 00000 n 
 0000000313 00000 n 
 0000000491 00000 n 
-0000008761 00000 n 
-0000008830 00000 n 
-0000008883 00000 n 
+0000008949 00000 n 
+0000009018 00000 n 
+0000009071 00000 n 
 trailer
 <<
 /Size 10
@@ -875,5 +879,5 @@ trailer
 /Info 9 0 R
 >>
 startxref
-9049
+9237
 %%EOF
