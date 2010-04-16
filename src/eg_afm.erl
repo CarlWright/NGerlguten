@@ -1,28 +1,27 @@
-%%======================================================================
-%%   General Terms
-%%----------------------------------------------------------------------
+%%==========================================================================
 %% Copyright (C) 2003 Joe Armstrong
 %%
-%%   Erlguten  is   free  software.   It   can  be  used,   modified  and
-%% redistributed  by anybody for  personal or  commercial use.   The only
-%% restriction  is  altering the  copyright  notice  associated with  the
-%% material. Individuals or corporations are permitted to use, include or
-%% modify the Erlguten engine.   All material developed with the Erlguten
-%% language belongs to their respective copyright holder.
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
 %% 
-%%   Copyright Notice
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
 %% 
-%%   This  program is  free  software.  It  can  be redistributed  and/or
-%% modified,  provided that this  copyright notice  is kept  intact. This
-%% program is distributed in the hope that it will be useful, but without
-%% any warranty; without even  the implied warranty of merchantability or
-%% fitness for  a particular  purpose.  In no  event shall  the copyright
-%% holder  be liable  for  any direct,  indirect,  incidental or  special
-%% damages arising in any way out of the use of this software.
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
-%% Authors:   Joe Armstrong <joe@sics.se>
-%% Last Edit: 2003-03-13
-%% =====================================================================
+%% Author: Joe Armstrong <joe@sics.se>
+%%==========================================================================
 
 -module(eg_afm).
 
@@ -68,7 +67,7 @@
 
 %% StemV is NOT in the .afm file but *is* in the
 %% encrypted part of the .pfb file where it is set with a command like
-%% /StdVW[50]def - this is the dominanmt width of the vertical stems
+%% /StdVW[50]def - this is the dominant width of the vertical stems
 %% (see page 42 of the Adobe "black book")
 %% 
 %% The  entry  StdVW  is an  array  with  only  one real  number  entry
@@ -95,73 +94,55 @@
 %% Just look for the stuff I'm interested in and assume a fixed format for 
 %% input
 
-%-compile(export_all).
 
--export([make/0, read_font_info/1]).
+-export([make/0]).
 
--import(lists, [foreach/2, keysearch/3, mapfoldl/3,
-		map/2, member/2, foldl/3,reverse/1]).
--import(pdf_op, [i2s/1, a2s/1, n2s/1]).
 -include_lib("kernel/include/file.hrl").    
 
-%%
-%% this makes all the egFont# modules and the egFontMap module
-%%
+%% ============================================================================
+
 make() ->
     F = all_afms(),
-    {F1,_} = mapfoldl(fun(File,I) -> {{File,I}, I+1}  end, 1, F),
+    {F1,_} = lists:mapfoldl(fun(File,I) ->
+			      {{File,I}, I+1}
+		      end, 1, F),
     io:format("Found:~p~n",[F1]),
-    F2 = map(fun({File, Index}) -> 
+    F2 = lists:map(fun({File, Index}) -> 
 		     {Mod,FontName,Type} = parse(File, Index),
 		     {File,Mod,FontName,Index,Type}
 	     end, F1),
-    mkMk(map(fun(I) -> element(2,I) end, F2)),
-    mkegFontMap(map(fun({_,M,Func,I,_}) -> {M,Func,I} end, F2)),
+    mk_Make(lists:map(fun(I) -> element(2,I) end, F2)),
+    mk_eg_font_map(lists:map(fun({_,M,Func,I,_}) -> {M,Func,I} end, F2)),
     External = [{File,Mod} || {File,Mod,_,_,external} <- F2],
     io:format("External=~p~n",[External]),
-    foreach(fun({File,Mod}) -> copy_pdf(File,Mod) end, External).
+    lists:foreach(fun({File,Mod}) -> copy_pdf(File,Mod) end, External).
 
-%%
-%% this returns the location of the afm files
-%%
-font_map() ->
-    fonts_out() ++ "/font_locations".
-%%
-%% this defines where the egFont# modules and the egFontMap module   
-fonts_out() ->
-%%    this_dir() ++ "../priv/fonts/bin".
-    "../priv/fonts/bin".
+fonts_out() -> "../priv/src".
 
 %% Just run pdf_afm_qdh:all() to build the font tables
-%% this returns a list of strings. Each string is the location of an afm file.
-%%
 all_afms() ->
-    {ok, F} = file:open("../priv/fonts/font_locations", read),  %% this file should not have any blank lines;
-    L= read_locations(F, []),                                   %% the line(s) must end in a LF char.
+    {ok, F} = file:open("../priv/font_locations", read),
+    L= read_locations(F, []),
     file:close(F),
     find_atms(L, []).
-%%
-%% this returns a list of afm filename strings.
-%%
+
 find_atms([H|T], L) ->
     case is_dir(H) of
 	true ->
-	    A = find:files(H, "*.afm", false),
+	    A = eg_lib:find_files(H, "*.afm", false),
 	    find_atms(T, A ++ L);
 	false ->
 	    case exists(H) of
 		true ->
 		    find_atms(T, [H|L]);
 		false ->
-		    %% io:format("~s is not a file~n",[H]),
+		    io:format("~s is not a file~n",[H]),
 		    find_atms(T, L)
 	    end
     end;
 find_atms([], L) ->
     L.
-%%
-%% returns a value like ["../priv/fonts/builtIn"] from the content of the font locations file.
-%%
+
 read_locations(F, L) ->
     case io:get_line(F, '>') of
 	eof ->
@@ -170,10 +151,7 @@ read_locations(F, L) ->
 	    read_locations(F, [first(Str)|L])
     end.
 
-%%
-%% this looks into the file system to determine the kind of file is named by the passed in parameter
-%% It uses the record definition in "kernel/include/file.hrl" to extract the file type
-%%
+
 file_type(File) ->
     case file:read_file_info(File) of
 	{ok, Info} -> Info#file_info.type;
@@ -184,9 +162,7 @@ file_type(File) ->
 is_dir(X) ->
     file_type(X) == directory.
 
-%% 
-%% this returns a boolean value indicating if the file indicated by File exists.
-%%
+
 exists(File) ->
     case file:read_file_info(File) of
 	{ok, _} ->
@@ -200,93 +176,53 @@ first([X]) ->
 first([H|T]) ->
     [H|first(T)].
 
-this_dir() ->
-    filename:dirname(code:which(?MODULE)).
-
-
-read_font_info(FontName) ->
-    %% io:format("Font map=~s~n",[font_map()]),
-    Map = font_map(),
-    case file:read_file(Map) of
-	{ok, Bin} ->
-	    T = binary_to_term(Bin),
-	    case keysearch(FontName, 1, T) of
-		{value, {_,File}} ->
-		    FontFile = fonts_out() ++ "/" ++ File ++ ".efm",
-		    case file:read_file(FontFile) of
-			{ok, Bin1} ->
-			    All = binary_to_term(Bin1),
-			    Char_widths=mk_widths(All),
-			    {ok, {afm_qdh1, 
-				  All#afm2.baseFont,
-				  Char_widths,
-				  All#afm2.kernPairs,
-				  All}};
-			_ ->
-			    {error, {misssing_font_file, FontFile}}
-		    end;
-		_ ->
-		    {error, no_such_font}
-	    end;
-	_ ->
-	    {error, no_font_map}
-    end.
-    
-%%
-%% this produces a Makefile to build all the egFont# files and the egFontMap.erl file    
-%%
-mkMk(FontMap) ->
-    Str = ["# this makefile is created by the mkMk function in eg_afm.erl\n",
-    "ERLC_FLAGS=+nowarn_unused_vars +nowarn_unused_function\n"
-	   "include ../../../conf/include.mk\n\n"
-	   "../../../ebin/%.beam: %.erl\n"
-	   "\t$(ERLC) $(ERLC_FLAGS) -o ../../../ebin $<\n\n"
-	   "MODS= egFontMap ",
-	   map(fun(J) ->[J," "] end, FontMap),"\n\n",
-	   "EBIN_FILES=${MODS:%=../../../ebin/%.beam}\n"
+mk_Make(FontMap) ->
+    Str = ["ERLC_FLAGS=+nowarn_unused_vars +nowarn_unused_function\n"
+	   "include ../../conf/include.mk\n\n"
+	   "../../ebin/%.beam: %.erl\n"
+	   "\t$(ERLC) $(ERLC_FLAGS) -o ../../ebin $<\n\n"
+	   "MODS= eg_font_map ",
+	   lists:map(fun(J) ->[J," "] end, FontMap),"\n\n",
+	   "EBIN_FILES=${MODS:%=../../ebin/%.beam}\n"
 	   "all: ${EBIN_FILES}\n\n",
 	   "clean:\n",
-	   "\trm -f ${EBIN_FILES}\n\n"],
+	   "\trm -f ${EBIN_FILES}\n\n"
+	  ],
     %% io:format("Makefile(~s)=~s~n",[Makefile,Str]),
     file:write_file(fonts_out() ++ "/Makefile", [Str]).
-%%    
+    
 %% [{Mod,Fname,Index}]
-%% this produces an egFont# file where # is a font alias number.
-%%
-mkegFontMap(FontMap) ->
-    All = map(fun(I) -> element(2, I) end, FontMap),
-    Str = ["-module(egFontMap).\n",
-    "% This module is created by the mkegFontMap function in module eg_afm\n",
-	   "-export([handler/1,allFonts/0]).\n",
-	   map(fun({Mod,Font,I}) ->
+mk_eg_font_map(FontMap) ->
+    All = lists:map(fun(I) -> element(2, I) end, FontMap),
+    Str = ["-module(eg_font_map).\n",
+	   "-export([handler/1,all_fonts/0]).\n",
+	   lists:map(fun({Mod,Font,I}) ->
 		       ["handler(\"",Font,"\")-> ", Mod,";\n"]
 	       end, FontMap),
 	   "handler(_) -> undefined.\n",
-	   "allFonts() -> ",io_lib:format("~p.~n", [All])],
-    file:write_file(fonts_out() ++ "/egFontMap.erl", [Str]).
-%% 
-%% this parses an afm file and produces an egFont#.erl module to encapsulate info on a built-in font.
-%%
+	   "all_fonts() -> ",io_lib:format("~p.~n", [All])],
+    file:write_file(fonts_out() ++ "/eg_font_map.erl", [Str]).
+
 parse(F,Index) ->
     %% io:format("Parsing:~p~n",[F]),
-    Mod = "egFont" ++ i2s(Index),
+    Mod = "eg_font_" ++ eg_pdf_op:i2s(Index),
     Out = fonts_out() ++ "/" ++ Mod ++ ".erl",
     L = file2numbered_lines(F),
     Fn   = get_font_name(L),
     io:format("Found font:~s~n",[Fn]),
-    Type = case member(Fn, pdf:inBuiltFonts()) of
+    Type = case lists:member(Fn, eg_pdf:inBuiltFonts()) of
 	       true -> internal;
 	       false ->  external
 	   end,
     Cw = get_char_widths(L, get_encoding(L)),
     Kern = get_kerning_info(L, Cw),
-    Cw1  = map(fun({Index1,Width,_Name}) ->
+    Cw1  = lists:map(fun({Index1,Width,_Name}) ->
 		      {Index1, Width}
 	      end, Cw),
     %% io:format("Cw1=~p~n",[Cw1]),
     {First,Last,Widths} = normalise_widths(Cw1),
     %% io:format("First=~p last=~p ~n",[First,Last]),
-    Kern1 = map(fun({XY,_,W}) -> {XY, W} end, Kern),
+    Kern1 = lists:map(fun({XY,_,W}) -> {XY, W} end, Kern),
     Ascender = get_val(L, "Ascender"),
     T = #afm2{baseFont=Fn, widths=Widths, firstChar=First,
 	      lastChar=Last, kernPairs=Kern1,
@@ -303,7 +239,6 @@ parse(F,Index) ->
 	      stemV=stemV(Fn),
 	      fontBBox=get_fontBBox(L)},
     file:write_file(Out, mk_program(Mod, T)),
-    file:close(Out),
     %% io:format("Font ~s ~w entries ~w entries in kerning table~n",
     %% [Fn, length(Cw1), length(Kern1)]),
     {Mod, Fn, Type}.
@@ -322,38 +257,35 @@ copy_pdf(File, Mod) ->
 	    exit(enofile)
     end.
 
-% This formats an egFont# module where # is a font alias number.
-%
 mk_program(Mod, T) ->
     %% io:format("Mod=~p T=~p~n",[Mod,T]),
     ["-module(", Mod, ").\n",
-    "% This module is formatted by the mk_program function of the eg_afm module\n",
      "-export([width/1, kern/2, fontName/0, firstChar/0,lastChar/0]).\n",
      "-export([index/0,ascender/0,capHeight/0,descender/0,italicAngle/0]).\n", 
      "-export([xHeight/0, flags/0, type/0, stemV/0,fontBBox/0,widths/0]).\n",
      "-export([encoding/0]).\n",
      "fontName() -> \"", T#afm2.baseFont,"\".\n",
-     "index() -> ", n2s(T#afm2.index),".\n",
-     "type() -> ", a2s(T#afm2.type),".\n",
+     "index() -> ",      eg_pdf_op:n2s(T#afm2.index),".\n",
+     "type() -> ",       eg_pdf_op:a2s(T#afm2.type),".\n",
      "encoding() -> \"", T#afm2.encoding,"\".\n",
-     "firstChar() ->", n2s(T#afm2.firstChar),".\n",
-     "lastChar() ->", n2s(T#afm2.lastChar),".\n",
-     "ascender() ->", n2s(T#afm2.ascender),".\n",
-     "capHeight() ->",n2s(T#afm2.capHeight),".\n",
-     "descender() ->",n2s(T#afm2.descender),".\n",
-     "italicAngle() ->",n2s(T#afm2.italicAngle),".\n",
-     "xHeight() ->",n2s(T#afm2.xHeight),".\n",
-     "flags() ->",n2s(make_flags(T)),".\n",
-     "stemV() ->",n2s(T#afm2.stemV),".\n",
-     "fontBBox() ->", io_lib:format("~p.\n", [T#afm2.fontBBox]),
-     "widths() ->", io_lib:format("~p.\n", [T#afm2.widths]),
+     "firstChar() ->",   eg_pdf_op:n2s(T#afm2.firstChar),".\n",
+     "lastChar() ->",    eg_pdf_op:n2s(T#afm2.lastChar),".\n",
+     "ascender() ->",    eg_pdf_op:n2s(T#afm2.ascender),".\n",
+     "capHeight() ->",   eg_pdf_op:n2s(T#afm2.capHeight),".\n",
+     "descender() ->",   eg_pdf_op:n2s(T#afm2.descender),".\n",
+     "italicAngle() ->", eg_pdf_op:n2s(T#afm2.italicAngle),".\n",
+     "xHeight() ->",     eg_pdf_op:n2s(T#afm2.xHeight),".\n",
+     "flags() ->",       eg_pdf_op:n2s(make_flags(T)),".\n",
+     "stemV() ->",       eg_pdf_op:n2s(T#afm2.stemV),".\n",
+     "fontBBox() ->",    io_lib:format("~p.\n", [T#afm2.fontBBox]),
+     "widths() ->",      io_lib:format("~p.\n", [T#afm2.widths]),
      widths_2_erl(T#afm2.firstChar, T#afm2.widths),
      mk_kern(T#afm2.kernPairs)].
-%%
-%% this creates lines in the output egFont#.erl module like "kern(84,65)->-90;"
-%%
+
 mk_kern([{{I,J},K}|T]) ->
-    ["kern(",n2s(I),",",n2s(J),")->",n2s(K),";\n"|mk_kern(T)];
+    ["kern(",eg_pdf_op:n2s(I),",",eg_pdf_op:n2s(J),")->",
+     eg_pdf_op:n2s(K),";\n"
+     | mk_kern(T)];
 mk_kern([]) ->
     ["kern(_,_) -> 0.\n"].
 
@@ -362,7 +294,8 @@ widths_2_erl(N, []) ->
 widths_2_erl(N, [0|T]) ->
     widths_2_erl(N+1, T);
 widths_2_erl(N, [H|T]) ->
-    ["width(",n2s(N),")->",n2s(H),";\n"|widths_2_erl(N+1, T)].
+    ["width(",eg_pdf_op:n2s(N),")->",eg_pdf_op:n2s(H),";\n"
+     | widths_2_erl(N+1, T)].
 
 
 normalise_widths(Pairs) ->
@@ -372,7 +305,7 @@ normalise_widths(Pairs) ->
     {First,Last, Ws}.
 
 gather(X, [{X,W}], L) ->
-    {X, reverse([W|L])};
+    {X, lists:reverse([W|L])};
 gather(X, [{X,W}|T], L) ->
     gather(X+1, T, [W|L]);
 gather(X, Z=[{Y,W}|T], L) when Y > X ->
@@ -434,7 +367,7 @@ is_prefix(_, _) ->
     no.
     
 get_kerning_info(L, C) ->
-    foldl(fun(I, Acc) ->
+    lists:foldl(fun(I, Acc) ->
 		  case parse_kerning(I, C) of
 		      {ok, Add} ->
 			  [Add|Acc];
@@ -477,7 +410,7 @@ get_char_widths(L, Enc) ->
     F = fun(X,Acc) ->
 		add_char(X, Acc, Enc)
 	end,
-    foldl(F, [], L).
+    lists:foldl(F, [], L).
 
 add_char({Line,Str= "C " ++ _}, Acc, Enc) ->
     case parse_char_data(Str, Enc) of
@@ -596,14 +529,14 @@ stemV("Helvetica-Condensed-BoldObl") -> 130;
 stemV(X) -> io:format("No Vstem for:~p~n", [X]),
     70.
 
-mk_widths(M) ->
-    First = M#afm2.firstChar,
-    W     = M#afm2.widths,
-    mk_widths(First, W).
-
-mk_widths(N, [])    -> [];
-mk_widths(N, [0|T]) -> mk_widths(N+1,T);
-mk_widths(N, [W|T]) -> [{N,W}|mk_widths(N+1,T)].
+%% mk_widths(M) ->
+%%     First = M#afm2.firstChar,
+%%     W     = M#afm2.widths,
+%%     mk_widths(First, W).
+%% 
+%% mk_widths(N, [])    -> [];
+%% mk_widths(N, [0|T]) -> mk_widths(N+1,T);
+%% mk_widths(N, [W|T]) -> [{N,W}|mk_widths(N+1,T)].
 
 -define(FIXEDPITCH, (1 bsl 0)).
 -define(ADOBESTANDARD, (1 bsl 5)).
@@ -653,13 +586,13 @@ str2lines(L) -> str2lines(L, 1, [], []).
  
 str2lines([H|T], Line, C, L) ->
     case H of
-        $\n -> str2lines(T, Line+1,[],[{Line,reverse([$\n|C])}|L]);
+        $\n -> str2lines(T, Line+1,[],[{Line,lists:reverse([$\n|C])}|L]);
         _   -> str2lines(T, Line,  [H|C], L)
     end;
 str2lines([], Line, [], L) ->
-    reverse(L);
+    lists:reverse(L);
 str2lines([], Line, C, L) ->
-    reverse([{Line,reverse(C)}|L]).
+    lists:reverse([{Line,lists:reverse(C)}|L]).
 
 
 %% AdobeStandardEncoding

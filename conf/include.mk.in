@@ -15,7 +15,6 @@ EMAKEFILE=Emakefile
 
 ERL_SOURCES := $(wildcard *.erl)
 ERL_OBJECTS := $(ERL_SOURCES:%.erl=../ebin/%.beam)
-ERL_DOCUMENTS := $(ERL_SOURCES:%.erl=../doc/%.html)
 MODULES := $(ERL_SOURCES:%.erl=%)
 
 APP_SOURCES := $(wildcard *.app.src)
@@ -30,7 +29,3 @@ APPSCRIPT = '$$vsn=shift; $$mods=""; while(@ARGV){ $$_=shift; s/^([A-Z].*)$$/\'\
 
 ../ebin/%.beam: %.erl
 	$(ERLC) $(ERLC_FLAGS) -o ../ebin $<
-
-../doc/%.html: %.erl
-	${ERL} -noshell -run edoc file $< -run init stop
-	mv $*.html ../doc/

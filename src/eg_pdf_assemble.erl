@@ -1,44 +1,39 @@
-%%======================================================================
-%% eg_pdf_assemble.erl - PDF assembler
-%%----------------------------------------------------------------------
+%%==========================================================================
 %% Copyright (C) 2003 Joe Armstrong, Mikael Karlsson 
 %%
-%%   General Terms
-%%
-%%   Erlguten  is   free  software.   It   can  be  used,   modified  and
-%% redistributed  by anybody for  personal or  commercial use.   The only
-%% restriction  is  altering the  copyright  notice  associated with  the
-%% material. Individuals or corporations are permitted to use, include or
-%% modify the Erlguten engine.   All material developed with the Erlguten
-%% language belongs to their respective copyright holder.
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
 %% 
-%%   Copyright Notice
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
 %% 
-%%   This  program is  free  software.  It  can  be redistributed  and/or
-%% modified,  provided that this  copyright notice  is kept  intact. This
-%% program is distributed in the hope that it will be useful, but without
-%% any warranty; without even  the implied warranty of merchantability or
-%% fitness for  a particular  purpose.  In no  event shall  the copyright
-%% holder  be liable  for  any direct,  indirect,  incidental or  special
-%% damages arising in any way out of the use of this software.
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
 %% Authors:   Joe Armstrong   <joe@sics.se>
 %%            Mikael Karlsson <mikael.karlsson@creado.com>
-%% Last Edit: 2003-03-03
-%% =====================================================================
+%% Purpose: PDF assembler
+%%==========================================================================
 
 -module(eg_pdf_assemble).
 
--include("../include/eg.hrl").
--export ([pdfloop/2, handle_setfont/2, make_pdf_file/5]).
+-include("eg.hrl").
 
+-export([make_pdf_file/5,
+	 pdfloop/2
+	]).
 
--import(lists, [map/2, mapfoldl/3, member/2, reverse/1]).
--import(pdf_op, [f2s/1, i2s/1]).
--import(pdf_fonts, [fontInfo/1, fontNumber/1]).
--import(egFontMap, [handler/1]).
--import(eg_pdf_lib, [serialise/1]).
-
+%% ============================================================================
 
 
 %% This is for backwards compatibility with pre-image test files
@@ -51,9 +46,9 @@ make_pdf_file(OutFile, Info, Fonts, Images, Pages, MediaBox, ProcSet) ->
     file:write(F, header()),
     {ok, Pos0} = file:position(F, cur),
     %% io:format("Os=~p~n", [Os]),
-    {Posns, _} = mapfoldl(fun(I, Pos) -> 
+    {Posns, _} = lists:mapfoldl(fun(I, Pos) -> 
 				  {{obj,Index,_},_} = I,
-				  Data = serialise(I),
+				  Data = eg_pdf_lib:serialise(I),
 				  file:write(F, Data),
 				  {ok, Pos1} = file:position(F, cur),
 				  {{Index,Pos}, Pos1}
@@ -71,7 +66,8 @@ build_pdf(Info, Fonts, Images, Pages, MediaBox, ProcSet) ->
     PageTree = Free,
     {Free1,Ps,O3s} = mk_pages(Pages, PageTree, Free+1,[],[]),
     %% io:format("here2:~p~n",[O3s]),
-    O2 = {{obj,PageTree,0}, mkPageTree(Ps, Fonts1, XObjects, MediaBox, ProcSet)},
+    O2 = {{obj,PageTree,0},
+          mkPageTree(Ps, Fonts1, XObjects, MediaBox, ProcSet)},
     Root = Free1,
     O4 = {{obj,Root,0}, mkCatalogue(PageTree)},
     %% io:format("Free1=~p~n",[Free1]),
@@ -80,16 +76,16 @@ build_pdf(Info, Fonts, Images, Pages, MediaBox, ProcSet) ->
     {Root, NInfo, O0s ++ O1s ++ [O2|O3s] ++ [O4,O5]}.
     
 mk_fonts([], I, Fs, Os) -> 
-    A = {{obj,I,0},{dict,map(fun({Alias, FontObj}) ->
+    A = {{obj,I,0},{dict,lists:map(fun({Alias, FontObj}) ->
 		      {Alias, {ptr,FontObj,0}}
 	      end, lists:reverse(Fs))}},
-    {I+1, {ptr,I,0}, reverse([A|Os])};
-mk_fonts([Handler|T], I, Fs, E) ->    %Handler links to a font module, egfont# where # is a number.
+    {I+1, {ptr,I,0}, lists:reverse([A|Os])};
+mk_fonts([Handler|T], I, Fs, E) ->
     %% io:format("I need the font:~p~n",[Handler]),
-    Index = Handler:index(),          % This returns the font name.
-    Alias = "F" ++ i2s(Index),        % the index is used as th epdf alias for the font
+    Index = Handler:index(),
+    Alias = "F" ++ eg_pdf_op:i2s(Index),
     case Handler:type() of
-	internal ->                         % the built-in fonts are internal.
+	internal ->
 	    O = {{obj,I,0},mkFont(Handler)},
 	    mk_fonts(T, I+1, [{Alias,I}|Fs], [O|E]);
 	{Index, pdf_builtin} ->
@@ -103,7 +99,7 @@ mk_fonts([Handler|T], I, Fs, E) ->    %Handler links to a font module, egfont# w
 	    mk_fonts(T, I+3, [{Alias,I}|Fs], [O3,O2,O1|E])
     end.
 
-mk_pages([], _, N, P, O) -> {N, reverse(P), reverse(O)};
+mk_pages([], _, N, P, O) -> {N, lists:reverse(P), lists:reverse(O)};
 mk_pages([{page,Str}|T], Parent, I, L, E) ->
     O1 = {{obj,I,0},mkPageContents(Str)},
     O2 = {{obj,I+1,0},mkPage( Parent, I)},
@@ -121,7 +117,7 @@ mkCatalogue(PageTree) ->
 %% mkFont is used for the 14  inbuilt fonts
 mkFont(FontHandler) ->
     Index = FontHandler:index(),
-    Alias = "F" ++ i2s(Index),
+    Alias = "F" ++ eg_pdf_op:i2s(Index),
     %% io:format("mkFont Alias=~s FontHandler=~p~n",[Alias, FontHandler]),
     {dict,[{"Type",{name,"Font"}},
 	   {"Subtype",{name,"Type1"}},
@@ -158,7 +154,7 @@ mkFont1(M, FontDescriptorPrt, Index) ->
     Widths = make_width(M:encoding(),M,FirstChar,LastChar),
     {dict,[{"Type",{name,"Font"}},
 	   {"Subtype",{name,"Type1"}},
-	   {"Name",{name,"F" ++ i2s(Index)}},
+	   {"Name",{name,"F" ++ eg_pdf_op:i2s(Index)}},
 	   {"BaseFont",{name,M:fontName()}},
 	   {"Encoding",{name,encoding(M)}},
 	   {"FirstChar",FirstChar},
@@ -232,9 +228,9 @@ this_dir() ->
 font_dir() ->
     case code:priv_dir(erlguten) of
 	{error, bad_name} ->
-	    this_dir() ++ "/../priv/fonts/bin";
+	    filename:join(this_dir(), "../priv/src");
 	N ->
-	    filename:join(N,"fonts/bin")
+	    filename:join(N, "priv/src")
     end.
 
 get_font_program(Handler) ->
@@ -270,10 +266,11 @@ mkPageTree(L, Fonts, XObjects, MediaBox = {A,B,C,D}, ProcSet ) ->
     {dict,[{"Type",{name,"Pages"}},
 	   {"Count",length(L)},
 	   {"MediaBox", {array,[A,B,C,D]}},
-	   {"Kids",{array,map(fun(I) ->{ptr,I,0} end,L)}},
+	   {"Kids",{array,lists:map(fun(I) ->{ptr,I,0} end,L)}},
 	   {"Resources",
 	    {dict,[{"Font", Fonts },{"XObject", XObjects },
-		   {"ProcSet", {array,[{name,"PDF"},{name,"Text"}|ImProcSet]}}]}}]}.
+		   {"ProcSet",
+                    {array,[{name,"PDF"},{name,"Text"}|ImProcSet]}}]}}]}.
 
 
 
@@ -317,8 +314,8 @@ header() ->
 add_xref(F, Objs) ->
     {ok, P} = file:position(F, cur),
     XrefStart = P,
-    L  = ["xref\n0 ",i2s(length(Objs)+1),"\n",xref(0,"65535 f")|
-	  map(fun({I,Pos}) -> xref(Pos,"00000 n") end, Objs)],
+    L  = ["xref\n0 ",eg_pdf_op:i2s(length(Objs)+1),"\n",xref(0,"65535 f")|
+	  lists:map(fun({I,Pos}) -> xref(Pos,"00000 n") end, Objs)],
     file:write(F, L),
     XrefStart.
 
@@ -328,13 +325,13 @@ xref(I, Str) ->
 
 
 add_trailer(F, Objs, Root, Info) ->
-    L = ["trailer << /Size ", i2s(length(Objs)+1),
-	 " /Root ",i2s(Root), " 0 R ",
-	 " /Info ",i2s(Info), " 0 R >>\n"],
+    L = ["trailer << /Size ", eg_pdf_op:i2s(length(Objs)+1),
+	 " /Root ",eg_pdf_op:i2s(Root), " 0 R ",
+	 " /Info ",eg_pdf_op:i2s(Info), " 0 R >>\n"],
     file:write(F, L).
 
 add_start_xref(F, XrefStartPos) ->
-    L = ["startxref\n",i2s(XrefStartPos),"\n%%EOF\n"],
+    L = ["startxref\n",eg_pdf_op:i2s(XrefStartPos),"\n%%EOF\n"],
     file:write(F, L).
 
 
@@ -360,21 +357,18 @@ add_start_xref(F, XrefStartPos) ->
 %% %%EOF
 
 pdfloop(PDFC, Stream)->
-    receive	
-  {get_font_alias, Pid, Fontname} ->
-	    {F,FA,_} = handle_setfont(PDFC#pdfContext.fonts, Fontname),
-	    "F" ++ Str = FA,
-	    Index = list_to_integer(Str),
-	    %% eg_font_server:ensure_loaded(Fontname, Index),    -- try without this
-	    Pid ! {self(), font_alias, Index},
-	    pdfloop(PDFC#pdfContext{fonts=F}, Stream);
+    receive
 	{ensure_font, Fontname} ->
 	    {F,_,_} = handle_setfont(PDFC#pdfContext.fonts, Fontname),
 	    pdfloop(PDFC#pdfContext{fonts=F}, Stream);
 	{stream, {append_text, String}}->
-	    pdfloop(PDFC, [Stream, convert(PDFC#pdfContext.font_handler, String)," "]);
+	    StrToB = list_to_binary(convert(PDFC#pdfContext.font_handler, String)),
+	    Binary = <<Stream/binary, StrToB/binary, <<" ">>/binary>>,
+	    pdfloop(PDFC, Binary);
 	{stream, {append, String}}->
-	    pdfloop(PDFC, [Stream, convert(PDFC#pdfContext.font_handler, String)," "]);
+	    B = list_to_binary(convert(PDFC#pdfContext.font_handler, String)),
+	    Binary = <<Stream/binary, B/binary, <<" ">>/binary>>,
+	    pdfloop(PDFC, Binary);
 	{page_script, Script} ->
 	    %% io:format("New script ~p\n", [Script]),
 	    NewScript = handle_pagescript(PDFC#pdfContext.scripts,
@@ -383,32 +377,31 @@ pdfloop(PDFC, Stream)->
 	    pdfloop(PDFC#pdfContext{scripts=NewScript}, Stream);
 	{font, {set, Fontname, Size}}->
 	    {F,Alias,Fhand} = handle_setfont(PDFC#pdfContext.fonts, Fontname),
-	    S = pdf_op:set_font_by_alias(Alias, Size),
-	    pdfloop(PDFC#pdfContext{fonts=F,font_handler=Fhand}, [Stream,S]);
+	    S = list_to_binary(eg_pdf_op:set_font_by_alias(Alias, Size)),
+	    Binary = <<Stream/binary, S/binary>>,
+	    pdfloop(PDFC#pdfContext{fonts=F,font_handler=Fhand}, Binary);
 	{image, FilePath, Size}->
 	    {I,IMG,{W,H},ProcSet} = handle_image(PDFC#pdfContext.images, 
 						 FilePath, Size, 
 						 PDFC#pdfContext.procset),
-	    S = pdf_op:set_image(W,H, IMG),
-	    pdfloop(PDFC#pdfContext{images=I,procset=ProcSet}, [Stream,S]);
-
+	    S = list_to_binary(eg_pdf_op:set_image(W,H, IMG)),
+	    Binary = <<Stream/binary, S/binary>>,
+	    pdfloop(PDFC#pdfContext{images=I,procset=ProcSet}, Binary);
 	{page,{new, PID}}->
 	    {Add, PageNo} = 
 		handle_newpage(PDFC#pdfContext.pages,
 			       PDFC#pdfContext.currentpage,
-			       Stream),
+			       [Stream]),
 	    PID ! {page, PageNo},
-	    pdfloop(PDFC#pdfContext{pages=Add, currentpage=PageNo}, []);
+	    pdfloop(PDFC#pdfContext{pages=Add, currentpage=PageNo}, <<>>);
     	{page,{set,PageNo}}->
-	    {NewPages,NewStream} = handle_setpage(PDFC#pdfContext.pages,PageNo,
+	    {NewPages,[NewStream]} = handle_setpage(PDFC#pdfContext.pages,PageNo,
 						  PDFC#pdfContext.currentpage, 
-						  Stream),
-	    
-	    pdfloop(PDFC#pdfContext{pages=NewPages,currentpage=PageNo}, 
-		    NewStream);		    
+						  [Stream]),
+	    pdfloop(PDFC#pdfContext{pages=NewPages,currentpage=PageNo}, NewStream);		    
 	{page,{get_no, PID}} ->
 	    PID ! {page, PDFC#pdfContext.currentpage},
-	    pdfloop(PDFC, Stream);	    
+	    pdfloop(PDFC, Stream);    
 	{info,Info}->
 	    NewInfo = handle_info(PDFC#pdfContext.info, Info),
 	    pdfloop(PDFC#pdfContext{info=NewInfo}, Stream);
@@ -417,15 +410,17 @@ pdfloop(PDFC, Stream)->
 	{export,PID} ->
 	    %% add last page if necessary before exporting
 	    PDF = case Stream of 
-		[] ->		    
-		    handle_export(PDFC);
-		_ ->
-		    {Add, PageNo} = handle_newpage(PDFC#pdfContext.pages,
-						   PDFC#pdfContext.currentpage,
-						   Stream),
-		    handle_export(PDFC#pdfContext{pages=Add})
+		      <<>> ->		    
+			  PageNo = PDFC#pdfContext.pages,
+			  handle_export(PDFC);
+		      _ ->
+			  {Add, PageNo} = handle_newpage(
+					    PDFC#pdfContext.pages,
+					    PDFC#pdfContext.currentpage,
+					    [Stream]),
+			  handle_export(PDFC#pdfContext{pages=Add})
 	    end,
-	    PID ! {export, PDF},
+	    PID ! {export, PDF, PageNo},
 	    pdfloop(PDFC, Stream);
 	delete ->
 	    done;
@@ -478,20 +473,20 @@ handle_export(PDFC)->
 %%   {FontList1, Alias}
 %% Alias = "F" ++ Index
 handle_setfont(FontList, FontName)->
-    case handler(FontName) of
+    case eg_font_map:handler(FontName) of
 	undefined ->
-	    io:format("There is no font called: ~s... ", [FontName]),
-	    io:format("Using Times-Roman~n"),
+	    io:format("There is no font called:~s~n", [FontName]),
+	    io:format("Using Times-Roman"),
 	    handle_setfont(FontList, "Times-Roman");
 	Handler ->
 	    Index = Handler:index(),
 	    %% io:format("handler for ~s is ~p index:~p~n",
 	    %% [FontName,Handler,Index]),
-	    case member(Handler, FontList) of
+	    case lists:member(Handler, FontList) of
 		true ->
-		    {FontList, "F"++ pdf_op:i2s(Index), Handler};
+		    {FontList, "F"++ eg_pdf_op:i2s(Index), Handler};
 		false ->
-		    {[Handler|FontList], "F"++ pdf_op:i2s(Index), Handler}
+		    {[Handler|FontList], "F"++ eg_pdf_op:i2s(Index), Handler}
 	    end
     end.
 
@@ -501,11 +496,13 @@ handle_image(ImageDict, FilePath, Size, ProcSet)->
 	    {ImageDict, Alias, set_size(Size,{W,H}), ProcSet };
 	error ->
 	    Alias = "Im" ++ 
-		i2s(dict:size(ImageDict) + 1),
+		eg_pdf_op:i2s(dict:size(ImageDict) + 1),
 	    case eg_pdf_image:get_head_info(FilePath) of
 		{jpeg_head,{W1, H1, Ncomponents, Data_precision}} ->
 		    NewDict =dict:store(FilePath,
-					#image{alias=Alias, width=W1, height=H1},
+					#image{alias  = Alias,
+                                               width  = W1,
+                                               height = H1},
 					ImageDict),
 		    {NewDict, Alias, set_size(Size, {W1,H1}),
 		     imageBC(Ncomponents, ProcSet) };

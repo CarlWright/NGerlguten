@@ -1,30 +1,29 @@
-%%======================================================================
-%% eg_test2.erl - test cases
-%%----------------------------------------------------------------------
+%%==========================================================================
 %% Copyright (C) 2003 Joe Armstrong
 %%
-%%   General Terms
-%%
-%%   Erlguten  is   free  software.   It   can  be  used,   modified  and
-%% redistributed  by anybody for  personal or  commercial use.   The only
-%% restriction  is  altering the  copyright  notice  associated with  the
-%% material. Individuals or corporations are permitted to use, include or
-%% modify the Erlguten engine.   All material developed with the Erlguten
-%% language belongs to their respective copyright holder.
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
 %% 
-%%   Copyright Notice
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
 %% 
-%%   This  program is  free  software.  It  can  be redistributed  and/or
-%% modified,  provided that this  copyright notice  is kept  intact. This
-%% program is distributed in the hope that it will be useful, but without
-%% any warranty; without even  the implied warranty of merchantability or
-%% fitness for  a particular  purpose.  In no  event shall  the copyright
-%% holder  be liable  for  any direct,  indirect,  incidental or  special
-%% damages arising in any way out of the use of this software.
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
-%% Authors:   Joe Armstrong <joe@sics.se>
+%% Author: Joe Armstrong <joe@sics.se>
 %% Last Edit: 2003-03-11
-%% =====================================================================
+%% Purpose: Test cases
+%%==========================================================================
 
 
 %% This is for the brave who want to try writing PDF by hand
@@ -36,12 +35,12 @@
 
 -module(eg_test2).
 
--include("../include/eg.hrl").
+-include("../src/eg.hrl").
 
 -export([test/0]).
 
--import(lists, [map/2, mapfoldl/3, member/2, reverse/1]).
--import(pdf_op, [i2s/1]).
+
+%% ============================================================================
     
 test() ->
     Info = #info{creator="Erlang", 
@@ -56,7 +55,7 @@ test() ->
     Pages = [page(1),page(2),page(3)], 
     Pages1 = zap(Pages),
     MediaBox={0,0,595,842},
-    Fonts1 = map(fun(I) -> egFontMap:handler(I) end, Fonts),
+    Fonts1 = lists:map(fun(I) -> eg_font_map:handler(I) end, Fonts),
     eg_pdf_assemble:make_pdf_file("../test/eg_test2.pdf",
 					Info, Fonts1, Pages1, MediaBox).
 
@@ -64,11 +63,11 @@ zap(Pages) ->
     FR = cmd("Times-Roman"),
     FI = cmd("Times-Italic"),
     FC = cmd("Courier"),
-    map(fun({page,I}) -> {page, xform(I, FR, FI, FC)} end, Pages).
+    lists:map(fun({page,I}) -> {page, xform(I, FR, FI, FC)} end, Pages).
 
 cmd(F) ->
-    M = egFontMap:handler(F),
-    "/F" ++ i2s(M:index()) ++ " ".
+    M = eg_font_map:handler(F),
+    "/F" ++ eg_pdf_op:i2s(M:index()) ++ " ".
 
 xform("/FR " ++ T, FR, FI, FC) -> FR ++ xform(T, FR, FI, FC);
 xform("/FI " ++ T, FR, FI, FC) -> FI ++ xform(T, FR, FI, FC);
@@ -89,7 +88,7 @@ BT
   /FR 14 Tf
   1 0 0 1 20 750 Tm
   18    0 Td (Line 1 indent 36 point) Tj
-  -18 -16 Td (line 2 indent 0) Tj
+  -18 -16 Td (line 2 indebt 0) Tj
   0   -16 Td (line 3 indent 0) Tj
   0   -16 Td (line 4 indent 0) Tj
   12  -16 Td (line 5 indent 12 points) Tj

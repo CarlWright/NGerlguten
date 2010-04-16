@@ -1,38 +1,44 @@
-%%======================================================================
-%% xml parser
-%%----------------------------------------------------------------------
+%%==========================================================================
 %% Copyright (C) 2003 Joe Armstrong
 %%
-%%   General Terms
-%%
-%%   Erlguten  is   free  software.   It   can  be  used,   modified  and
-%% redistributed  by anybody for  personal or  commercial use.   The only
-%% restriction  is  altering the  copyright  notice  associated with  the
-%% material. Individuals or corporations are permitted to use, include or
-%% modify the Erlguten engine.   All material developed with the Erlguten
-%% language belongs to their respective copyright holder.
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
 %% 
-%%   Copyright Notice
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
 %% 
-%%   This  program is  free  software.  It  can  be redistributed  and/or
-%% modified,  provided that this  copyright notice  is kept  intact. This
-%% program is distributed in the hope that it will be useful, but without
-%% any warranty; without even  the implied warranty of merchantability or
-%% fitness for  a particular  purpose.  In no  event shall  the copyright
-%% holder  be liable  for  any direct,  indirect,  incidental or  special
-%% damages arising in any way out of the use of this software.
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
-%% Authors:   Joe Armstrong <joe@sics.se>
-%% Last Edit: 2003-03-11
-%% =====================================================================
+%% Authors: Joe Armstrong <joe@sics.se>
+%% Purpose: XML parser
+%%==========================================================================
 
 -module(eg_xml_lite).
 
--export([parse_all_forms/2, parse_all_forms/1, parse_single_form/2,
-	 parse_file/1, continue/2, pp/1, xml2bin/2, bin2xml/2, test/1]).
+-export([parse_all_forms/1, 
+	 parse_all_forms/2, 
+	 parse_single_form/2,
+	 parse_file/1,
+	 continue/2, 
+	 pp/1, 
+	 xml2bin/2, 
+	 bin2xml/2, 
+	 test/1
+	]).
 
 
--import(lists, [map/2, member/2, all/2, reverse/1, sort/1]).
+%% ============================================================================
 
 %% Test cases
 
@@ -42,7 +48,8 @@ test(2) ->
     {more, C} = parse_single_form("<", 0),
     continue(C, "abc>");
 test(3) ->
-    reent_test("<a def=\"ads\"   ghi  = 'abc'  >aa<b>aaa</b>gg<ab/>aa<abc a='bb' /></a>");
+    reent_test("<a def=\"ads\"   ghi  = 'abc'  >aa<b>aaa</b>"
+               "gg<ab/>aa<abc a='bb' /></a>");
 test(4) ->
     parse_all_forms("<a>bc</i>");
 test(5) ->
@@ -73,9 +80,18 @@ test(8) ->
 
 %% parse_file(File) -> {error, What} | [Forms]
 
-parse_file(String) ->
-	Result = parse_all_forms(String, 1),
-	Result.
+parse_file(F) ->
+    case file:read_file(F) of
+	{ok, Bin} ->
+	    Result = parse_all_forms(binary_to_list(Bin), 1),
+	    %% case Result of
+	    %%   {error, E} -> true;
+	    %% Tree -> pp(Tree)
+	    %% end,
+	    Result;
+	Error ->
+	    Error
+    end.
 
 xml2bin(In, Out) ->
     case file:read_file(In) of
@@ -104,7 +120,7 @@ bin2xml(In, Out) ->
 atomize(A={Atom,_}) when is_atom(Atom) ->
     A;
 atomize({Str,Args,List}) -> 
-    {list_to_atom(Str), Args, map(fun atomize/1, List)}.
+    {list_to_atom(Str), Args, lists:map(fun atomize/1, List)}.
     
 %%----------------------------------------------------------------------
 
@@ -119,7 +135,7 @@ top_parse_loop(Str, Line, L) ->
 	{ok, Form, Str1, Line1} -> 
 	    case all_blanks(Str1) of
 		true ->
-		    reverse([Form|L]);
+		    lists:reverse([Form|L]);
 		false ->
 		    top_parse_loop(Str1, Line1, [Form|L])
 	    end;
@@ -166,19 +182,19 @@ tokenise_result({more, Cont}, State) ->
 
 step_parser(Stack, {sTag, _, Tag, Args}) ->
     %% Push new frame onto the stack
-    {more, [{Tag, sort(Args), []}|Stack]};
+    {more, [{Tag, lists:sort(Args), []}|Stack]};
 step_parser([{Tag,Args,C}|L], P={Flat, _, D}) when Flat == pi;
 						   Flat == raw;
 						   Flat == cdata;
 						   Flat == comment;
 						   Flat == doctype ->
-    {more, [{Tag,sort(Args),[{Flat,D}|C]}|L]};
+    {more, [{Tag,lists:sort(Args),[{Flat,D}|C]}|L]};
 step_parser([{Tag,Args,C}|L], {empty, _, TagE, ArgsE}) ->
-    {more, [{Tag,Args,[{TagE,sort(ArgsE),[]}|C]}|L]};
+    {more, [{Tag,Args,[{TagE,lists:sort(ArgsE),[]}|C]}|L]};
 step_parser([{Tag, Args, C}|L], {eTag, _, Tag}) ->
     %% This is a matching endtag
     %% Now we normalise the arguments that were found
-    C1 = deblank(reverse(C)),
+    C1 = deblank(lists:reverse(C)),
     pfinish([{Tag,Args,C1}|L]);
 step_parser([{STag, Args, C}|L], {eTag, _, Tag}) ->
     {error,{badendtagfound,Tag,starttagis,STag}};
@@ -211,7 +227,7 @@ deblank1([H|T]) ->
 deblank1([]) ->
     [].
 
-all_blanks(L) -> all(fun is_Blank/1, L).
+all_blanks(L) -> lists:all(fun is_Blank/1, L).
 
 is_Blank($ )  -> true;
 is_Blank($\n) -> true;
@@ -234,7 +250,7 @@ pp({Node,Args,[]}, Level) ->
 pp({Node,Args,L}, Level) ->
     S = name(Node),
     [indent(Level),"<",S,pp_args(Args),">\n",
-     map(fun(I) -> pp(I, Level+2) end, L),
+     lists:map(fun(I) -> pp(I, Level+2) end, L),
      indent(Level),"</",S,">\n"];
 pp({raw,Str}, Level) ->
     [indent(Level),Str,"/n"];
@@ -248,7 +264,7 @@ pp_args([{Key,Val}|T]) ->
     [" ",name(Key),"=",Q,Val,Q|pp_args(T)].
 
 quote(Str) ->
-    case member($", Str) of
+    case lists:member($", Str) of
 	true  -> $';
 	false -> $"
     end.
@@ -260,13 +276,4 @@ indent(0) -> [];
 indent(N) -> [$ |indent(N-1)].
 
 reent_test(O)->a.
-
-    
-
-
-
-
-
-
-
 

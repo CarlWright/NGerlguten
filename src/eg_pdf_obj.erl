@@ -1,31 +1,30 @@
-%%======================================================================
-%% Purpose: PDF objects api
-%%----------------------------------------------------------------------
+%%==========================================================================
 %% Copyright (C) 2003 Mikael Karlsson
 %%
-%%   General Terms
-%%
-%%   Erlguten  is   free  software.   It   can  be  used,   modified  and
-%% redistributed  by anybody for  personal or  commercial use.   The only
-%% restriction  is  altering the  copyright  notice  associated with  the
-%% material. Individuals or corporations are permitted to use, include or
-%% modify the Erlguten engine.   All material developed with the Erlguten
-%% language belongs to their respective copyright holder.
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
 %% 
-%%   Copyright Notice
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
 %% 
-%%   This  program is  free  software.  It  can  be redistributed  and/or
-%% modified,  provided that this  copyright notice  is kept  intact. This
-%% program is distributed in the hope that it will be useful, but without
-%% any warranty; without even  the implied warranty of merchantability or
-%% fitness for  a particular  purpose.  In no  event shall  the copyright
-%% holder  be liable  for  any direct,  indirect,  incidental or  special
-%% damages arising in any way out of the use of this software.
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
 %% Authors:   Mikael Karlsson <mikael.karlsson@creado.com>
 %%            Joe Armstrong <joe@sics.se>
-%% Last Edit: 2004-08-01
-%% =====================================================================
+%% Purpose: PDF objects api
+%%==========================================================================
+
 %%
 %% @doc PDF Objects.
 %%
@@ -35,16 +34,10 @@
 %% @end
 
 -module(eg_pdf_obj).
-%% Date:    2004-08-01
--export([catalogue/2, info/1, destination/2, fonts/2]).
--import(pdf_op, [f2s/1, i2s/1]).
 
--import(eg_pdf_lib, 
-	[find_in_dict/2, get_next_ref/1, get_ref/1, make_object/2, 
-	 make_object_key/1, search_object/2, store_object/2, add_object/2, 
-	 delete_object/2, pdf_item/1, pdf_item/2, store_in_dict/2, 
-	 pdf_object_dict_item/2, is_pdf_object_type/2, 
-	 get_objects_of_type/2 ]).
+-export([catalogue/2, info/1, destination/2, fonts/2]).
+
+%% ============================================================================
 
 %% @spec catalogue(PagesRef::integer(), Options) -> dict() 
 %% Options = [Option]
@@ -128,10 +121,10 @@ destination(PageRef, {"FitBV", Left}) ->
 %% @spec fonts(Fonts, Objects::pdftype()) -> {FontsPtr, Objects}
 
 fonts(Fonts, Objects) ->
-    Free0 = get_next_ref(Objects),
-    Fonts1 = lists:map(fun(I) -> egFontMap:handler(I) end, Fonts),
+    Free0 = eg_pdf_lib:get_next_ref(Objects),
+    Fonts1 = lists:map(fun(I) -> eg_font_map:handler(I) end, Fonts),
     {Free,FontsPtr,O1s}  = mk_fonts(Fonts1, Free0, [], []),
-    {FontsPtr, store_object(O1s, Objects)}.
+    {FontsPtr, eg_pdf_lib:store_object(O1s, Objects)}.
 
 mk_fonts([], I, Fs, Os) -> 
     A = {{obj,I,0},{dict,lists:map(fun({Alias, FontObj}) ->
@@ -141,7 +134,7 @@ mk_fonts([], I, Fs, Os) ->
 mk_fonts([Handler|T], I, Fs, E) ->
     %% io:format("I need the font:~p~n",[Handler]),
     Index = Handler:index(),
-    Alias = "F" ++ i2s(Index),
+    Alias = "F" ++ eg_pdf_op:i2s(Index),
     case Handler:type() of
 	internal ->
 	    O = {{obj,I,0},mkFont(Handler)},
@@ -160,7 +153,7 @@ mk_fonts([Handler|T], I, Fs, E) ->
 %% mkFont is used for the 14  inbuilt fonts
 mkFont(FontHandler) ->
     Index = FontHandler:index(),
-    Alias = "F" ++ i2s(Index),
+    Alias = "F" ++ eg_pdf_op:i2s(Index),
     %% io:format("mkFont Alias=~s FontHandler=~p~n",[Alias, FontHandler]),
     {dict,[{"Type",{name,"Font"}},
 	   {"Subtype",{name,"Type1"}},
@@ -193,7 +186,7 @@ mkFont1(M, FontDescriptorPrt, Index) ->
     Widths = make_width(M:encoding(), M, FirstChar, LastChar),
     {dict,[{"Type",{name,"Font"}},
 	   {"Subtype",{name,"Type1"}},
-	   {"Name",{name,"F" ++ i2s(Index)}},
+	   {"Name",{name,"F" ++ eg_pdf_op:i2s(Index)}},
 	   {"BaseFont",{name,M:fontName()}},
 	   {"Encoding",{name,encoding(M)}},
 	   {"FirstChar",FirstChar},
@@ -262,8 +255,7 @@ mkFontFile(Handler) ->
      Bin}.
 
 
-font_dir() ->
-     "../priv/fonts/bin".
+font_dir() -> "../priv/src".
 
 get_font_program(Handler) ->
     File = font_dir() ++ "/" ++ atom_to_list(Handler) ++ ".pfb",

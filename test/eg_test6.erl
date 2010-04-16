@@ -1,57 +1,43 @@
-%%======================================================================
-%% Purpose: Grid planning sheet
-%%----------------------------------------------------------------------
+%%==========================================================================
 %% Copyright (C) 2003 Joe Armstrong
 %%
-%%   General Terms
-%%
-%%   Erlguten  is   free  software.   It   can  be  used,   modified  and
-%% redistributed  by anybody for  personal or  commercial use.   The only
-%% restriction  is  altering the  copyright  notice  associated with  the
-%% material. Individuals or corporations are permitted to use, include or
-%% modify the Erlguten engine.   All material developed with the Erlguten
-%% language belongs to their respective copyright holder.
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
 %% 
-%%   Copyright Notice
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
 %% 
-%%   This  program is  free  software.  It  can  be redistributed  and/or
-%% modified,  provided that this  copyright notice  is kept  intact. This
-%% program is distributed in the hope that it will be useful, but without
-%% any warranty; without even  the implied warranty of merchantability or
-%% fitness for  a particular  purpose.  In no  event shall  the copyright
-%% holder  be liable  for  any direct,  indirect,  incidental or  special
-%% damages arising in any way out of the use of this software.
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
 %% Authors:   Joe Armstrong <joe@sics.se>
-%% Last Edit: 2003-03-12
-%% =====================================================================
+%% Purpose: Grid planning sheet
+%%==========================================================================
 
 -module(eg_test6).
 
--import(pdf_lib, [moveAndShow/4]).
-
 -export([test/0]).
 
+%% ============================================================================
+
 test()->
-    PDF = pdf:new(),
-    pdf:set_pagesize(PDF,a4),
-    pdf:set_page(PDF,1),
-    %% pdf:set_font(PDF, "GoodCityModern", 40),
-    pdf:set_font(PDF, "Victorias-Secret", 40),
-    moveAndShow(PDF, 50, 700, "Hello Joe from Gutenburg"),
+    PDF = eg_pdf:new(),
+    eg_pdf:set_pagesize(PDF,a4),
+    eg_pdf:set_page(PDF,1),
+    eg_pdf:set_font(PDF, "Victorias-Secret", 40),
+    eg_pdf_lib:moveAndShow(PDF, 50, 700, "Hello Joe from Gutenburg"),
 
-    Serialised = pdf:export(PDF),
+    {Serialised, _PageNo} = eg_pdf:export(PDF),
     file:write_file("../test/eg_test6.pdf",[Serialised]),
-    pdf:delete(PDF).
-
-
-
-
-
-
-
-
-
-
-
+    eg_pdf:delete(PDF).
 

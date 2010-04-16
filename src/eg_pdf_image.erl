@@ -1,30 +1,28 @@
-%%======================================================================
-%% eguten_pdf_image.erl Import images to PDF
-%%----------------------------------------------------------------------
+%%==========================================================================
 %% Copyright (C) 2003 Mikael Karlsson
 %%
-%%   General Terms
-%%
-%%   Erlguten  is   free  software.   It   can  be  used,   modified  and
-%% redistributed  by anybody for  personal or  commercial use.   The only
-%% restriction  is  altering the  copyright  notice  associated with  the
-%% material. Individuals or corporations are permitted to use, include or
-%% modify the Erlguten engine.   All material developed with the Erlguten
-%% language belongs to their respective copyright holder.
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
 %% 
-%%   Copyright Notice
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
 %% 
-%%   This  program is  free  software.  It  can  be redistributed  and/or
-%% modified,  provided that this  copyright notice  is kept  intact. This
-%% program is distributed in the hope that it will be useful, but without
-%% any warranty; without even  the implied warranty of merchantability or
-%% fitness for  a particular  purpose.  In no  event shall  the copyright
-%% holder  be liable  for  any direct,  indirect,  incidental or  special
-%% damages arising in any way out of the use of this software.
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
-%% Authors:   Mikael Karlsson <mikael.karlsson@creado.com>
-%% Last Edit: 2003-03-15
-%% =====================================================================
+%% Author:   Mikael Karlsson <mikael.karlsson@creado.com>
+%% Purpose: Import images to PDF
+%%==========================================================================
 
 -module(eg_pdf_image).
 
@@ -32,19 +30,19 @@
 %%          Pack into XObjects
 %% 
 
--include("../include/eg.hrl").
+-export([mk_images/4, get_head_info/1, process_header/1]).
 
--import(lists, [map/2, mapfoldl/3, member/2, reverse/1]).
+-include("eg.hrl").
 
--export ([get_head_info/1, read_image/1, mk_images/4, read_image/1]).
+%% ============================================================================
 
 
 mk_images([], I, Is, Os) -> 
-    A = {{obj,I,0},{dict,map(fun({Alias, ImageIndex}) ->
-				     {Alias, {ptr,ImageIndex,0}}
-			     end, 
-			     lists:reverse(Is))}},
-    {I+1, {ptr,I,0}, reverse([A|Os])};
+    A = {{obj,I,0},{dict,lists:map(fun({Alias, ImageIndex}) ->
+					   {Alias, {ptr,ImageIndex,0}}
+				   end, 
+				   lists:reverse(Is))}},
+    {I+1, {ptr,I,0}, lists:reverse([A|Os])};
 mk_images([{ImageURI, #image{alias=Alias}=Im}|T], I, Fs, E) ->
     O = mk_image(I, ImageURI, Im),
     mk_images(T, I+1, [{Alias,I}|Fs], [O|E]).
@@ -77,8 +75,13 @@ colorspace(3)-> "DeviceRGB";
 colorspace(4)-> "DeviceCMYK".
 
 read_image(File) ->
-    {ok, Image} = file:read_file(File),
-    Image.
+  case file:read_file(File) of
+    {ok, Image} ->
+      Image;
+    {error, Reason} ->
+      io:format("Can not read file ~s; reason is ~s~n",[File,Reason]),
+      error 
+  end.
 
 get_head_info(File) ->
     process_header(read_image(File)).

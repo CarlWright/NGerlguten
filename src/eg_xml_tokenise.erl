@@ -1,31 +1,28 @@
-%%======================================================================
-%% xml tokeniser
-%%----------------------------------------------------------------------
+%%==========================================================================
 %% Copyright (C) 2003 Joe Armstrong
 %%
-%%   General Terms
-%%
-%%   Erlguten  is   free  software.   It   can  be  used,   modified  and
-%% redistributed  by anybody for  personal or  commercial use.   The only
-%% restriction  is  altering the  copyright  notice  associated with  the
-%% material. Individuals or corporations are permitted to use, include or
-%% modify the Erlguten engine.   All material developed with the Erlguten
-%% language belongs to their respective copyright holder.
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
 %% 
-%%   Copyright Notice
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
 %% 
-%%   This  program is  free  software.  It  can  be redistributed  and/or
-%% modified,  provided that this  copyright notice  is kept  intact. This
-%% program is distributed in the hope that it will be useful, but without
-%% any warranty; without even  the implied warranty of merchantability or
-%% fitness for  a particular  purpose.  In no  event shall  the copyright
-%% holder  be liable  for  any direct,  indirect,  incidental or  special
-%% damages arising in any way out of the use of this software.
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
-%% Authors:   Joe Armstrong <joe@sics.se>
-%% Last Edit: 2003-03-11
-%% =====================================================================
-
+%% Author: Joe Armstrong <joe@sics.se>
+%% Purpose: XML tokeniser
+%%==========================================================================
 
 -module(eg_xml_tokenise).
 
@@ -48,9 +45,13 @@
 %% 7) Only ISO Latin 1 is recognised
 %% 8) Unrecognised Enties are left unchanged
 
--import(lists, [foreach/2, reverse/1, reverse/2]).
 
--export([dump_token/2, get_next_token/2, continue/2, test/0]).
+-export([dump_token/2, 
+	 get_next_token/2, 
+	 continue/2, 
+	 test/0
+	]).
+
 
 -define(in(X,Low,Hi), Low =< X, X =< Hi).
 -define(SPACE,32).
@@ -59,6 +60,8 @@
 -define(RETURN,$\r).
 
 -define( white(X), X == ?SPACE ; X == ?NEWLINE ; X == ?TAB ; X == ?RETURN ).
+
+%% ============================================================================
 
 get_next_token(Str, Ln) ->
     catch get_next_token1(Str, Ln).
@@ -69,17 +72,17 @@ continue(Cont, Str) ->
 %% test cases
 
 test() ->
-    foreach(fun(I) -> reent_test(I) end, ok_tags()),
-    foreach(fun(I) ->
-		    case get_next_token(I, 1) of
-			{error, Ln, Term} ->
-			    io:format("~s fails:~p good~n",[I,{Ln,Term}]),
-			    ok;
-			Other ->
-			    io:format("Should fail!:~s ~p~n",
-				      [I, Other])
-		    end
-	    end, bad_tags()).
+    lists:foreach(fun(I) -> reent_test(I) end, ok_tags()),
+    lists:foreach(fun(I) ->
+			  case get_next_token(I, 1) of
+			      {error, Ln, Term} ->
+				  io:format("~s fails:~p good~n",[I,{Ln,Term}]),
+				  ok;
+			      Other ->
+				  io:format("Should fail!:~s ~p~n",
+					    [I, Other])
+			  end
+		  end, bad_tags()).
 
 ok_tags() ->
     ["<![CDATA[123]]>aaa",
@@ -137,7 +140,7 @@ gab(Str, _, Ln) ->
 %%----------------------------------------------------------------------
 %% PI's cannot contain >? (even inside quotes)
 
-get_pi(">"++T, "?"++L, Ln) -> {done, {pi, Ln, reverse(L)}, T, Ln};
+get_pi(">"++T, "?"++L, Ln) -> {done, {pi, Ln, lists:reverse(L)}, T, Ln};
 get_pi([$\n|T], L, Ln)     -> get_pi(T, [$\n|L], Ln+1);
 get_pi([H|T], L, Ln)       -> get_pi(T, [H|L], Ln);
 get_pi([], L, Ln)          -> {more, fun(S) -> get_pi(S, L, Ln) end}.
@@ -145,7 +148,8 @@ get_pi([], L, Ln)          -> {more, fun(S) -> get_pi(S, L, Ln) end}.
 %%----------------------------------------------------------------------
 %% Comments 
 
-get_comment(">"++T, "--"++L,Ln) -> {done, {comment, Ln, reverse(L)}, T, Ln};
+get_comment(">"++T, "--"++L,Ln) -> {done, {comment, Ln, lists:reverse(L)}, 
+				    T, Ln};
 get_comment([$\n|T], L, Ln)     -> get_comment(T, [$\n|L], Ln+1);
 get_comment([H|T], L, Ln)       -> get_comment(T, [H|L], Ln);
 get_comment([], L, Ln)          -> {more, fun(S) -> get_comment(S, L, Ln) end}.
@@ -153,7 +157,7 @@ get_comment([], L, Ln)          -> {more, fun(S) -> get_comment(S, L, Ln) end}.
 %%----------------------------------------------------------------------
 %% CDATA 
 
-get_cdata(">" ++ T, "]]"++L, Ln) -> {done, {cdata, Ln,reverse(L)}, T, Ln};
+get_cdata(">" ++ T, "]]"++L, Ln) -> {done, {cdata, Ln,lists:reverse(L)}, T, Ln};
 get_cdata([$\n|T], L, Ln)        -> get_cdata(T, [$\n|L], Ln+1);
 get_cdata([H|T], L, Ln)          -> get_cdata(T, [H|L], Ln);
 get_cdata([], L, Ln)             -> {more, fun(S) -> get_cdata(S, L, Ln) end}.
@@ -171,7 +175,7 @@ get_doctype([$"|T], L, Level, Ln) ->
 get_doctype([$'|T], L, Level, Ln) ->
     get_q_doctype($', T, [$'|L], Level, Ln);
 get_doctype([$>|T], L, 0, Ln) ->
-    {done, {doctype, Ln, reverse(L)}, T, Ln};
+    {done, {doctype, Ln, lists:reverse(L)}, T, Ln};
 get_doctype([$>|T], L, Level, Ln) ->
     get_doctype(T, [$>|L], Level-1, Ln);
 get_doctype([$<|T], L, Level, Ln) ->
@@ -272,7 +276,7 @@ get_Name([H|T], Ln) ->
 get_Name(S=[H|T], L, Ln) ->
     case is_NameChar(H) of
 	true  -> get_Name(T, [H|L], Ln);
-	false -> {reverse(L), S}
+	false -> {lists:reverse(L), S}
     end.
 
 %% [40] STag         ::= '<' Name (S Attribute)* S? '>'
@@ -284,9 +288,9 @@ get_args(S, L, Ln) ->
     {S1, Ln1} = skip_white(S, Ln),
     case S1 of
 	[$/|_] ->
-	    {reverse(L), S1, Ln1};
+	    {lists:reverse(L), S1, Ln1};
 	[$>|_] ->
-	    {reverse(L), S1, Ln1};
+	    {lists:reverse(L), S1, Ln1};
 	_ ->
 	    {Name, S2} = get_Name(S1, Ln1),
 	    {S3, Ln3}  = skip_white(S2, Ln1),
@@ -304,7 +308,7 @@ get_AttVal([$"|T], Ln) -> collect_AttVal($", T, [], Ln);
 get_AttVal([$'|T], Ln) -> collect_AttVal($', T, [], Ln);
 get_AttVal([H|T], Ln) ->  error(Ln, "expecting ' or \"").
 
-collect_AttVal(S, [S|T], L, Ln)   -> {reverse(L), T, Ln};
+collect_AttVal(S, [S|T], L, Ln)   -> {lists:reverse(L), T, Ln};
 collect_AttVal(S, [$\n|T], L, Ln) -> collect_AttVal(S, T, [$\n|L], Ln+1);
 collect_AttVal(S, [$r,$\n|T], L, Ln) -> collect_AttVal(S, T, [$\n|L], Ln+1);
 collect_AttVal(S, [$\r|T], L, Ln)  -> collect_AttVal(S, T, [$\n|L], Ln+1);
@@ -347,7 +351,7 @@ is_NameChar(X) ->
 get_raw(Str, Ln) -> get_raw(Str, [], Ln).
 
 get_raw([$<|T], L, Ln)  -> 
-    {done, {raw,Ln-count_nls(L,0),reverse(L)}, [$<|T], Ln};
+    {done, {raw,Ln-count_nls(L,0),lists:reverse(L)}, [$<|T], Ln};
 get_raw([$\n|T], L, Ln) -> get_raw(T, [$\n|L], Ln+1);
 get_raw([$\r,$\n|T], L, Ln) -> get_raw(T, [$\n|L], Ln+1);
 get_raw([$\r|T], L, Ln)  -> get_raw(T, [$\n|L], Ln+1);
@@ -360,11 +364,11 @@ count_nls([_|T], N)   -> count_nls(T, N);
 count_nls([], N)      -> N.
 
 get_amp([$;|T], Amp, L, Ln) -> 
-    Amp1 = reverse(Amp),
+    Amp1 = lists:reverse(Amp),
     case translate_amp(Amp1) of
 	error ->
 	    Ent = "&" ++ Amp1 ++ ";",
-	    get_raw(T, reverse(Ent, L), Ln);
+	    get_raw(T, lists:reverse(Ent, L), Ln);
 	Code ->
 	    get_raw(T, [Code|L], Ln)
     end;
@@ -502,9 +506,9 @@ dump_token(O, {raw, R}) ->
     io:format(O, "~s", [R]);
 dump_token(O, {tagStart, Tag, Args}) ->
     io:format(O, "<~s", [Tag]),
-    foreach(fun({Key,Val}) ->
-		   io:format(O, ' ~s="~s"', [Key,Val])
-	   end, Args),
+    lists:foreach(fun({Key,Val}) ->
+			  io:format(O, ' ~s="~s"', [Key,Val])
+		  end, Args),
     io:format(O, ">", []);
 dump_token(O, {tagStart, Tag}) ->
     io:format(O, "<~s>", [Tag]);

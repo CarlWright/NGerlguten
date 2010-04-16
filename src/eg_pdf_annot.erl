@@ -1,31 +1,28 @@
-%%======================================================================
-%% eg_pdf_annot.erl PDF Annotations
-%%----------------------------------------------------------------------
+%%==========================================================================
 %% Copyright (C) 2003 Mikael Karlsson
 %%
-%%   General Terms
-%%
-%%   Erlguten  is   free  software.   It   can  be  used,   modified  and
-%% redistributed  by anybody for  personal or  commercial use.   The only
-%% restriction  is  altering the  copyright  notice  associated with  the
-%% material. Individuals or corporations are permitted to use, include or
-%% modify the Erlguten engine.   All material developed with the Erlguten
-%% language belongs to their respective copyright holder.
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
 %% 
-%%   Copyright Notice
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
 %% 
-%%   This  program is  free  software.  It  can  be redistributed  and/or
-%% modified,  provided that this  copyright notice  is kept  intact. This
-%% program is distributed in the hope that it will be useful, but without
-%% any warranty; without even  the implied warranty of merchantability or
-%% fitness for  a particular  purpose.  In no  event shall  the copyright
-%% holder  be liable  for  any direct,  indirect,  incidental or  special
-%% damages arising in any way out of the use of this software.
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
-%% Authors:   Mikael Karlsson <mikael.karlsson@creado.com>
-%% Last Edit: 2003-03-15
-%% =====================================================================
-
+%% Author: Mikael Karlsson <mikael.karlsson@creado.com>
+%% Purpose: PDF Annotations
+%%==========================================================================
 
 %% @doc Annotations.
 %%
@@ -72,14 +69,15 @@
 
 -module(eg_pdf_annot).
 
+-include("eg.hrl").
 
--import(lists, [map/2, mapfoldl/3, member/2, reverse/1]).
 
-%% -compile(export_all).
 -export([new_text/2, new_text/3, new_open_text/2, new_open_text/3, 
-	 new_link/2, new_link/3, new_action/2, new_line/3,
-	 serialise/2]).
+	 new_link/2, new_link/3, new_action/2, new_line/3, set_flags/2,
+         andflags/2, orflags/2, contents/1, flag/1, isflagset/2, rect/1,
+	 set_borderstyle/3, style/1, serialise/2]).
 
+%% ============================================================================
 
 %% Subtypes
 subtype(text)             -> {name, "Text"};
@@ -250,11 +248,11 @@ serialise(Annots, I)->
     serialise(Annots, I, [], []).
 
 serialise([], I, Is, Os) -> 
-    A = {{obj,I,0},{array,map(fun(J) ->
-				     {ptr,J,0}
-			     end, 
-			     lists:reverse(Is))}},
-    {I+1, {ptr,I,0}, reverse([A|Os])};
+    A = {{obj,I,0},{array,lists:map(fun(J) ->
+					    {ptr,J,0}
+				    end, 
+				    lists:reverse(Is))}},
+    {I+1, {ptr,I,0}, lists:reverse([A|Os])};
 serialise([H|T], I, Fs, E) ->
     O = mk_annot(I, H),
     serialise(T, I+1, [I|Fs], [O|E]).

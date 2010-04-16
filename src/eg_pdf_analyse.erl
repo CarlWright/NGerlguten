@@ -1,44 +1,39 @@
-%%======================================================================
-%% eg_pdf_analyse.erl Anayse a PDF file
-%%----------------------------------------------------------------------
+%%==========================================================================
 %% Copyright (C) 2003 Joe Armstrong
 %%
-%%   General Terms
-%%
-%%   Erlguten  is   free  software.   It   can  be  used,   modified  and
-%% redistributed  by anybody for  personal or  commercial use.   The only
-%% restriction  is  altering the  copyright  notice  associated with  the
-%% material. Individuals or corporations are permitted to use, include or
-%% modify the Erlguten engine.   All material developed with the Erlguten
-%% language belongs to their respective copyright holder.
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
 %% 
-%%   Copyright Notice
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
 %% 
-%%   This  program is  free  software.  It  can  be redistributed  and/or
-%% modified,  provided that this  copyright notice  is kept  intact. This
-%% program is distributed in the hope that it will be useful, but without
-%% any warranty; without even  the implied warranty of merchantability or
-%% fitness for  a particular  purpose.  In no  event shall  the copyright
-%% holder  be liable  for  any direct,  indirect,  incidental or  special
-%% damages arising in any way out of the use of this software.
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
-%% Authors:   Joe Armstrong <joe@sics.se>
-%% Last Edit: 2003-03-11
-%% =====================================================================
+%% Author: Joe Armstrong <joe@sics.se>
+%% Purpose: Analyse a PDF file, manipulate PDF files, pack and unpack files
+%% into PDF files
+%% =========================================================================
 
 -module(eg_pdf_analyse).
 
-%% Purpose: Manipulate PDF files
-%%          Pack and unpack files into PDF files
 
-%% -compile(export_all).
-
-%% pdf:pack(Pdf, File, Pdf1)
+%% eg_pdf:pack(Pdf, File, Pdf1)
 %%   Packs file File into Pdf producing Pdf1
-%% pdf:unpack(Pdf) 
+%% eg_pdf:unpack(Pdf) 
 %%   Extracts any file that was packed into the Pdf file
 
--export([batch/1, pack/3, unpack/1]).
+-export([batch/1, pack/3, unpack/1, cvt/1]).
 
 -export([test_pack/0, test_unpack/0, debug/1, debug/2]).
 
@@ -57,8 +52,8 @@
 %% get_tables(Pdf) -> {XrefPtr, xref(), trailer()}.
 %% get_object(Pdf, Ptr, Xref) -> Obj
 
--import(lists, [all/2, map/2, foreach/2, reverse/1]).
--import(file, [pread/3]).
+
+%% ============================================================================
 
 batch([pack,A,B,C]) ->
     pack(atom_to_list(A), atom_to_list(B), atom_to_list(C)),
@@ -129,7 +124,8 @@ tables(File) ->
     Pdf = open(File),
     {XrefPtr, Xref, Trailer} = T = get_tables(Pdf),
     io:format("Tables=~p~n",[T]),
-    Blocks = reverse(map(fun(I) -> get_xref_entry(I, Xref, Pdf) end, Xref)),
+    Blocks = lists:reverse(
+	       lists:map(fun(I) -> get_xref_entry(I, Xref, Pdf) end, Xref)),
     %% io:format("Blocks=~p~n",[Blocks]),
     close(Pdf),
     {{xrefprt,XrefPtr},
@@ -188,9 +184,9 @@ find_obj_ptr(I, J, [])              -> exit(pointer_error).
 
 read_object(F, Pos, Xref) ->
     case read_obj(Pos, F) of
-	{I, Str1, Pos1} when integer(I)->
+	{I, Str1, Pos1} when is_integer(I)->
 	    case read_obj(Str1, Pos1, F) of
-		{J, Str2, Pos2} when integer(J) ->
+		{J, Str2, Pos2} when is_integer(J) ->
 		    case read_obj(Str2, Pos2, F) of
 			{obj, Str3, Pos3} ->
 			    {Obj, Str4, Pos4} = read_obj(Str3, Pos3, F),
@@ -248,10 +244,10 @@ cvt(Bin) ->
     end.
 
 all_printable(L) ->
-    all(fun is_printable/1, L).
+    lists:all(fun is_printable/1, L).
 
 is_printable(I) ->
-    I > 31, I < 256.
+    (I > 31) and (I < 256).
 
     
 
@@ -280,8 +276,8 @@ start_xref1("startxref\r" ++ T) -> T;
 start_xref1([_|T])              -> start_xref1(T);
 start_xref1([])                 -> exit({corrupt_pdf,startxref}).
 
-isolate_xref("\n%%EOF" ++ _, L) -> list_to_integer(reverse(L));
-isolate_xref("\r%%EOF" ++ _, L) -> list_to_integer(reverse(L));
+isolate_xref("\n%%EOF" ++ _, L) -> list_to_integer(lists:reverse(L));
+isolate_xref("\r%%EOF" ++ _, L) -> list_to_integer(lists:reverse(L));
 isolate_xref([H|T], L)          -> isolate_xref(T, [H|L]);
 isolate_xref(X, Y)              -> exit({corrupt_pdf, X,Y}).
 
@@ -361,7 +357,7 @@ find_trailer_pointer(F) ->
     {ok, Pos} = file:position(F, {eof,-Guess}),
     Data = read_str(F, Pos, Guess),
     %% Data is not the last Guess Bytes of the files
-    Data1 = reverse(Data),
+    Data1 = lists:reverse(Data),
     find_trailer_pointer(Data1, 0, Pos+Guess, F).
 
 find_trailer_pointer(">>" ++ T, Level, Pos, F) ->
@@ -374,7 +370,7 @@ find_trailer_pointer("reliart" ++ T, 0, Pos, F) ->
 find_trailer_pointer(Str, Level, Pos, F) when length(Str) < 8 -> 
     %% Need yet more stuff
     Data = read_str(F, Pos - 512, 512),
-    find_trailer_pointer(Str ++ reverse(Data), Level, Pos, F);
+    find_trailer_pointer(Str ++ lists:reverse(Data), Level, Pos, F);
 find_trailer_pointer([H|T], 0, Pos, F) ->
     find_trailer_pointer(T, 0, Pos-1, F);
 find_trailer_pointer([H|T], Level, Pos, F) when Level > 0  ->
@@ -453,9 +449,9 @@ get_comment(Str, Pos, F) ->
 get_hex_string(Str, Pos, F) -> get_hex_string(Str, Pos, F, []).
 
 get_hex_string(">" ++ Str, Pos, F, L) ->
-    {{string, reverse(L)}, Str, Pos+1};
+    {{string, lists:reverse(L)}, Str, Pos+1};
 get_hex_string([X,$>|Str], Pos, F, L) ->
-    {{string, reverse([hex2byte(X,$0)|L])}, Str, Pos+2};
+    {{string, lists:reverse([hex2byte(X,$0)|L])}, Str, Pos+2};
 get_hex_string([X,Y|T], Pos, F, L) ->
     get_hex_string(T, Pos+2, F, [hex2byte(X,Y)|L]);
 get_hex_string(Str, Pos, F, L) ->
@@ -479,7 +475,7 @@ get_dict(Str, Pos, F, L) ->
     case read_obj(Str, Pos, F) of
 	{dictEnd, Str1, Pos1} ->
 	    %% ensure(F, Pos1-2,">>"),
-	    {{dict, parse_dict(reverse(L))}, Str1, Pos1};
+	    {{dict, parse_dict(lists:reverse(L))}, Str1, Pos1};
 	{Obj, Str1, Pos1} ->
 	    get_dict(Str1, Pos1, F, [Obj|L])
     end.
@@ -491,7 +487,7 @@ parse_dict([]) -> [];
 parse_dict([H|_]) ->
     exit({pdferror, expecting_name_in_dict, found,H}).
 
-get_next_obj([I,J,r|T]) when integer(I), integer(J) ->
+get_next_obj([I,J,r|T]) when is_integer(I), is_integer(J) ->
     {{ptr,I,J}, T};
 get_next_obj([H|T]) ->
     {H, T}.
@@ -502,7 +498,7 @@ get_array(Str, Pos, F) ->
 get_array(Str, Pos, F, L) ->
     case read_obj(Str, Pos, F) of
 	{arrayEnd, Str1, Pos1} ->
-	    {{array, parse_array(reverse(L))}, Str1, Pos1};
+	    {{array, parse_array(lists:reverse(L))}, Str1, Pos1};
 	{Obj, Str1, Pos1} ->
 	    get_array(Str1, Pos1, F, [Obj|L])
     end.
@@ -519,7 +515,7 @@ parse_array(T) ->
 
 gs(Str, Pos, F) -> gs(Str, Pos, F, 0, []).
     
-gs([$)|T], Pos, F, 0, L)   -> {{string, reverse(L)}, T, Pos+1};
+gs([$)|T], Pos, F, 0, L)   -> {{string, lists:reverse(L)}, T, Pos+1};
 gs([$)|T], Pos, F, Lev, L) -> gs(T, Pos+1, F, Lev - 1, [$)|L]);
 gs([$(|T], Pos, F, Lev, L) -> gs(T, Pos+1, F, Lev + 1, [$(|L]);
 gs([$\\,$n|T], Pos, F, Lev, L)  -> gs(T, Pos+2, F, Lev, [$\n|L]);
@@ -563,7 +559,7 @@ get_named_object(Str, Pos, F) ->
 
 get_named_object(S=[H|T], Pos, F, L) ->
     case is_name_delim(H) of
-	true  -> {{name, reverse(L)}, S, Pos};
+	true  -> {{name, lists:reverse(L)}, S, Pos};
 	false -> get_named_object(T, Pos+1, F, [H|L])
     end;
 get_named_object([], Pos, F, L) ->
@@ -617,11 +613,11 @@ gi([H|T], Pos, F, Type, L) when ?IN(H, $0, $9) ->
     gi(T, Pos+1, F, Type, [H|L]);
 gi([], Pos, F, Type, L) ->
     case read_str(F, Pos, 1024) of
-	eof -> gi_final(Type, reverse(L), Pos, "");
+	eof -> gi_final(Type, lists:reverse(L), Pos, "");
 	Str -> gi(Str, Pos, F, Type, L)
     end;
 gi(Str, Pos, F, Type, L) ->
-    gi_final(Type, reverse(L), Pos, Str).
+    gi_final(Type, lists:reverse(L), Pos, Str).
 
 gi_final(int, L, Pos, Str) ->
     case (catch list_to_integer(L)) of

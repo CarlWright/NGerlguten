@@ -1,15 +1,33 @@
-%    -*- Erlang -*- 
-%    File:	eg_convert.erl
-%    Author:	Johan Bevemyr
-%    Created:	Thu Jan 27 00:04:18 2005
-%    Purpose:   
+%%==========================================================================
+%% Copyright (C) 2005 Johan Bevemyr
+%% 
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
+%% 
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
+%% 
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
+%%
+%% Author: Johan Bevemyr <jb@son.bevemyr.com>
+%%==========================================================================
 
--module('eg_convert').
--author('jb@son.bevemyr.com').
+-module(eg_convert).
 
 -export([mac2pdf/1,pdf2mac/1]).
 
-mac2pdf(List) when list(List) ->
+mac2pdf(List) when is_list(List) ->
     [mac2pdf(X) || X <- List];
 mac2pdf(8#101)->8#101;
 mac2pdf(8#256)->8#306;
@@ -220,7 +238,7 @@ mac2pdf(8#172)->8#172;
 mac2pdf(8#060)->8#060;
 mac2pdf(X)    ->X.
 
-pdf2mac(List) when list(List) ->
+pdf2mac(List) when is_list(List) ->
     [pdf2mac(X) || X <- List];
 pdf2mac(8#101)->8#101;
 pdf2mac(8#306)->8#256;

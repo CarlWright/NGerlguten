@@ -1,102 +1,90 @@
-%%======================================================================
-%% Purpose: Test PDF documents main api
-%%----------------------------------------------------------------------
+%%==========================================================================
 %% Copyright (C) 2004 Sean Hinde
 %%
-%%   General Terms
-%%
-%%   Erlguten  is   free  software.   It   can  be  used,   modified  and
-%% redistributed  by anybody for  personal or  commercial use.   The only
-%% restriction  is  altering the  copyright  notice  associated with  the
-%% material. Individuals or corporations are permitted to use, include or
-%% modify the Erlguten engine.   All material developed with the Erlguten
-%% language belongs to their respective copyright holder.
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
 %% 
-%%   Copyright Notice
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
 %% 
-%%   This  program is  free  software.  It  can  be redistributed  and/or
-%% modified,  provided that this  copyright notice  is kept  intact. This
-%% program is distributed in the hope that it will be useful, but without
-%% any warranty; without even  the implied warranty of merchantability or
-%% fitness for  a particular  purpose.  In no  event shall  the copyright
-%% holder  be liable  for  any direct,  indirect,  incidental or  special
-%% damages arising in any way out of the use of this software.
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
-%% Authors:   Sean Hinde <sean.hinde@mac.com>
-%% Last Edit: 2004-07-02
-%% =====================================================================
+%% Authors: Sean Hinde <sean.hinde@mac.com>
+%% Purpose: Test PDF documents main api
+%%==========================================================================
 
 -module(tmo_doc).
 
-%% Date:    2004-07-02
-%% Purpose: Test PDF documents main api
-
-
--export([file/0, file/1, file/2]).
--import(eg_richText, [mk_face/5]).
+-export([file/0, file/1, file/2, test/0]).
 
 -define(font_size, 10).
 
--record(doc_info, {system = " ",
-                   type = " ",
+-record(doc_info, {system    = " ",
+                   type      = " ",
                    reference = " ",
-                   author = " ",
-                   version = " ",
-                   date = " "}).
+                   author    = " ",
+                   version   = " ",
+                   date      = " "}).
 
 % State during main output routine
--record(st, {doc_info = #doc_info{},
-             toc_num = [],  % toc after page numbering
-             toc = [],      % toc before page numbering
-             y = 735,       % How far up the current page (700 is starting position)
-             min_y = 60,    % Bottom margin - bottom edge of page to last text line of page
-             max_y = 735,    % Top margin - bottom edge of page to top of text area
-             page = 1,       % Current Page Num
-             fig = 1,      % Current figure number
-             pending_images = []
-            }).
+-record(st,
+        {doc_info = #doc_info{},
+         toc_num = [], % toc after page numbering
+         toc = [],     % toc before page numbering
+         y = 735,      % How far up the current page; starting position is 700
+         min_y = 60,   % Bottom margin - bottom edge of page to last text line
+         max_y = 735,  % Top margin - bottom edge of page to top of text area
+         page = 1,     % Current Page Number
+         fig = 1,      % Current figure number
+         pending_images = []
+        }).
              
-             
-
+test() ->
+  file().
+  
 file() ->
     file("../test/process.xml").
 
 file(File_name) ->
-  Outfile = filename:rootname(File_name) ++ ".pdf",
-  case file:read_file(File_name) of
-  	{ok, Bin} ->
-  	  file:close(File_name),
-      XML = eg_xml_lite:parse_file(binary_to_list(Bin)),
+    Outfile = "../test/" ++ filename:rootname(filename:basename(File_name)) ++ ".pdf",
+    Xml = eg_xml_lite:parse_file(File_name),
+    {value, {xml, Doc}} = lists:keysearch(xml, 1, Xml),
+    {Doc_info, History, ToC} = doc_meta(Doc),
+    io:format("Doc Info = ~p~n",[Doc_info]),
+    PDF = eg_pdf:new(),
+    St = #st{doc_info = Doc_info,
+             toc = ToC,
+             y = 700,
+             page = 1},
 
-      {value, {xml, Doc}} = lists:keysearch(xml, 1, XML),
-      {Doc_info, History, ToC} = doc_meta(Doc),
-      io:format("Doc Info = ~p~n",[Doc_info]),
-      PDF = pdf:new(),
-      St = #st{doc_info = Doc_info,
-               toc = ToC,
-               y = 700,
-               page = 1},
-  
-      St1 = title_page(PDF, Doc_info, St),
-      St2 = revision_pages(PDF, History, Doc_info, St1),
-      St3 = toc_pages(PDF, ToC, Doc_info, St2),
-      St4 = St3#st{y = St#st.max_y},
-      St5 = main_content(PDF, Doc, St4),
-      io:format("Main Content = done~n",[]),
-      page_numbers(PDF, St5),
-      Serialised = pdf:export(PDF),
-      file:write_file(Outfile,[Serialised]),
-      pdf:delete(PDF);
-    Error ->
-  	    error
-      end.
+    St1 = title_page(PDF, Doc_info, St),
+    St2 = revision_pages(PDF, History, Doc_info, St1),
+    St3 = toc_pages(PDF, ToC, Doc_info, St2),
+    St4 = St3#st{y = St#st.max_y},
+    St5 = main_content(PDF, Doc, St4),
+    io:format("Main Content = done~n",[]),
+    page_numbers(PDF, St5),
+    {Serialised, _PageNo} = eg_pdf:export(PDF),
+    file:write_file(Outfile,[Serialised]),
+    eg_pdf:delete(PDF).
 
 file(File_name, section) ->
     Outfile = filename:rootname(filename:basename(File_name)) ++ ".pdf",
     Xml = eg_xml_lite:parse_file(File_name),
     {value, {xml, Doc}} = lists:keysearch(xml, 1, Xml),
     ToC = doc_toc([Doc]),
-    PDF = pdf:new(),
+    PDF = eg_pdf:new(),
     St = #st{doc_info = #doc_info{},
              toc = ToC,
              y = 735,
@@ -104,66 +92,67 @@ file(File_name, section) ->
     St5 = main_content(PDF, {document, [], [Doc]}, St),
     io:format("Main Content = done~n",[]),
     page_numbers(PDF, St5),
-    Serialised = pdf:export(PDF),
+    {Serialised, _PageNo} = eg_pdf:export(PDF),
     file:write_file(Outfile,[Serialised]),
-    pdf:delete(PDF).
+    eg_pdf:delete(PDF).
 
 title_page(PDF, Doc_info, S) ->
-    pdf:set_author(PDF, Doc_info#doc_info.author),
-    pdf:set_title(PDF, Doc_info#doc_info.system),
-    pdf:set_subject(PDF, Doc_info#doc_info.type),
+    eg_pdf:set_author(PDF, Doc_info#doc_info.author),
+    eg_pdf:set_title(PDF, Doc_info#doc_info.system),
+    eg_pdf:set_subject(PDF, Doc_info#doc_info.type),
 
     header(PDF, Doc_info#doc_info.system, Doc_info#doc_info.type),
 
     %% Title in middle of front page
-    pdf:ensure_font_gets_loaded(PDF, "Times-Bold"),
-    pdf:ensure_font_gets_loaded(PDF, "Courier"),
-    pdf:ensure_font_gets_loaded(PDF, "Courier-Bold"),
-    pdf:ensure_font_gets_loaded(PDF, "Helvetica"),
-    pdf:ensure_font_gets_loaded(PDF, "Times-Italic"),
-    pdf:begin_text(PDF),
+    eg_pdf:ensure_font_gets_loaded(PDF, "Times-Bold"),
+    eg_pdf:ensure_font_gets_loaded(PDF, "Courier"),
+    eg_pdf:ensure_font_gets_loaded(PDF, "Courier-Bold"),
+    eg_pdf:ensure_font_gets_loaded(PDF, "Helvetica"),
+    eg_pdf:ensure_font_gets_loaded(PDF, "Times-Italic"),
+    eg_pdf:begin_text(PDF),
 
     Txt = [{raw, Doc_info#doc_info.system ++ "\r\n" ++ Doc_info#doc_info.type}],
-    TagMap = {[p], [{default,mk_face("Times-Bold",26,true,default,0)}]},
+    TagMap = {[p], [{default,eg_richText:mk_face("Times-Bold",26,true,
+						 default,0)}]},
     
     Norm = eg_xml2richText:normalise_xml({p, [], Txt}, TagMap),
     {p, _, RichText} = Norm,
     {Lines, _, _} =
         eg_line_break:break_richText(RichText, {centered, [400]}),
     lines2pdf(PDF, 100,586,Lines, 52, [400], [0], centered),
-    pdf:end_text(PDF),
+    eg_pdf:end_text(PDF),
 
     %% Document Info
-    pdf:begin_text(PDF),
-    pdf:set_font(PDF, "Times-Roman", 12),
-    pdf:set_text_pos(PDF, 100, 425),
-    pdf:text(PDF, "Document Number: "),
-    pdf:set_text_pos(PDF, 100, 0),
-    pdf:text(PDF, Doc_info#doc_info.reference),
-    pdf:set_text_pos(PDF, -100, -25),
-    pdf:text(PDF, "Author: "),
-    pdf:set_text_pos(PDF, 100, 0),
-    pdf:text(PDF, Doc_info#doc_info.author),
-    pdf:set_text_pos(PDF, -100, -25),
-    pdf:text(PDF, "Version: "),
-    pdf:set_text_pos(PDF, 100, 0),
-    pdf:text(PDF, Doc_info#doc_info.version),
-    pdf:set_text_pos(PDF, -100, -25),
-    pdf:text(PDF, "Date: "),
-    pdf:set_text_pos(PDF, 100, 0),
-    pdf:text(PDF, Doc_info#doc_info.date),
-    pdf:end_text(PDF),
+    eg_pdf:begin_text(PDF),
+    eg_pdf:set_font(PDF, "Times-Roman", 12),
+    eg_pdf:set_text_pos(PDF, 100, 425),
+    eg_pdf:text(PDF, "Document Number: "),
+    eg_pdf:set_text_pos(PDF, 100, 0),
+    eg_pdf:text(PDF, Doc_info#doc_info.reference),
+    eg_pdf:set_text_pos(PDF, -100, -25),
+    eg_pdf:text(PDF, "Author: "),
+    eg_pdf:set_text_pos(PDF, 100, 0),
+    eg_pdf:text(PDF, Doc_info#doc_info.author),
+    eg_pdf:set_text_pos(PDF, -100, -25),
+    eg_pdf:text(PDF, "Version: "),
+    eg_pdf:set_text_pos(PDF, 100, 0),
+    eg_pdf:text(PDF, Doc_info#doc_info.version),
+    eg_pdf:set_text_pos(PDF, -100, -25),
+    eg_pdf:text(PDF, "Date: "),
+    eg_pdf:set_text_pos(PDF, 100, 0),
+    eg_pdf:text(PDF, Doc_info#doc_info.date),
+    eg_pdf:end_text(PDF),
     S.
 
 revision_pages(PDF, Revisions, Doc_info, S) ->
     %% Revision History 
-    pdf:new_page(PDF),
+    eg_pdf:new_page(PDF),
     header(PDF, Doc_info#doc_info.system, Doc_info#doc_info.type),
-    pdf:begin_text(PDF),
-    pdf:set_font(PDF, "Helvetica-Bold", 14),
-    pdf:set_text_pos(PDF, 50, 735),
-    pdf:text(PDF, "History"),
-    pdf:end_text(PDF),
+    eg_pdf:begin_text(PDF),
+    eg_pdf:set_font(PDF, "Helvetica-Bold", 14),
+    eg_pdf:set_text_pos(PDF, 50, 735),
+    eg_pdf:text(PDF, "History"),
+    eg_pdf:end_text(PDF),
     io:format("Revisions = ~p~n",[Revisions]),
 
     Header = {row, [], [{cell, [], [{b, [], [{raw, "Version"}]}]},
@@ -173,28 +162,28 @@ revision_pages(PDF, Revisions, Doc_info, S) ->
                         {cell, [], [{b, [], [{raw, "Author"}]}]}]},
     
     S1 = table(PDF, [Header] ++ Revisions, 50, 475, S#st{y = 725}),
-    pdf:begin_text(PDF),
-    pdf:set_font(PDF, "Helvetica-Bold", 14),
-    pdf:set_text_pos(PDF, 50, S1#st.y-25),
-    pdf:text(PDF, "References"),
-    pdf:end_text(PDF),
+    eg_pdf:begin_text(PDF),
+    eg_pdf:set_font(PDF, "Helvetica-Bold", 14),
+    eg_pdf:set_text_pos(PDF, 50, S1#st.y-25),
+    eg_pdf:text(PDF, "References"),
+    eg_pdf:end_text(PDF),
 
     footer(PDF),
-    S1#st{page = S#st.page + 1}.                                 % TODO - number of pages used
+    S1#st{page = S#st.page + 1}.    % TODO - number of pages used
 
 %% Output Table of Contents Pages
 toc_pages(PDF, ToC, Doc_info, St) ->
-    pdf:new_page(PDF),
+    eg_pdf:new_page(PDF),
     header(PDF, Doc_info#doc_info.system, Doc_info#doc_info.type),
     
-    pdf:begin_text(PDF),
-    pdf:set_font(PDF, "Helvetica-Bold", 18),
-    pdf:set_text_pos(PDF, 235, 735),
-    pdf:text(PDF, "Table of Contents"),
-    pdf:end_text(PDF),
+    eg_pdf:begin_text(PDF),
+    eg_pdf:set_font(PDF, "Helvetica-Bold", 18),
+    eg_pdf:set_text_pos(PDF, 235, 735),
+    eg_pdf:text(PDF, "Table of Contents"),
+    eg_pdf:end_text(PDF),
 
-    pdf:set_font(PDF, "Times-Roman", 12),
-    pdf:set_fill_color(PDF,blue),
+    eg_pdf:set_font(PDF, "Times-Roman", 12),
+    eg_pdf:set_fill_color(PDF,blue),
 
     %% Lay out the table of contents. Indent is the indent from the
     %% left of the page. Gap is the offset from the start of the
@@ -206,27 +195,35 @@ toc_pages(PDF, ToC, Doc_info, St) ->
                         I = indent(Lvl),
                         G = gap(Lvl),
                         S = space(PrevLvl, Lvl),
-                        pdf:begin_text(PDF),
-                        pdf:set_text_pos(PDF, X+I, Y-S),
-                        pdf:text(PDF, N),
-                        pdf:end_text(PDF),
-                        pdf:begin_text(PDF),
+                        eg_pdf:begin_text(PDF),
+                        eg_pdf:set_text_pos(PDF, X+I, Y-S),
+                        eg_pdf:text(PDF, N),
+                        eg_pdf:end_text(PDF),
+                        eg_pdf:begin_text(PDF),
                         %% io:format("ToC PDF:~p~n",[{N, Txt}]),
                         TagMap = {[p], 
-                                  [{default,mk_face("Times-Roman",12,true,default,0)},
-                                   {em,mk_face("Times-Italic",12,true,default,0)},
-                                   {code,mk_face("Courier",12,true,default,0)},
-                                   {b,mk_face("Times-Bold",12,true,default,0)}]},
+                                  [{default,
+                                    eg_richText:mk_face("Times-Roman",12,
+                                                        true,default,0)},
+                                   {em,
+                                    eg_richText:mk_face("Times-Italic",12,
+                                                        true,default,0)},
+                                   {code,
+                                    eg_richText:mk_face("Courier",12,
+                                                        true,default,0)},
+                                   {b,
+                                    eg_richText:mk_face("Times-Bold",12,
+                                                        true,default,0)}]},
                         {p, _, RichText} = 
                             eg_xml2richText:normalise_xml({p, [], Txt}, TagMap),
-                        lines2pdf(PDF, X+G+I,Y-S,[RichText],0,[300],[0],justified),
-                        
-                        pdf:end_text(PDF),
+                        lines2pdf(PDF, X+G+I,Y-S,[RichText],0,[300],[0],
+                                  justified),
+                        eg_pdf:end_text(PDF),
                         {Lvl, X, Y-S}
                   end, {0,50,700}, ToC),
-    pdf:set_fill_color(PDF,black),
+    eg_pdf:set_fill_color(PDF,black),
     footer(PDF),
-    St#st{page = St#st.page + 1}.                                          % TODO number of pages used
+    St#st{page = St#st.page + 1}.    % TODO number of pages used
 
 indent(1) -> 0;
 indent(2) -> 25;
@@ -269,10 +266,10 @@ doc(PDF, [{appendix, _, Appendix}|T], S) ->
     doc(PDF, T, S1);
 doc(PDF, [_|T], S) ->
     doc(PDF, T, S);
-doc(PDF, [], S) ->
+doc(_PDF, [], S) ->
     S.
 
-appendix(PDF, Appendix, S) ->
+appendix(_PDF, _Appendix, S) ->
     S.
 
 sect1(PDF, [{para, _, Para}|T], S) ->
@@ -307,7 +304,7 @@ sect1(PDF, [{table, _, Rows}|T], S) ->
     sect1(PDF, T, S1);
 sect1(PDF, [_|T], S) ->
     sect1(PDF, T, S);
-sect1(PDF, [], S) ->
+sect1(_PDF, [], S) ->
     S.
 
 sect2(PDF, [{para, _, Para}|T], S) ->
@@ -337,7 +334,7 @@ sect2(PDF, [{table, _, Rows}|T], S) ->
     sect2(PDF, T, S1);
 sect2(PDF, [_|T], S) ->
     sect2(PDF, T, S);
-sect2(PDF, [], S) ->
+sect2(_PDF, [], S) ->
     S.
 
 
@@ -360,7 +357,7 @@ sect3(PDF, [{table, _, Rows}|T], S) ->
     sect3(PDF, T, S1);
 sect3(PDF, [_|T], S) ->
     sect3(PDF, T, S);
-sect3(PDF, [], S) ->
+sect3(_PDF, [], S) ->
     S.
 
 title1(PDF, Title, S0) ->
@@ -375,21 +372,25 @@ title1(PDF, Title, S0) ->
         end,
 
     [{Num, Lvl, Str}|T] = S#st.toc,
-    pdf:rectangle(PDF, 60,S#st.y,500,2, fill),
-    pdf:begin_text(PDF),
-    pdf:set_font(PDF, "Helvetica-Bold", 18),
-    pdf:set_text_pos(PDF, 60, S#st.y-25),
-    pdf:text(PDF, Num),
+    eg_pdf:rectangle(PDF, 60,S#st.y,500,2, fill),
+    eg_pdf:begin_text(PDF),
+    eg_pdf:set_font(PDF, "Helvetica-Bold", 18),
+    eg_pdf:set_text_pos(PDF, 60, S#st.y-25),
+    eg_pdf:text(PDF, Num),
     TagMap = {[p], 
-              [{default,mk_face("Helvetica-Bold",18,true,default,0)},
-               {em,mk_face("Helvetica-Bold",18,true,default,0)},
-               {code,mk_face("Courier-Bold",18,true,default,0)},
-               {b,mk_face("Helvetica-Bold",18,true,default,0)}]},
+              [{default, eg_richText:mk_face("Helvetica-Bold",18,
+                                             true,default,0)},
+               {em,      eg_richText:mk_face("Helvetica-Bold",18,
+                                             true,default,0)},
+               {code,    eg_richText:mk_face("Courier-Bold",18,
+                                             true,default,0)},
+               {b,       eg_richText:mk_face("Helvetica-Bold",18,
+                                             true,default,0)}]},
     {p, _, RichText} = 
         eg_xml2richText:normalise_xml({p, [], Title}, TagMap),
     lines2pdf(PDF, 80,S#st.y-25,[RichText],0,[500],[0],justified),
-    pdf:end_text(PDF),
-    pdf:rectangle(PDF, 60,S#st.y-40,500,2, fill),
+    eg_pdf:end_text(PDF),
+    eg_pdf:rectangle(PDF, 60,S#st.y-40,500,2, fill),
     S#st{toc_num = [{Lvl, Num, Str, S#st.page}|S#st.toc_num],
          toc = T,
          y = S#st.y - 50}.
@@ -402,15 +403,19 @@ title(PDF, Title, Level, S0) ->
                 S0
         end,
     [{Num, Lvl, Str}|T] = S#st.toc,
-    pdf:begin_text(PDF),
-    pdf:set_font(PDF, "Helvetica-Bold", ?font_size + 2),
-    pdf:set_text_pos(PDF, 50, S#st.y-20),
-    pdf:text(PDF, Num),
+    eg_pdf:begin_text(PDF),
+    eg_pdf:set_font(PDF, "Helvetica-Bold", ?font_size + 2),
+    eg_pdf:set_text_pos(PDF, 50, S#st.y-20),
+    eg_pdf:text(PDF, Num),
     TagMap = {[p], 
-              [{default,mk_face("Helvetica-Bold",?font_size + 2,true,default,0)},
-               {em,mk_face("Helvetica-Bold",?font_size + 2,true,default,0)},
-               {code,mk_face("Courier-Bold",?font_size + 2,true,default,0)},
-               {b,mk_face("Helvetica-Bold",?font_size + 2,true,default,0)}]},
+              [{default, eg_richText:mk_face("Helvetica-Bold",?font_size + 2,
+                                             true,default,0)},
+               {em,      eg_richText:mk_face("Helvetica-Bold",?font_size + 2,
+                                             true,default,0)},
+               {code,    eg_richText:mk_face("Courier-Bold",?font_size + 2,
+                                             true,default,0)},
+               {b,       eg_richText:mk_face("Helvetica-Bold",?font_size + 2,
+                                             true,default,0)}]},
     {p, _, RichText} = 
         eg_xml2richText:normalise_xml({p, [], Title}, TagMap),
     Indent = case Level of
@@ -419,7 +424,7 @@ title(PDF, Title, Level, S0) ->
                  3 -> 90
              end,
     lines2pdf(PDF, Indent,S#st.y-20,[RichText],0,[500],[0],justified),
-    pdf:end_text(PDF),
+    eg_pdf:end_text(PDF),
     
     S#st{toc_num = [{Lvl, Num, Str, S#st.page}|S#st.toc_num],
          toc = T,
@@ -427,17 +432,22 @@ title(PDF, Title, Level, S0) ->
 
 para(PDF, Indent, Width, Para0, S) ->
     Para = skip_white(Para0),                   % Remove leading ws
-    TagMap = {[para], [{default,mk_face("Times-Roman",?font_size,true,default,0)},
-                    {em,mk_face("Times-Italic",?font_size,true,default,0)},
-                    {code,mk_face("Courier",?font_size,true,default,0)},
-                    {b,mk_face("Times-Bold",?font_size,true,default,0)}]},
+    TagMap = {[para], [{default, eg_richText:mk_face("Times-Roman",?font_size,
+                                                     true,default,0)},
+                       {em,      eg_richText:mk_face("Times-Italic",?font_size,
+                                                     true,default,0)},
+                       {code,    eg_richText:mk_face("Courier",?font_size,
+                                                     true,default,0)},
+                       {b,       eg_richText:mk_face("Times-Bold",?font_size,
+                                                     true,default,0)}]},
     %%io:format("Para = ~p~n",[Para]),
     Norm = eg_xml2richText:normalise_xml({para, [], Para}, TagMap),
     %% io:format("Norm1 = ~p~n",[Norm]),
     {para, _, RichText} = Norm,
     Widths =  [Width],
     Off = [Indent],
-    {Lines, _, _} = case eg_line_break:break_richText(RichText, {justified, Widths}) of
+    {Lines, _, _} = case eg_line_break:break_richText(RichText,
+                                                      {justified, Widths}) of
                         impossible ->
                             io:format("Cannot break line are widths ok~n"),
                             {[],[],[]};
@@ -465,28 +475,28 @@ list2(PDF, _, _, [], _, S) ->
                        % list, so we should give them a chance here.
 
 
-item(PDF, Indent, Width, [{para, _, Para}|T] = P, Type, S0) ->
+item(PDF, Indent, Width, [{para, _, _Para} | _T] = P, Type, S0) ->
     S = if ((S0#st.y - 14) < S0#st.min_y) ->
                 new_page(PDF, false, S0);
            true ->
                 S0
         end,
-    pdf:begin_text(PDF),
+    eg_pdf:begin_text(PDF),
     Type1 = if is_integer(Type) ->
-                    pdf:set_text_pos(PDF, 80, S#st.y-?font_size-2),
-                    pdf:set_font(PDF, "Times-Roman", ?font_size),
-                    pdf:text(PDF, pdf_op:n2s(Type) ++ "."),
+                    eg_pdf:set_text_pos(PDF, 80, S#st.y-?font_size-2),
+                    eg_pdf:set_font(PDF, "Times-Roman", ?font_size),
+                    eg_pdf:text(PDF, eg_pdf_op:n2s(Type) ++ "."),
                     Type + 1;
                Type == bulleted ->
-                    pdf:set_text_pos(PDF, 80, S#st.y-14),
-                    pdf:set_font(PDF, "Times-Roman", 16),
-                    pdf:text(PDF, [225]),              % Bullet Char
+                    eg_pdf:set_text_pos(PDF, 80, S#st.y-14),
+                    eg_pdf:set_font(PDF, "Times-Roman", 16),
+                    eg_pdf:text(PDF, [225]),              % Bullet Char
                     bulleted
             end,
-    pdf:end_text(PDF),
+    eg_pdf:end_text(PDF),
     {S1, T1} = item_paras(PDF, Indent, Width-10, P, S),
     item(PDF, Indent, Width, T1, Type1, S1);
-item(PDF, _, _, [], Type, S0) ->
+item(_PDF, _, _, [], Type, S0) ->
     {S0, Type};
 item(PDF, Indent, Width, Item0, Type, S0) ->
     S = if ((S0#st.y - 14) < S0#st.min_y) ->
@@ -495,25 +505,29 @@ item(PDF, Indent, Width, Item0, Type, S0) ->
                 S0
         end,
     %% io:format("Item0 = ~p~n",[Item0]),
-    pdf:begin_text(PDF),
-    pdf:set_font(PDF, "Times-Roman", 16),
+    eg_pdf:begin_text(PDF),
+    eg_pdf:set_font(PDF, "Times-Roman", 16),
     Type1 = if is_integer(Type) ->
-                    pdf:set_text_pos(PDF, 80, S#st.y-?font_size-2),
-                    pdf:set_font(PDF, "Times-Roman", ?font_size),
-                    pdf:text(PDF, pdf_op:n2s(Type) ++ "."),
+                    eg_pdf:set_text_pos(PDF, 80, S#st.y-?font_size-2),
+                    eg_pdf:set_font(PDF, "Times-Roman", ?font_size),
+                    eg_pdf:text(PDF, eg_pdf_op:n2s(Type) ++ "."),
                     Type + 1;
                Type == bulleted ->
-                    pdf:set_text_pos(PDF, 80, S#st.y-14),
-                    pdf:set_font(PDF, "Times-Roman", 16),
-                    pdf:text(PDF, [225]),              % Bullet Char
+                    eg_pdf:set_text_pos(PDF, 80, S#st.y-14),
+                    eg_pdf:set_font(PDF, "Times-Roman", 16),
+                    eg_pdf:text(PDF, [225]),              % Bullet Char
                     bulleted
             end,
-    pdf:end_text(PDF),
+    eg_pdf:end_text(PDF),
     Item = skip_white(Item0),                   % Remove leading ws
-    TagMap = {[item], [{default,mk_face("Times-Roman",?font_size,true,default,0)},
-                       {em,mk_face("Times-Italic",?font_size,true,default,0)},
-                       {code,mk_face("Courier",?font_size,true,default,0)},
-                       {b,mk_face("Times-Bold",?font_size,true,default,0)}]},
+    TagMap = {[item], [{default, eg_richText:mk_face("Times-Roman",?font_size,
+                                                     true,default,0)},
+                       {em,      eg_richText:mk_face("Times-Italic",?font_size,
+                                                     true,default,0)},
+                       {code,    eg_richText:mk_face("Courier",?font_size,
+                                                     true,default,0)},
+                       {b,       eg_richText:mk_face("Times-Bold",?font_size,
+                                                     true,default,0)}]},
     %% io:format("code = ~p~n", [Para]),
     Norm = eg_xml2richText:normalise_xml({item, [], Item}, TagMap),
     %% io:format("Norm1 = ~p~n",[Norm]),
@@ -521,7 +535,7 @@ item(PDF, Indent, Width, Item0, Type, S0) ->
     Widths =  [Width-10],
     Off = [Indent],
     {Lines, _, _} = eg_line_break:break_richText(RichText, {justified, Widths}),
-    %% io:format("Output = ~p~n",[{Lines, Widths, Off, Indent, Width, justified, S}]),
+    %% io:format("Output = ~p~n",[{Lines,Widths,Off,Indent,Width,justified,S}]),
     S1 = output_lines(PDF, Lines, Widths, Off, Indent, Width-10, justified, S),
     %% io:format("Output Done~n"),
     {S1#st{y = S1#st.y - 5}, Type1}.
@@ -529,23 +543,26 @@ item(PDF, Indent, Width, Item0, Type, S0) ->
 item_paras(PDF, Indent, Width, [{para, _, Para}|T], S) ->
     S1 = para(PDF, Indent, Width, Para, S),
     item_paras(PDF, Indent, Width, T, S1);
-item_paras(PDF, Indent, Width, [_|T] = Items, S) ->
+item_paras(_PDF, _Indent, _Width, [_|_T] = Items, S) ->
     {S, Items};
 item_paras(_, _, _, [], S) ->
     {S, []}.
 
 code(PDF, Indent, Width, Para, S) ->
     TagMap = {[code], 
-              [{default,mk_face("Courier",?font_size,false,default,0)}]},
+              [{default,eg_richText:mk_face("Courier",?font_size,false,
+					    default,0)}]},
     %% io:format("code = ~p~n", [Para]),
     Norm = eg_xml2richText:normalise_xml({code, [], Para}, TagMap),
     %% io:format("Norm1 = ~p~n",[Norm]),
     {code, _, RichText} = Norm,
     Widths =  [Width],
     Off = [Indent],
-    {Lines, W, O} = eg_line_break:break_richText(RichText, {preformatted, Widths}),
+    {Lines, _W, _O} = eg_line_break:break_richText(RichText,
+                                                   {preformatted, Widths}),
     %% io:format("Lines1 = ~p~n",[{Lines, W, O}]),
-    S1 = output_lines(PDF, Lines, Widths, Off, Indent, Width, left_justified, S),
+    S1 = output_lines(PDF, Lines, Widths, Off, Indent, Width,
+                      left_justified, S),
     S1#st{y = S1#st.y - 5}.
 
 output_lines(PDF, Lines, Widths, Off, Indent, Width, Just, S) ->
@@ -557,9 +574,9 @@ output_lines(PDF, Lines, Widths, Off, Indent, Width, Just, S) ->
             Code = eg_richText2pdf:richText2pdf(Indent, Y, Just, 0, Lines, 
                                                 (?font_size+2), Widths, Off),
             %% io:format("Code = ~p~n",[Code]),
-            pdf:begin_text(PDF),
-            pdf:append_stream(PDF, Code),
-            pdf:end_text(PDF),
+            eg_pdf:begin_text(PDF),
+            eg_pdf:append_stream(PDF, Code),
+            eg_pdf:end_text(PDF),
             S#st{y = S#st.y - Y_req};
        true ->
             Left =  (Y - Min_y),
@@ -570,9 +587,9 @@ output_lines(PDF, Lines, Widths, Off, Indent, Width, Just, S) ->
             Code = eg_richText2pdf:richText2pdf(Indent, Y, Just, 0, TPL, 
                                                 (?font_size+2), Widths, Off),
             %% io:format("Code = ~p~n",[Code]),
-            pdf:begin_text(PDF),
-            pdf:append_stream(PDF, Code),
-            pdf:end_text(PDF),
+            eg_pdf:begin_text(PDF),
+            eg_pdf:append_stream(PDF, Code),
+            eg_pdf:end_text(PDF),
             S1 = new_page(PDF, true, S),
             output_lines(PDF, NPL, Widths, Off, Indent, Width, Just, S1)
     end.
@@ -585,7 +602,7 @@ output_lines(PDF, Lines, Widths, Off, Indent, Width, Just, S) ->
 image(PDF, Path, S0) ->
     S = space_before(10, S0),
     case eg_pdf_image:get_head_info(Path) of
-        {jpeg_head,{W, H, Ncomponents, Data_precision}} ->
+        {jpeg_head,{W, H, _Ncomponents, _Data_precision}} ->
            {W0, H0} = if (W =< 435) ->
                               {W, H};
                          true ->
@@ -602,16 +619,18 @@ image(PDF, Path, S0) ->
                true ->
                     X = 218 - trunc(W1/2) + 50,
                     io:format("Image~n"),
-                    pdf:image(PDF, Path, {X, S#st.y-H1}, {width, W1}),
-                    pdf:begin_text(PDF),
-                    pdf:set_text_pos(PDF, X + W1/2, S#st.y-H1 - 8),
-                    pdf:text(PDF, "Figure " ++ pdf_op:n2s(S#st.fig)),
-                    pdf:end_text(PDF),
+                    eg_pdf:image(PDF, Path, {X, S#st.y-H1}, {width, W1}),
+                    eg_pdf:begin_text(PDF),
+                    eg_pdf:set_text_pos(PDF, X + W1/2, S#st.y-H1 - 8),
+                    eg_pdf:text(PDF, "Figure " ++ eg_pdf_op:n2s(S#st.fig)),
+                    eg_pdf:end_text(PDF),
                     S#st{y = S#st.y - H1 - 20,
                          fig = S#st.fig + 1}
             end;
-        Else ->
-            io:format("Error, image format not supported or image not found: ~p~n",[Path]),
+        _Other ->
+            io:format("Error, "
+                      "image format not supported or image not found: ~p~n",
+                      [Path]),
             S
     end.
 
@@ -620,9 +639,10 @@ images(PDF, S) ->
 
 images(PDF, [{img, Path}|T], S) ->
     S1 = image(PDF, Path, S#st{pending_images = T}),
-    io:format("Length = ~p~n",[{length(S1#st.pending_images), length(S#st.pending_images)}]),
+    io:format("Length = ~p~n",[{length(S1#st.pending_images),
+                                length(S#st.pending_images)}]),
     if length(S1#st.pending_images) == length(S#st.pending_images) ->
-            pdf:new_page(PDF),
+            eg_pdf:new_page(PDF),
             io:format("New page~n"),
             header(PDF, S1),
             footer(PDF),
@@ -631,12 +651,12 @@ images(PDF, [{img, Path}|T], S) ->
        true ->
             images(PDF, T, S1#st{pending_images = T})
     end;
-images(PDF, [], S) ->
+images(_PDF, [], S) ->
     S.
 
 new_page(PDF, Images, S) ->
     io:format("Page = ~p~n", [S#st.page+1]),
-    pdf:new_page(PDF),
+    eg_pdf:new_page(PDF),
     header(PDF, S),
     footer(PDF),
     if (S#st.pending_images == []) or (Images == false) ->
@@ -653,42 +673,44 @@ header(PDF, #st{doc_info = I}) ->
     header(PDF, I#doc_info.system, I#doc_info.type).
 
 header(PDF, Title, Subtitle) ->
-    pdf:image(PDF,'../test/tmobile.jpg',{50,790},{height,29}),
+    eg_pdf:image(PDF,'../test/tmobile.jpg',{50,790},{height,29}),
 
-%     pdf:set_fill_gray(PDF,0.75),
-%     pdf:rectangle(PDF, 40,780,515,2, fill),
-%     pdf:set_fill_gray(PDF,0.0),
+%     eg_pdf:set_fill_gray(PDF,0.75),
+%     eg_pdf:rectangle(PDF, 40,780,515,2, fill),
+%     eg_pdf:set_fill_gray(PDF,0.0),
 
     %% Header
-    pdf:begin_text(PDF),
-    {L1, W1, O1} = xml2lines("<p><b>" ++ Title ++"</b></p>",200,14,1,preformatted),
+    eg_pdf:begin_text(PDF),
+    {L1, W1, O1} = xml2lines("<p><b>" ++ Title ++"</b></p>",200,14,1,
+                             preformatted),
     lines2pdf(PDF, 345,818,L1, 14, W1, O1, right_justified),
     
-    {L2, W2, O2} = xml2lines("<p><b>" ++ Subtitle++ "</b></p>",200,14,1,preformatted),
+    {L2, W2, O2} = xml2lines("<p><b>" ++ Subtitle++ "</b></p>",200,14,1,
+                             preformatted),
     lines2pdf(PDF, 345,802,L2, 14, W2, O2, right_justified),
-     pdf:end_text(PDF).
+     eg_pdf:end_text(PDF).
 
 footer(PDF) ->
-    pdf:set_fill_gray(PDF,0.75),
-    pdf:rectangle(PDF, 40,45,515,2, fill),
-    pdf:set_fill_gray(PDF,0.0).
+    eg_pdf:set_fill_gray(PDF,0.75),
+    eg_pdf:rectangle(PDF, 40,45,515,2, fill),
+    eg_pdf:set_fill_gray(PDF,0.0).
 
 
 page_numbers(PDF, S) ->
-    page_numbers(PDF, S#st.page, pdf_op:n2s(S#st.page)).
+    page_numbers(PDF, S#st.page, eg_pdf_op:n2s(S#st.page)).
 
-page_numbers(PDF, 1, _) ->
+page_numbers(_PDF, 1, _) ->
     ok;
 page_numbers(PDF, N, Tot) ->
-    R = pdf:set_page(PDF, N),
+    R = eg_pdf:set_page(PDF, N),
     io:format("R = ~p~n",[R]),
-    pdf:begin_text(PDF),
-    pdf:set_font(PDF,"Helvetica", ?font_size),
-    Str = "Page " ++ pdf_op:n2s(N) ++ " of " ++ Tot,
-    Width = pdf:get_string_width(PDF,"Helvetica", ?font_size, Str),
-    pdf:set_text_pos(PDF, 555 - Width, 30),
-    pdf:text(PDF, Str),
-    pdf:end_text(PDF),
+    eg_pdf:begin_text(PDF),
+    eg_pdf:set_font(PDF,"Helvetica", ?font_size),
+    Str = "Page " ++ eg_pdf_op:n2s(N) ++ " of " ++ Tot,
+    Width = eg_pdf:get_string_width(PDF,"Helvetica", ?font_size, Str),
+    eg_pdf:set_text_pos(PDF, 555 - Width, 30),
+    eg_pdf:text(PDF, Str),
+    eg_pdf:end_text(PDF),
     page_numbers(PDF, N-1, Tot).
 
 %% Creating tables
@@ -714,7 +736,8 @@ page_numbers(PDF, N, Tot) ->
 %%           so if there is a solution where every or most rows can
 %%           fit on one line this would be very nice.
 
-%%            Could do proportional split based on total volume of text in each column
+%%            Could do proportional split based on total volume of text
+%%            in each column
 %%
 %%           We could find the longest cell for each column
 
@@ -755,11 +778,12 @@ table(PDF, Rows, X, W0, S0) ->
     io:format("Longest word = ~p~n",[Longest_words]),
     Min_tab_width = lists:sum(Longest_words) + Cols * 5000,
     if Min_tab_width div 1000 + Cols > W -> % round up each col to next Pt
-            io:format("*** Warning *** Table will not fit into available width ~p~n", 
+            io:format("*** Warning *** "
+                      "Table will not fit into available width ~p~n", 
                       [Min_tab_width div Cols + Cols]);
        true -> ok
     end,
-    Text_width = Col_width - 4 - 1, % leave space for lines + ws
+    _Text_width = Col_width - 4 - 1, % leave space for lines + ws
 
     %% Sum the total length of text in each column. This gives a
     %% general measure of the size of a column.
@@ -844,7 +868,7 @@ rows(PDF, [H|T],[Row|Rows],X,Col_widths, Cols, Mid_row, S) ->
     %% TODO - Work out when to draw top line - i.e. when we are really
     %% at the start of a row even in a multipage row
     if Mid_row == false ->
-            pdf:rectangle(PDF, X,S#st.y,lists:sum(Col_widths) + 1,1, fill);
+            eg_pdf:rectangle(PDF, X,S#st.y,lists:sum(Col_widths) + 1,1, fill);
        true -> ok
     end,
     if S#st.y - (H*?font_size) =< S#st.min_y ->
@@ -854,7 +878,8 @@ rows(PDF, [H|T],[Row|Rows],X,Col_widths, Cols, Mid_row, S) ->
             %% io:format("NPR = ~p~n", [NPR]),
             %% Draw a line at the bottom as 
             if NPR == [] ->
-                    pdf:rectangle(PDF, X,S1#st.y,lists:sum(Col_widths) + 1,1, fill);
+                    eg_pdf:rectangle(PDF, X,S1#st.y,lists:sum(Col_widths) + 1,1,
+                                     fill);
                true -> ok
             end,
             Mid_row_2 = NPR /= [],
@@ -866,38 +891,47 @@ rows(PDF, [H|T],[Row|Rows],X,Col_widths, Cols, Mid_row, S) ->
        true ->
             Y = S#st.y,
             S1 = row(PDF, Row, X,Col_widths,H, Cols, S),
-            rows(PDF, T, Rows, X, Col_widths, Cols, false, S1#st{y = Y - (H*?font_size)-5})
+            rows(PDF, T, Rows, X, Col_widths, Cols, false,
+                 S1#st{y = Y - (H*?font_size)-5})
     end;
-rows(PDF, [], [], X, Col_widths, Cols, Mid_row, S) ->
+rows(PDF, [], [], X, Col_widths, _Cols, _Mid_row, S) ->
     %% Draw final line under table
-    pdf:rectangle(PDF, X,S#st.y,lists:sum(Col_widths) + 1,1, fill),
+    eg_pdf:rectangle(PDF, X,S#st.y,lists:sum(Col_widths) + 1,1, fill),
     S.
 
 row(PDF, [{Lines, Width, Off}|Cells], X, [Col_width|T], Height, Cols, S) ->
-    pdf:rectangle(PDF, X,S#st.y,1,-(Height*?font_size)-5, fill),
-    pdf:begin_text(PDF),
+    eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*?font_size)-5, fill),
+    eg_pdf:begin_text(PDF),
     lines2pdf(PDF, X+3,S#st.y,Lines, ?font_size, Width, Off, justified),
-    pdf:end_text(PDF),
+    eg_pdf:end_text(PDF),
     row(PDF, Cells, X+Col_width, T, Height, Cols-1, S);
 row(PDF, [], X, [], Height, 0, S) ->
-    pdf:rectangle(PDF, X,S#st.y,1,-(Height*?font_size)-5, fill),
+    eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*?font_size)-5, fill),
     S;
 row(PDF, [], X, [Col_width|T], Height, Cols, S) ->
-    pdf:rectangle(PDF, X,S#st.y,1,-(Height*?font_size)-5, fill),
+    eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*?font_size)-5, fill),
     row(PDF, [], X+Col_width, T, Height, Cols-1, S).
 
 
 row2rtf({row, _, Row}, Col_widths) ->
-    TagMap = {[cell], [{default,mk_face("Times-Roman",?font_size,true,default,0)},
-                       {em,mk_face("Times-Italic",?font_size,true,default,0)},
-                       {code,mk_face("Courier",?font_size,true,default,0)},
-                       {b,mk_face("Times-Bold",?font_size,true,default,0)}]},
+    TagMap = {[cell], [{default, eg_richText:mk_face("Times-Roman",?font_size,
+                                                     true,default,0)},
+                       {em,      eg_richText:mk_face("Times-Italic",?font_size,
+                                                     true,default,0)},
+                       {code,    eg_richText:mk_face("Courier",?font_size,
+                                                     true,default,0)},
+                       {b,       eg_richText:mk_face("Times-Bold",?font_size,
+                                                     true,default,0)}]},
     row2rtf1(Row, Col_widths, TagMap);
 row2rtf({header, _, Row}, Col_widths) ->
-    TagMap = {[cell], [{default,mk_face("Times-Bold",?font_size,true,default,0)},
-                       {em,mk_face("Times-Bold",?font_size,true,default,0)},
-                       {code,mk_face("Courier-Bold",?font_size,true,default,0)},
-                       {b,mk_face("Times-Bold",?font_size,true,default,0)}]},
+    TagMap = {[cell], [{default, eg_richText:mk_face("Times-Bold",?font_size,
+                                                     true,default,0)},
+                       {em,      eg_richText:mk_face("Times-Bold",?font_size,
+                                                     true,default,0)},
+                       {code,    eg_richText:mk_face("Courier-Bold",?font_size,
+                                                     true,default,0)},
+                       {b,       eg_richText:mk_face("Times-Bold",?font_size,
+                                                     true,default,0)}]},
     row2rtf1(Row, Col_widths, TagMap).
 
 
@@ -1055,12 +1089,13 @@ expand(Init, Max_cell_widths, W) ->
     end.
             
 
-ensure_maximums([{fixed, H}|T], [Max_needed|T1], Gain, Res) ->
+ensure_maximums([{fixed, H}|T], [_Max_needed|T1], Gain, Res) ->
     ensure_maximums(T, T1, Gain, Res ++ [{fixed, H}]);
 ensure_maximums([H|T], [Max_needed|T1], Gain, Res) ->
     io:format("ensure_maximums - ~p~n",[{Gain , H , Max_needed}]),
     if Max_needed =< H ->
-            ensure_maximums(T, T1, Gain + H - Max_needed, Res ++ [{fixed, Max_needed}]);
+            ensure_maximums(T, T1, Gain + H - Max_needed,
+                            Res ++ [{fixed, Max_needed}]);
        true ->
             ensure_maximums(T, T1, Gain, Res ++ [H])
     end;
@@ -1068,14 +1103,14 @@ ensure_maximums([], [], Gain, Res) ->
     {Res, Gain}.
 
 distribute_reduction(Cols, Minimums, Lost) ->
-    Sum = lists:foldl(fun({fixed, Col}, Sum) ->
+    Sum = lists:foldl(fun({fixed, _Col}, Sum) ->
                               Sum;
                          (Col, Sum) ->
                               Sum + Col
                       end, 0, Cols),
     distribute_reduction(Cols, Minimums, Sum, Lost).
 
-distribute_reduction([{fixed, Col}|T], [Min|T1], Sum, Lost) ->
+distribute_reduction([{fixed, Col}|T], [_Min|T1], Sum, Lost) ->
     [{fixed, Col}|distribute_reduction(T, T1, Sum, Lost)];
 distribute_reduction([Col|T], [Min|T1], Sum, Lost) ->
     Reduced = Col - Col/Sum*Lost,
@@ -1090,15 +1125,13 @@ distribute_reduction([Col|T], [Min|T1], Sum, Lost) ->
        true ->
             [Reduced|distribute_reduction(T, T1, Sum, Lost)]
     end;
-distribute_reduction([], [], Sum, Lost) ->
+distribute_reduction([], [], _Sum, _Lost) ->
     [].
 
 distribute_increase(Cols, Sum, W) ->
     Gain = W - Sum,
-    To_share = lists:foldl(fun({fixed, Col}, Sum1) ->
-                                   Sum1;
-                              (Col, Sum1) ->
-                                   Sum1 + Col
+    To_share = lists:foldl(fun ({fixed, _Col}, Sum1) -> Sum1;
+                               (Col, Sum1)           -> Sum1 + Col
                            end, 0, Cols),
     distribute_increase1(Cols, Gain, To_share).
     
@@ -1134,17 +1167,18 @@ split_row(Height, Cells) ->
                         {TPR ++ [{TPL, W, O}], NPR ++ [{NPL, W, O}]}
                 end, {[], []}, Cells).
 
-%% Create a clickable link on the page.
-%% We need to define an object for each link of the form:
-%% 46 0 obj
-%% <</Subtype/Link
-%% /BS <</W 0>>
-%% /Border [0 0 0]
-%% /Rect [71.2 468.2 263.1 478.1]
-%% /Dest (d0e272)
-%% >>
-link(PDF, X,Y, Text, Link_to) ->
-    [].
+
+%% %% Create a clickable link on the page.
+%% %% We need to define an object for each link of the form:
+%% %% 46 0 obj
+%% %% <</Subtype/Link
+%% %% /BS <</W 0>>
+%% %% /Border [0 0 0]
+%% %% /Rect [71.2 468.2 263.1 478.1]
+%% %% /Dest (d0e272)
+%% %% >>
+%% link(PDF, X,Y, Text, Link_to) ->
+%%     [].
 
 
 %% Generic routines for paragraph formatting
@@ -1156,12 +1190,16 @@ xml2lines(Para, Len, PtSize, NLines, Justification) ->
     lines(Xml, Len, PtSize, NLines, Justification).
 
 
-lines(Xml, Len, PtSize, NLines, Justification) ->
+lines(Xml, Len, _PtSize, NLines, Justification) ->
     TagMap = {[p], 
-              [{default,mk_face("Times-Roman",?font_size,true,default,0)},
-               {em,mk_face("Times-Italic",?font_size,true,default,0)},
-               {code,mk_face("Courier",?font_size,true,default,0)},
-               {b,mk_face("Times-Bold",?font_size,true,default,0)}]},
+              [{default, eg_richText:mk_face("Times-Roman",?font_size,
+                                             true,default,0)},
+               {em,      eg_richText:mk_face("Times-Italic",?font_size,
+                                             true,default,0)},
+               {code,    eg_richText:mk_face("Courier",?font_size,
+                                             true,default,0)},
+               {b,       eg_richText:mk_face("Times-Bold",?font_size,
+                                             true,default,0)}]},
     %%io:format("TagMap: ~p~n",[TagMap]),
    % ensure_fonts_are_loaded(PDF, TagMap),
     Norm = eg_xml2richText:normalise_xml(Xml, TagMap),
@@ -1173,7 +1211,7 @@ lines(Xml, Len, PtSize, NLines, Justification) ->
         impossible ->
             io:format("Cannot break line are widths ok~n"),
             {[],[],[]};
-        {Lines,A,B} ->
+        {Lines,_A,_B} ->
             %% io:format("Lines = ~p~n",[Lines]),
             %io:format("Other things = ~p~n",[{A,B}]),
             {Lines, Widths, Off}
@@ -1185,7 +1223,7 @@ lines2pdf(PDF, X,Y,Lines, Leading, Widths, Off, Justification) ->
     Code = eg_richText2pdf:richText2pdf(X, Y, Justification, 0, Lines, 
                                         Leading, Widths, Off),
     %io:format("Code = ~p~n",[Code]),
-    pdf:append_stream(PDF, Code).
+    eg_pdf:append_stream(PDF, Code).
     
 
 parse_xml_para_str(Str) ->
@@ -1269,23 +1307,23 @@ doc_toc(Doc, N) ->
 
 doc_toc1({Sect1, _, [{title, _, Title}|S1]}, {Acc, 1}) when Sect1 == sect1;
                                                             Sect1 == section ->
-    {Titles, N} = doc_toc(S1, 2),
+    {Titles, _N} = doc_toc(S1, 2),
     {Acc ++ [{1, Title}|Titles], 1};
-doc_toc1({sect1, _, [{title, _, Title}|_]}, {Acc, _}) ->
+doc_toc1({sect1, _, [{title, _, _Title}|_]}, {_Acc, _}) ->
     exit({error, "sect1 not a top level"});
 
 doc_toc1({Sect2, _, [{title, _, Title}|S2]}, {Acc, 2}) when Sect2 == sect2;
                                                             Sect2 == section ->
-    {Titles, N} = doc_toc(S2, 3),
+    {Titles, _N} = doc_toc(S2, 3),
     {Acc ++ [{2, Title}|Titles], 2};
-doc_toc1({sect2, _, [{title, _, Title}|_]}, {Acc, _}) ->
+doc_toc1({sect2, _, [{title, _, _Title}|_]}, {_Acc, _}) ->
     exit({error, "sect2 not at second level"});
 
 doc_toc1({Sect3, _, [{title, _, Title}|S3]}, {Acc, 3}) when Sect3 == sect3;
                                                             Sect3 == section ->
-    {Titles, N} = doc_toc(S3, 3),
+    {Titles, _N} = doc_toc(S3, 3),
     {Acc ++ [{3, Title}|Titles], 3};
-doc_toc1({sect3, _, [{title, _, Title}|_]}, {Acc, _}) ->
+doc_toc1({sect3, _, [{title, _, _Title}|_]}, {_Acc, _}) ->
     exit({error, "sect3 not at second level"});
 
 doc_toc1(_, Acc) ->
@@ -1334,7 +1372,7 @@ skip_white(X = [{raw, [H|T]}|T1]) ->
 	true  -> skip_white([{raw, T}|T1]);
 	false -> X
     end;
-skip_white(X = [{raw, []}|T1]) ->
+skip_white([{raw, []}|T1]) ->
     T1;
 skip_white(Else) ->
     Else.

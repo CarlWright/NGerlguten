@@ -1,39 +1,39 @@
-%%======================================================================
-%% eg_font_server.erl - font server
-%%----------------------------------------------------------------------
+%%==========================================================================
 %% Copyright (C) 2003 Joe Armstrong
 %%
-%%   General Terms
-%%
-%%   Erlguten  is   free  software.   It   can  be  used,   modified  and
-%% redistributed  by anybody for  personal or  commercial use.   The only
-%% restriction  is  altering the  copyright  notice  associated with  the
-%% material. Individuals or corporations are permitted to use, include or
-%% modify the Erlguten engine.   All material developed with the Erlguten
-%% language belongs to their respective copyright holder.
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
 %% 
-%%   Copyright Notice
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
 %% 
-%%   This  program is  free  software.  It  can  be redistributed  and/or
-%% modified,  provided that this  copyright notice  is kept  intact. This
-%% program is distributed in the hope that it will be useful, but without
-%% any warranty; without even  the implied warranty of merchantability or
-%% fitness for  a particular  purpose.  In no  event shall  the copyright
-%% holder  be liable  for  any direct,  indirect,  incidental or  special
-%% damages arising in any way out of the use of this software.
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
 %% Authors:   Joe Armstrong <joe@sics.se>
-%% Last Edit: 2003-03-11
-%% =====================================================================
+%%==========================================================================
 
 -module(eg_font_server).
 
+-include("eg.hrl").
 
--compile(export_all).
--import(lists, [member/2, foreach/2]).
+
+-export([start/0, stop/0, char_width/2, data/1, info/1, kern/2]).
+
+%% ============================================================================
 
 start() ->
-    case member(fonts, ets:all()) of
+    case lists:member(fonts, ets:all()) of
 	true ->
 	    true;
 	false ->
@@ -44,32 +44,32 @@ start() ->
 stop() ->
     ets:delete(fonts).
 
-available_fonts() ->
-    eg_afm:available_fonts().
+%% available_fonts() ->
+%%     eg_afm:available_fonts().
 
-ensure_loaded(Font, Index) ->
-    %% io:format("Ensure_loaded font number=~p = ~s~n", [Index, Font]),
-    case ets:lookup(fonts, {info, Index}) of
-	[_] ->
-	    true;
-	[] ->
-	    case eg_afm:read_font_info(Font) of
-		{ok, {afm_qdh1,Font,Widths,Kern,All}} ->
-		    ets:insert(fonts, {{info, Index}, Font}),
-		    ets:insert(fonts, {{allData, Font}, All}),
-		    foreach(fun({Char,W}) ->
-				    ets:insert(fonts,
-					       {{width,Index,Char}, W})
-			    end, Widths),
-		    foreach(fun({KP,W}) ->
-				    ets:insert(fonts,
-					       {{kern,Index,KP}, W})
-			    end, Kern),
-		    true;
-		{error, Why} ->
-		    exit({cannot_load_font, Why})
-	    end
-    end.
+%% ensure_loaded(Font, Index) ->
+%%     %% io:format("Ensure_loaded font number=~p = ~s~n", [Index, Font]),
+%%     case ets:lookup(fonts, {info, Index}) of
+%% 	[_] ->
+%% 	    true;
+%% 	[] ->
+%% 	    case eg_afm:read_font_info(Font) of
+%% 		{ok, {afm_qdh1,Font,Widths,Kern,All}} ->
+%% 		    ets:insert(fonts, {{info, Index}, Font}),
+%% 		    ets:insert(fonts, {{allData, Font}, All}),
+%% 		    lists:foreach(fun({Char,W}) ->
+%% 				    ets:insert(fonts,
+%% 					       {{width,Index,Char}, W})
+%% 			    end, Widths),
+%% 		    lists:foreach(fun({KP,W}) ->
+%% 				    ets:insert(fonts,
+%% 					       {{kern,Index,KP}, W})
+%% 			    end, Kern),
+%% 		    true;
+%% 		{error, Why} ->
+%% 		    exit({cannot_load_font, Why})
+%% 	    end
+%%     end.
 
 info(Index) ->
     case ets:lookup(fonts, {info, Index}) of

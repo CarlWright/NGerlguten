@@ -163,7 +163,7 @@ app_name/src/
       included in the form:
     </para>
     <code>
--vsn('$Id: process.xml 70 2004-12-27 14:26:32Z jb $ ').
+-vsn('$Id$').
     </code>
     <para>
       This will be expanded by CVS to include all the required version

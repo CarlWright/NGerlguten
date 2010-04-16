@@ -1,30 +1,28 @@
-%%======================================================================
-%% erlguten_lines2pdf.erl - Convert internal form of line to PDF
-%%----------------------------------------------------------------------
+%%==========================================================================
 %% Copyright (C) 2003 Joe Armstrong
 %%
-%%   General Terms
-%%
-%%   Erlguten  is   free  software.   It   can  be  used,   modified  and
-%% redistributed  by anybody for  personal or  commercial use.   The only
-%% restriction  is  altering the  copyright  notice  associated with  the
-%% material. Individuals or corporations are permitted to use, include or
-%% modify the Erlguten engine.   All material developed with the Erlguten
-%% language belongs to their respective copyright holder.
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
 %% 
-%%   Copyright Notice
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
 %% 
-%%   This  program is  free  software.  It  can  be redistributed  and/or
-%% modified,  provided that this  copyright notice  is kept  intact. This
-%% program is distributed in the hope that it will be useful, but without
-%% any warranty; without even  the implied warranty of merchantability or
-%% fitness for  a particular  purpose.  In no  event shall  the copyright
-%% holder  be liable  for  any direct,  indirect,  incidental or  special
-%% damages arising in any way out of the use of this software.
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
-%% Authors:   Joe Armstrong <joe@sics.se>
-%% Last Edit: 2003-03-11
-%% =====================================================================
+%% Author: Joe Armstrong <joe@sics.se>
+%% Purpose: Convert internal form of line to PDF
+%%==========================================================================
 
 -module(eg_richText2pdf).
 
@@ -33,14 +31,13 @@
 
 -export([richText2pdf/8]).
 
--import(lists, [map/2,reverse/1, reverse/2]).
 
--import(pdf_op, [a2s/1, i2s/1, n2s/1, f2s/1, flatten/1]).
--import(eg_richText, [classify_inline/1, string/1, font/1, pointSize/1,
-		      color/1, string/1, lineWidth/1, numberOfSpaces/1]).
-
--record(pdf, {color=default,
-	      xy={-1,-1},face={none,none},tw=-1,inTJ=false,code=[]}).
+-record(pdf, {color = default,
+	      xy    = {-1,-1},
+	      face  = {none,none},
+	      tw    = -1,
+	      inTJ  = false,
+	      code  = []}).
 
 %% -define(DEBUG, true).
 
@@ -50,10 +47,19 @@ dbg_io(Str,Args) ->
     io:format("eg_richText2pdf: ~p " ++ Str, [self()] ++ Args),
     ok.
 -else.
-dbg_io(_) -> ok.
+%dbg_io(_) -> ok.
 dbg_io(_,_) -> ok.
 -endif.
 
+%% ============================================================================
+
+%% returns: Code
+%% usage  : * add pdf content to PDF using eg_pdf:append_stream(PDF, Code)
+%%          * note that this must be wrapped in eg_pdf:begin_text(PDF) and
+%%            eg_pdf:end_text(PDF) to create a 'text object' this is required 
+%%            as the usage of Rot adds a 'Tm' (transformation matrix) in the pdf
+%%            source, which may only be used inside a 'text object' (chp 5.3 
+%%            in pdf reference manual 1.4 and 1.7)
 richText2pdf(X, Y0, Type, Rot, Lines, Leading, Widths, Offsets) ->
     Y = Y0 - Leading,
     P = start(),
@@ -95,8 +101,8 @@ last_offset_width([O|O1],[W|W1]) ->
     {O2, W2}.
 
 line2pdf(X, Y, {richText, Line}, Len, Style, P) ->
-    TotWidth = lineWidth(Line)/1000,
-    NS       = numberOfSpaces(Line),
+    TotWidth = eg_richText:lineWidth(Line)/1000,
+    NS       = eg_richText:numberOfSpaces(Line),
     case Style of
 	justified ->
 	    Tw = if 
@@ -139,7 +145,7 @@ make_line(X, Y, Line, Tw, P) ->
     make_line(Line, Tw, P1).
 
 make_line([H|T], Tw, P) ->
-    case classify_inline(H) of
+    case eg_richText:classify_inline(H) of
 	space ->
 	    {Font,Size} = get_font_info(H),
 	    P1 = ensure_face(Font, Size, P),
@@ -147,17 +153,17 @@ make_line([H|T], Tw, P) ->
 	    make_line(T, Tw, add_space(Font, P2));
 	word ->
 	    {Font,Size} = get_font_info(H),
-	    Str = string(H),
+	    Str = eg_richText:string(H),
 	    %% dbg_io("Outputting Word=~p Font=~p oldFont=~p~n",
 	    %% [H,Font,P#pdf.face]),
 	    P1 = ensure_face(Font, Size, P),
 	    P2 = ensure_tw(Tw, P1),
-	    Color = color(H),
+	    Color = eg_richText:color(H),
 	    P3 = ensure_color(Color, P2),
 	    make_line(T, Tw, add_string(Font, Str, P3));
 	fixedStr ->
 	    {Font,Size} = get_font_info(H),
-	    Str = string(H),
+	    Str = eg_richText:string(H),
 	    P1 = ensure_face(Font, Size, P),
 	    P2 = ensure_tw(0, P1),
 	    make_line(T, Tw, add_string(Font, Str, P2));
@@ -169,25 +175,26 @@ make_line([], _, P) ->
     P.
 
 get_font_info(X) ->
-    {font(X), pointSize(X)}.
+    {eg_richText:font(X), eg_richText:pointSize(X)}.
 
 finalise(P) ->
     P1 = close_tj(P),
-    reverse(P1#pdf.code).
+    lists:reverse(P1#pdf.code).
 
 start() -> #pdf{}.
 
 init_rotation_matrix(X, Y, 0, P) ->
     %% dbg_io("here=~p~n",[{X,Y,0,P}]),
-    C = "1 0 0 1 " ++ n2s(X) ++ " " ++ n2s(Y) ++ " Tm ",
+    C = "1 0 0 1 " ++ eg_pdf_op:n2s(X) ++ " " ++ eg_pdf_op:n2s(Y) ++ " Tm ",
     P1 = add_code(C, P#pdf{xy={X,Y}}),
     {1,0,P1};
 init_rotation_matrix(X, Y, Rot, P) ->
     Rads = 3.14159*Rot/180,
     Cos = math:cos(Rads),
     Sin = math:sin(Rads),
-    C = n2s(Cos) ++ " " ++ n2s(Sin) ++ " " ++ n2s(-Sin) ++ " " ++
-	n2s(Cos) ++ " " ++ n2s(X) ++ " " ++ n2s(Y) ++ " Tm ",
+    C = eg_pdf_op:n2s(Cos)  ++ " " ++ eg_pdf_op:n2s(Sin) ++ " " ++ 
+	eg_pdf_op:n2s(-Sin) ++ " " ++ eg_pdf_op:n2s(Cos) ++ " " ++ 
+	eg_pdf_op:n2s(X)    ++ " " ++ eg_pdf_op:n2s(Y)   ++ " Tm ",
     P1 = add_code(C, P#pdf{xy={X,Y}}),
     {Cos, Sin, P1}.
 
@@ -196,14 +203,15 @@ add_move(X, Y, P) ->
     case P1#pdf.xy of
 	{-1, -1} ->
 	    %% dbg_io("Here aaa*********~n"),
-	    C = "1 0 0 1 " ++ n2s(X) ++ " " ++ n2s(Y) ++ " Tm ",
+	    C = "1 0 0 1 " ++ eg_pdf_op:n2s(X) ++ " " ++
+                eg_pdf_op:n2s(Y) ++ " Tm ",
 	    add_code(C, P1#pdf{xy={X,Y}});
 	{X, Y} ->
 	    add_code("0 0 TD ", P1);
 	{OldX, OldY} ->
 	    Dx = X - OldX,
 	    Dy = Y - OldY,
-	    C = n2s(Dx) ++ "  " ++ n2s(Dy) ++ " TD ",
+	    C = eg_pdf_op:n2s(Dx) ++ "  " ++ eg_pdf_op:n2s(Dy) ++ " TD ",
 	    add_code(C, P1#pdf{xy={X,Y}})
     end.
 
@@ -215,7 +223,8 @@ ensure_face(Font, Pts, P) ->
 	    P1 = close_tj(P),
 	    P2 = P1#pdf{face={Font,Pts}},
 	    Index = Font:index(),
-	    add_code("/F" ++ i2s(Index) ++ " " ++ i2s(Pts) ++ " Tf ", P2)
+	    add_code("/F" ++ eg_pdf_op:i2s(Index) ++ " " ++
+                     eg_pdf_op:i2s(Pts) ++ " Tf ", P2)
     end.
 
 ensure_color(Color, P) ->
@@ -233,7 +242,8 @@ ensure_color(Color, P) ->
 set_color(default) ->
     set_color({0,0,0});
 set_color({R,G,B}) ->
-    f2s(R) ++ " " ++ f2s(G) ++" " ++ f2s(B) ++ " rg ".
+    eg_pdf_op:f2s(R) ++ " " ++ eg_pdf_op:f2s(G) ++" " ++
+        eg_pdf_op:f2s(B) ++ " rg ".
 
 close_tj(P) ->
     case P#pdf.inTJ of
@@ -256,7 +266,7 @@ ensure_tw(N, P) ->
 	N -> P;
 	_ ->
 	    P1 = close_tj(P),
-	    add_code(n2s(N) ++ " Tw ", P1#pdf{tw=N})
+	    add_code(eg_pdf_op:n2s(N) ++ " Tw ", P1#pdf{tw=N})
     end.
 
 add_string(Font, Str, P) ->
@@ -270,15 +280,15 @@ add_space(Font, P) ->
 
 add_code(Str, P) ->
     C1 = P#pdf.code,
-    P#pdf{code=reverse(Str, C1)}.
+    P#pdf{code=lists:reverse(Str, C1)}.
 
 
 str2pdf(Font, "")  -> "";
 str2pdf(Font, Str) ->
     K = str2TJ(Font, Str),
-    K1 = map(fun({Str1,Kern}) -> {quote_strings(Str1), Kern} end, K),
-    Pdf1 = map(fun({S,I}) -> ["(", S,")",i2s(I)] end, K1),
-    flatten(Pdf1).
+    K1 = lists:map(fun({Str1,Kern}) -> {quote_strings(Str1), Kern} end, K),
+    Pdf1 = lists:map(fun({S,I}) -> ["(", S,")",eg_pdf_op:i2s(I)] end, K1),
+    eg_pdf_op:flatten(Pdf1).
     
 quote_strings([$(|T])  -> [$\\,$(|quote_strings(T)];
 quote_strings([$)|T])  -> [$\\,$)|quote_strings(T)];
@@ -301,15 +311,15 @@ str2TJ(Font, [H1,H2|T], Tmp,  L) ->
 	0 ->
 	    str2TJ(Font, [H2|T], [H1|Tmp], L); 
 	N ->
-	    Str = reverse([H1|Tmp]),
+	    Str = lists:reverse([H1|Tmp]),
 	    str2TJ(Font, [H2|T], [], [{Str,-N}|L])
     end;
 str2TJ(Font, [H|T], Tmp, L) ->
     str2TJ(Font, T, [H|Tmp], L);
 str2TJ(Font, [], [], L) ->
-    reverse(L);
+    lists:reverse(L);
 str2TJ(Font, [], Tmp, L) ->
-    reverse([{reverse(Tmp), 0}|L]).
+    lists:reverse([{lists:reverse(Tmp), 0}|L]).
 
 %% To set the font use /Fn Pt Tf
 %% [(A) 90 (W) 120 (A) 105 (Y again - correctly kerned) ] TJ

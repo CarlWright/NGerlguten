@@ -1,3 +1,2 @@
 #!/bin/sh
-erl -pa ../ebin -pa `pwd` -pa ../priv/fonts/bin -s erlguten batch $1 -s erlang halt
-
+erl -pa ../ebin -pa `pwd` -s erlguten batch $1 -s erlang halt

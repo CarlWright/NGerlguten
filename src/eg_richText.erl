@@ -1,10 +1,33 @@
+%%==========================================================================
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
+%% 
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
+%% 
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
+%%==========================================================================
+
 -module(eg_richText).
+
+%% OLD AND BROKEN doc ?! (see modern version further down)
 
 %% encapsulates operations on text() and inline() objects
 
 %% ADT 
 %%   +deftype richText() = {richText, [inLine()]
-%%   +deftype inline()   = Word | FixedString | Opaque | Space | NL
+%%   +deftype inLine()   = Word | FixedString | Opaque | Space | NL
 %%   +deftype Word       = {word, Width, Face, Str},
 %%   +deftype FixedStr   = {fixedStr, Width, Face, Str},
 %%   +deftype Opaque     = {opaque, Width, X}
@@ -17,11 +40,24 @@
 %%   str2text(Foint, PointSize, Str) -> text()
 %%   text2str(text()) -> str().
 
+%% ----------------------------------------------------------------------------
+%% This is what str2richText/6 returns, above ADT and Interface appears to be
+%% out of date.
+%%
+%% @type richText() = {richText, [inLine()]}
+%% @type inLine()   = word() | space() | nl()
+%% @type word()     = {word, Width::thousendth_pt(), Face::record(face), 
+%%                     Str::string()}
+%% @type space()    = {space, Width::thousendth_pt(), Face::record(face)}
+%% @type nl()       = {nl, Face::record(face)}
+%% @type thousendth_pt() = integer()
+%% @end
+%% ----------------------------------------------------------------------------
+
 -export([test/1, 
 	 cloan_space/1,
 	 cloan_word/2,
 	 font/1,
-	 fontHandler/1,
 	 fontFromFace/1,
 	 classify_inline/1,
 	 widthExcludingSpaces/1,
@@ -45,14 +81,12 @@
 	 str2richText/1,
 	 str2richText/2,
 	 str2richText/6, 
-	 richText2str/1]).
+	 richText2str/1,
+	 width_of/3
+	]).
 
-%% -compile(export_all).
--import(lists, [filter/2, foldl/3, map/2, reverse/1, reverse/2, sum/1]).
 
--import(pdf_op, [flatten/1]).
-
--include("../include/eg.hrl").
+-include("eg.hrl").
 
 
 %% -define(DEBUG, true).
@@ -67,6 +101,7 @@ dbg_io(_) -> ok.
 dbg_io(_,_) -> ok.
 -endif.
 
+
 test(1) ->
     str2richText("TimesDutch", 12, 0, default, true,
 "Hello joe how are you today?
@@ -77,7 +112,7 @@ Have a nice day,
 from Mr. C. Computer.").
 
 richText2str({richText, L}) ->
-    flatten(map(fun inline2str/1, L)).
+    eg_pdf_op:flatten(lists:map(fun inline2str/1, L)).
 
 inline2str({word,_,Face,Str}) -> Str;
 inline2str({space,_, _}) -> " ";
@@ -85,35 +120,45 @@ inline2str({nl,_}) -> "\n";
 inline2str({fixedStr,_,Face,Str}) -> Str;
 inline2str(_) -> "".
 
+%% ----------------------------------------------------------------------------
 str2richText(Str) ->
     str2richText("Times-Roman", 12, 0, default, true, Str).
 
 str2richText(Str, Pts) ->
     str2richText("Times-Roman", Pts, 0, default, true, Str).
 
+%% ----------------------------------------------------------------------------
+%% @spec  str2richText(Font, Point, Voff, Color, Break, Str) -> richText()
+%% @doc   convert string to "word" sequence containing word font/size info 
+%% @end------------------------------------------------------------------------
 str2richText(Font, Point, Voff, Color, Break, Str) ->
     valid_bool(Break),
     F  = fontHandler(Font),
     Face = #face{font=F, pointSize=Point, vOffset=Voff, 
 		 color=Color, breakable=Break},
     L1 = normalise_str(Str, []),
-    L2 = map(fun({wd1,S}) ->
-		     Width = width_of(F, Point, S),
-		     {word, Width, Face, S};
-		(spaces) ->
-		     Width = width_of(F, Point, [$\s]),
-		     {space, Width, Face};
-		(lineFeed) ->
-		     {nl, Face}
-	     end, L1),
+    L2 = lists:map(fun({wd1,S}) ->
+			   Width = width_of(F, Point, S),
+			   {word, Width, Face, S};
+		      (spaces) ->
+			   Width = width_of(F, Point, [$\s]),
+			   {space, Width, Face};
+		      (lineFeed) ->
+			   {nl, Face}
+		   end, L1),
     {richText, L2}.
 
 valid_bool(true) -> true;
 valid_bool(false) -> true;
 valid_bool(X) -> exit({badarg, str2richText, breakNotBool, was, X}).
 
+%% ----------------------------------------------------------------------------
+%% @spec normalise_str(Str, Acc) -> [spaces | lineFeed | {wd1, Word::string()}]
+%% @doc  split Str into word and space segments, single and duplicate 
+%%       whitespace chars get replaced by a single 'spaces', NL -> lineFeed 
+%% @end------------------------------------------------------------------------
 normalise_str([], L) ->
-    reverse(L);
+    lists:reverse(L);
 normalise_str([$\n|T], L) ->
     normalise_str(T, [lineFeed|L]);
 normalise_str([H|T],  L) ->
@@ -141,14 +186,14 @@ skip_white([]) ->
     [].
 
 collect_word(X=[$\n|T], L) ->
-    {reverse(L), X};
+    {lists:reverse(L), X};
 collect_word(X=[H|T], L) ->
     case is_white(H) of
-        true  -> {reverse(L), X};
+        true  -> {lists:reverse(L), X};
         false -> collect_word(T, [H|L])
     end;
 collect_word([], L) ->
-    {reverse(L), []}.
+    {lists:reverse(L), []}.
 
 width_of(Font, PointSize, Str) ->
     PointSize * sizeof(Font, Str).
@@ -160,15 +205,15 @@ width_of(Font, PointSize, Str) ->
 %%   Size is correctly adjusted for kerning information
 
 sizeof(Font, Str) ->
-    Widths = map(fun(I) -> char_width(Font, I) end, Str),
+    Widths = lists:map(fun(I) -> char_width(Font, I) end, Str),
     %% dbg_io("Str=|~s| Widths=~p~nFont=~p~n",[Str, Widths, Font]),
-    W1 = sum(Widths),
+    W1 = lists:sum(Widths),
     %% and add the correct kerning info
     kern_adj(Str, W1, Font).
 
 char_width(Font, I) ->
     case Font:width(I) of
-	Width when integer(Width) ->
+	Width when is_integer(Width) ->
 	    Width;
 	_ ->
 	    dbg_io("Character ~w in font ~p has no width~n", [I, Font]),
@@ -291,29 +336,29 @@ mk_face(Font, PointSize, Breakable, Color, VoffSet) ->
 	  color=Color, breakable=Breakable}.
 
 fontHandler(Font) ->
-    case egFontMap:handler(Font) of
+    case eg_font_map:handler(Font) of
 	undefined ->
 	    dbg_io("There is no font called:~s~n",[Font]),
 	    dbg_io("Using Times-Roman~n"),
-	    egFontMap:handler("Times-Roman");
+	    eg_font_map:handler("Times-Roman");
 	Mod ->
 	    Mod
     end.
 
 lineWidth(Toks) ->
-    foldl(fun(I, S) -> width(I) + S end, 0, Toks).
+    lists:foldl(fun(I, S) -> width(I) + S end, 0, Toks).
     
 numberOfSpaces(Toks) ->
-    Toks1 = filter(fun(I) -> is_space(I) end, Toks),
+    Toks1 = lists:filter(fun(I) -> is_space(I) end, Toks),
     length(Toks1).
 
 widthExcludingSpaces(Toks) ->
-    foldl(fun(I, S) ->
-		  case is_space(I) of
-		      true  -> S;
-		      false -> S + width(I)
-		  end
-	  end, 0, Toks).
+    lists:foldl(fun(I, S) ->
+			case is_space(I) of
+			    true  -> S;
+			    false -> S + width(I)
+			end
+		end, 0, Toks).
 
 is_face_breakable(F) ->
     F#face.breakable.

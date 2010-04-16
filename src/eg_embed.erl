@@ -1,36 +1,35 @@
-%%======================================================================
-%% Purpose: Font embedding code
-%%----------------------------------------------------------------------
+%%==========================================================================
 %% Copyright (C) 2003 Joe Armstrong
 %%
-%%   General Terms
-%%
-%%   Erlguten  is   free  software.   It   can  be  used,   modified  and
-%% redistributed  by anybody for  personal or  commercial use.   The only
-%% restriction  is  altering the  copyright  notice  associated with  the
-%% material. Individuals or corporations are permitted to use, include or
-%% modify the Erlguten engine.   All material developed with the Erlguten
-%% language belongs to their respective copyright holder.
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
 %% 
-%%   Copyright Notice
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
 %% 
-%%   This  program is  free  software.  It  can  be redistributed  and/or
-%% modified,  provided that this  copyright notice  is kept  intact. This
-%% program is distributed in the hope that it will be useful, but without
-%% any warranty; without even  the implied warranty of merchantability or
-%% fitness for  a particular  purpose.  In no  event shall  the copyright
-%% holder  be liable  for  any direct,  indirect,  incidental or  special
-%% damages arising in any way out of the use of this software.
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
-%% Authors:   Joe Armstrong <joe@sics.se>
-%% Last Edit: 2003-03-12
-%% =====================================================================
-
+%% Author: Joe Armstrong <joe@sics.se>
+%% Purpose: Font embedding code
+%%==========================================================================
 
 -module(eg_embed).
 
--compile(export_all).
--import(lists, [map/2]).
+-export([embed/1, 
+	 parse_pfb/1
+	]).
+
 
 %% The format of a PBF is specified in 5040.Download_Fonts.pdf
 %% It is a sequence of chunks
@@ -42,12 +41,12 @@
 %%    Type = 2 -> binary
 %%    Len = N1 + N2*256 + N3*256*256 + N4*256*256*256,
 
-test() ->
-    embed("brush.pfb").
+% test() ->
+%     embed("brush.pfb").
 
 embed(F) ->
     P = parse_pfb(F),
-    O = map(fun({_,_,B}) -> B end, P),
+    O = lists:map(fun({_,_,B}) -> B end, P),
     file:write_file(F ++ ".synth", O).
 
 %% Parse_pfb -> [{Type,Len,Bin}]
