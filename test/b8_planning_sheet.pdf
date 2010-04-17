@@ -252,12 +252,12 @@ ET
 Q
   /F12 11 Tf 
 BT
- 50 188  Td  (b8 template planning sheet-) Tj
+ 27 178  Td  (b8 template planning sheet-) Tj
  
 ET
  
 BT
- 50 148  Td  (Width = 178 -- Height = 250) Tj
+ 27 163  Td  (Width = 178 -- Height = 250) Tj
  
 ET
  
@@ -279,7 +279,7 @@ endobj
 9 0 obj
 <<
 /Creator  (Erlang) 
-/CreationDate (D:20100417145756)
+/CreationDate (D:20100417154437)
 /Producer  (erlguten-3.1) 
 /Author  () 
 /Title  () 

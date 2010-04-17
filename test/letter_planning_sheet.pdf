@@ -772,12 +772,12 @@ ET
 Q
   /F12 37 Tf 
 BT
- 50 594  Td  (letter template planning sheet-) Tj
+ 92 562  Td  (letter template planning sheet-) Tj
  
 ET
  
 BT
- 50 554  Td  (Width = 612 -- Height = 792) Tj
+ 92 521  Td  (Width = 612 -- Height = 792) Tj
  
 ET
  
@@ -799,7 +799,7 @@ endobj
 9 0 obj
 <<
 /Creator  (Erlang) 
-/CreationDate (D:20100417145840)
+/CreationDate (D:20100417154447)
 /Producer  (erlguten-3.1) 
 /Author  () 
 /Title  () 
