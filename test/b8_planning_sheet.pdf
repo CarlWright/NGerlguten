@@ -43,7 +43,7 @@ endobj
 endobj
 6 0 obj
 <<
-/Length  2268 
+/Length  2267 
 >>
 
 stream
@@ -250,14 +250,14 @@ BT
 ET
  
 Q
-  /F12 11 Tf 
+  /F12 7 Tf 
 BT
  27 178  Td  (b8 template planning sheet-) Tj
  
 ET
  
 BT
- 27 163  Td  (Width = 178 -- Height = 250) Tj
+ 27 167  Td  (Width = 178 -- Height = 250) Tj
  
 ET
  
@@ -279,7 +279,7 @@ endobj
 9 0 obj
 <<
 /Creator  (Erlang) 
-/CreationDate (D:20100417154437)
+/CreationDate (D:20100417154904)
 /Producer  (erlguten-3.1) 
 /Author  () 
 /Title  () 
@@ -296,9 +296,9 @@ xref
 0000000269 00000 n 
 0000000315 00000 n 
 0000000493 00000 n 
-0000002816 00000 n 
-0000002885 00000 n 
-0000002938 00000 n 
+0000002815 00000 n 
+0000002884 00000 n 
+0000002937 00000 n 
 trailer
 <<
 /Size 10
@@ -306,5 +306,5 @@ trailer
 /Info 9 0 R
 >>
 startxref
-3106
+3105
 %%EOF

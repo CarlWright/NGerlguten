@@ -38,7 +38,7 @@
 %%  This produces a planning sheet for a selected size paper.
 %%
 test()->
-    SheetSize = io:get_line("Sheet Size: "),
+    SheetSize = io:get_line("Sheet Size (see eg_pdf:pagesize) : "),
     SheetName = string:to_lower(string:strip(SheetSize -- "\n")),
     Size = list_to_atom(SheetName),
     PDF = eg_pdf:new(),
@@ -50,7 +50,7 @@ test()->
     TestString = "Width = " ++ n2s(Width) ++ " -- Height = " ++ n2s(Height),
     LabelString = SheetName ++ " template planning sheet-",
     Stringsize = eg_pdf:get_string_width(PDF, "Times-Roman", 36, TestString),
-    TargetSize = 36,
+    TargetSize = 24,
     Indent = round(Width * 0.15),
     FontSize = round(TargetSize * (((Width - (2 * Indent)) / Stringsize ))),
     eg_pdf:set_font(PDF,"Times-Roman", FontSize),

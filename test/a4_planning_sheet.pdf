@@ -783,14 +783,14 @@ BT
 ET
  
 Q
-  /F12 36 Tf 
+  /F12 24 Tf 
 BT
  89 598  Td  (a4 template planning sheet-) Tj
  
 ET
  
 BT
- 89 558  Td  (Width = 595 -- Height = 842) Tj
+ 89 570  Td  (Width = 595 -- Height = 842) Tj
  
 ET
  
@@ -812,7 +812,7 @@ endobj
 9 0 obj
 <<
 /Creator  (Erlang) 
-/CreationDate (D:20100417154441)
+/CreationDate (D:20100417154859)
 /Producer  (erlguten-3.1) 
 /Author  () 
 /Title  () 
