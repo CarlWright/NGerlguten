@@ -402,22 +402,16 @@ i(X) -> integer_to_list(X).
 
 %% -------------------------------------
     
-%% showGrid(PDF, a4 | usLetter) 
+%% showGrid(PDF, pagesize atom from eg_pdf.erl) 
 %%   adds a grid to the current page page
 
-sizeOfPaper(a4) ->
-    {595, 842};
-sizeOfPaper(usLetter) ->
-    {612, 792}.
 
 showGrid(PDF, Paper) ->
-    {PaperWidth, PaperHeight} = sizeOfPaper(Paper),
-    %% Top = PaperHeight - 10,
-    Top = 825, % hack
+    {_,_,PaperWidth, PaperHeight} = eg_pdf:pagesize(Paper),
+    Top = PaperHeight - 17, % hack
     Bottom = 10,
     Left = 10,
-    %% Right = PaperWidth - 10,
-    Right = 575,
+    Right = round((PaperWidth - 20) / 25) * 25,
     eg_pdf:set_font(PDF,"Helvetica", 8),
     vlines(PDF, Left, Right, Top, Bottom),
     hlines(PDF, Left, Right, Top, Bottom).
