@@ -27,26 +27,41 @@
 %% Last Edit: 2010-04-14
 %% =====================================================================
 
--module(letterPlanningSheet).
--import(pdf_op, [n2s/1]).
+-module(planningSheet).
+-import(eg_pdf_op, [n2s/1]).
 -import(eg_pdf_lib, [showGrid/2, moveAndShow/4]).
 
 -export([test/0]).
 
 
 %%
-%%  This produces a planning sheet for US letter size paper.
+%%  This produces a planning sheet for a selected size paper.
 %%
 test()->
+    SheetSize = io:get_line("Sheet Size: "),
+    SheetName = string:to_lower(string:strip(SheetSize -- "\n")),
+    Size = list_to_atom(SheetName),
     PDF = eg_pdf:new(),
-    eg_pdf:set_pagesize(PDF,letter),
+    eg_pdf:set_pagesize(PDF,Size),
+    {0,0,Width,Height} = eg_pdf:pagesize(Size),
     eg_pdf:set_page(PDF,1),
-    showGrid(PDF, letter),
-    eg_pdf:set_font(PDF,"Times-Roman", 36),
-    Base = 575,
-    moveAndShow(PDF, 50,Base, "Letter template planning sheet-"),
+    showGrid(PDF, Size),
+    
+    TestString = "Width = " ++ n2s(Width) ++ " -- Height = " ++ n2s(Height),
+    LabelString = SheetName ++ " template planning sheet-",
+    Stringsize = eg_pdf:get_string_width(PDF, "Times-Roman", 36, TestString),
+    TargetSize = 36,
+    Indent = round(Width * 0.15),
+    FontSize = round(TargetSize * ((Width - (2 * Indent)) / Stringsize )),
+    eg_pdf:set_font(PDF,"Times-Roman", FontSize),
+    Base = round(Height * 0.75),
+    moveAndShow(PDF, 50,Base, LabelString),
+
+    moveAndShow(PDF, 50, Base - 40, TestString),
     {Serialised, _PageNo} = eg_pdf:export(PDF),
-    file:write_file("../test/letter_planning_sheet.pdf",[Serialised]),
+    CustomName = "../test/" ++ SheetName ++ "_planning_sheet.pdf",
+    io:format("Output to ~s~n",[CustomName]),
+    ok = file:write_file(CustomName,[Serialised]),
     eg_pdf:delete(PDF).
 
 

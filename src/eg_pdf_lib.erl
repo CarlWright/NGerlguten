@@ -408,10 +408,10 @@ i(X) -> integer_to_list(X).
 
 showGrid(PDF, Paper) ->
     {_,_,PaperWidth, PaperHeight} = eg_pdf:pagesize(Paper),
-    Top = PaperHeight - 17, % hack
+    Top = round((PaperHeight - 20) / 25) * 25, % make grid lines fall on multiples of 25
     Bottom = 10,
     Left = 10,
-    Right = round((PaperWidth - 20) / 25) * 25,
+    Right = round((PaperWidth - 20) / 25) * 25,  % make grid lines fall on multiples of 25
     eg_pdf:set_font(PDF,"Helvetica", 8),
     vlines(PDF, Left, Right, Top, Bottom),
     hlines(PDF, Left, Right, Top, Bottom).
