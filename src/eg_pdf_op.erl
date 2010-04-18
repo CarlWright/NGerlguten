@@ -50,6 +50,7 @@
          restore_state/0,
          rotate/1,
          round_rect/3,
+         round_top_rect/3,
          save_state/0,
          scale/2,
          set_char_space/1,
@@ -264,6 +265,15 @@ round_rect({X,Y}, {W, H}, R) ->
       bezier_c( {X, Y+R*mpo()}, {X+R*mpo(), Y}, {X+R, Y} )
      ].
 
+round_top_rect({X,Y}, {W, H}, R) ->
+    [ move_to({X,Y}),
+      line_append({X+W, Y}),
+      line_append({X+W,Y+H-R}),
+      bezier_c( {X+W, Y+H-R+R*mpo()}, {X+W-R+R*mpo(), Y+H}, {X+W-R, Y+H}),
+      line_append({X+R, Y+H}),
+      bezier_c( {X+R*mpo(), Y+H}, {X, Y+H-R+R*mpo()}, {X, Y+H-R} ),
+      line_append({X, Y})
+     ].
 
 %% Line styles
 set_line_width(W) -> [n2s(W)," w\n"].

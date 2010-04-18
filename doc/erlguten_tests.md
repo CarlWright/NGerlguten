@@ -27,7 +27,7 @@ When you run eg_test6:test(), it produces a page of PDF. This is a very simple p
 
 ### eg_tmo_test
 
-When you run eg:tmo_test:file(). it produces a 9 page PDF from the file process.xml. The contents are some Erlang software development standards. This code produces the PDF based on the content of the XML file. Within this test program are functions to produce tables in a PDF. It produces the revision history table on the second page and it is used to format the section headings between the lines. This is a sophisticated example of using the pdf modules to format a document.
+When you run eg:tmo_test:file(), it produces a 9 page PDF from the file process.xml. The contents are some Erlang software development standards. This code produces the PDF based on the content of the XML file. Within this test program are functions to produce tables in a PDF. It produces the revision history table on the second page and it is used to format the section headings between the lines. This is a sophisticated example of using the pdf modules to format a document.
  
 ### tmo_doc
 
@@ -35,7 +35,7 @@ When you run tmo_doc:file(), you get an output file that at first glance looks t
 
 ### kd_test1
 
-When you run kd_test1:test(), it produces a 1 page PDF. It is a commercial bill in Swedish for a some recording, I think. It does a good job of including a graphics to show the vendor's logo. It looks interesting, but it has some problems with missing font information.
+When you run kd_test1:test(), it produces a 1 page PDF. It is a commercial bill in Swedish for a some recording, I think. It does a good job of including a graphics to show the vendor's logo. It looks interesting.
 
 ### eg_test12
 

@@ -64,6 +64,7 @@
          restore_state/1,
          rotate/2,
          round_rect/4,
+         round_top_rect/4,
          save_state/1,
          scale/3,
          set_author/2,
@@ -351,6 +352,10 @@ rectangle(PID,X,Y,WX,WY,Option) ->
 
 round_rect(PID, Point, Size, Radius)->
     append_stream(PID, eg_pdf_op:round_rect(Point, Size, Radius)).
+
+
+round_top_rect(PID, Point, Size, Radius)->
+    append_stream(PID, eg_pdf_op:round_top_rect(Point, Size, Radius)).
 
 
 %% Line styles

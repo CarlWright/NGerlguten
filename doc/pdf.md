@@ -47,7 +47,7 @@ This ends a text object in a PDF.
 
 ##### export/1  (PID) 
 
-This returns a string that represents all of the content that you've created in your pdf.
+This returns a tuple with {a string that represents all of the content that you've created in your pdf, page number}.
 
 ##### fontName/1 (Font)
 

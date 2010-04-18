@@ -26,7 +26,7 @@
 
 -module(eg_test3).
 
--export([test/0, norm/0]).
+-export([test/0, norm/0, zap/9, zap/8]).
     
 -include("../src/eg.hrl").
 
@@ -45,15 +45,14 @@ test() ->
     eg_pdf:set_page(PDF,1),
     eg_pdf_lib:showGrid(PDF, a4),
     box(PDF, moccasin, 50, 300, 225, 350), 
-    zap(PDF, gold, title, 20, 830, 66, 24, 24, 1),
-    zap(PDF, simple, 60, 650, 35, 14, 16, 5),
-    zap(PDF, simple, 60, 560, 30, 14, 16, 5),
-    zap(PDF, whitesmoke, two, 300, 760, 44, 18,20, 3),
-    zap(PDF, romanAndCourier1, 60, 360, 35, 14, 16, 7),
-    zap(PDF, palegreen, complex, 400, 600, 26, 12, 14, 22),
-    zap(PDF, 5, 60, 450, 35, 12, 14, 6),
-    zap(PDF, azure, narrow, 280, 650, 16, 8,10, 38),
-    %% eg_pdf_lib:showGrid(PDF, a4),
+    zap(PDF, gold, xml(title), 20, 830, 66, 24, 24, 1),
+    zap(PDF, xml(simple), 60, 650, 35, 14, 16, 5),
+    zap(PDF, xml(simple), 60, 560, 30, 14, 16, 5),
+    zap(PDF, whitesmoke, xml(two), 300, 760, 44, 18,20, 3),
+    zap(PDF, xml(romanAndCourier1), 60, 360, 35, 14, 16, 7),
+    zap(PDF, palegreen, xml(complex), 400, 600, 26, 12, 14, 22),
+    zap(PDF, xml(5), 60, 450, 35, 12, 14, 6),
+    zap(PDF, azure, xml(narrow), 280, 650, 16, 8,10, 38),
     eg_pdf:image(PDF,'../test/joenew.jpg',{50, 650},{width,200}),
     {Serialised, _PageNo} = eg_pdf:export(PDF),
     file:write_file("../test/eg_test3.pdf",[Serialised]),
@@ -66,7 +65,9 @@ ensure_fonts_are_loaded(PDF, {_,TagMap}) ->
 			  eg_pdf:ensure_font_gets_loaded(PDF, Font)
 		  end, TagMap).
 
-
+%% 
+%% zap only processes on paragraph correctly <p>  to </p>
+%%
 zap(PDF, Color, Sample, X, Y, Measure, PtSize, Leading, NLines) ->
     Width = Measure*6 + 20,
     Ht = NLines * PtSize + 20,
@@ -76,7 +77,7 @@ zap(PDF, Color, Sample, X, Y, Measure, PtSize, Leading, NLines) ->
 zap(PDF, Sample, X, Y, Measure, PtSize, Leading, NLines) ->
     %% Measure in picas 
     Len = Measure*6,
-    Xml = parse_xml_para_str(xml(Sample)),
+    Xml = parse_xml_para_str(Sample),
     %% io:format("XML=~p~n",[Xml]),
     TagMap = eg_xml2richText:default_tagMap(PtSize),
     ensure_fonts_are_loaded(PDF, TagMap),
