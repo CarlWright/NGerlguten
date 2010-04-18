@@ -29,7 +29,7 @@
 
 -module(comcastBill).
 -import(eg_pdf_op, [n2s/1]).
--import(eg_pdf_lib, [showGrid/2, moveAndShow/4]).
+-import(eg_pdf_lib, [showGrid/2, moveAndShow/4, moveAndShowRot/5]).
 
 -export([test/0]).
 
@@ -49,7 +49,7 @@ test()->
     eg_pdf:round_rect(PDF, {360,705},{210,75}, 5),
     eg_pdf:path(PDF, stroke),
     eg_pdf:set_font(PDF,"Helvetica", 10),
-    Base = 765,
+    Base = 760,
     Increment = 12,
     moveAndShow(PDF, 370,Base,                    "Account Number"),
     moveAndShow(PDF, 370,Base - Increment,        "Billing Date"),
@@ -67,6 +67,12 @@ test()->
     
     eg_pdf:image(PDF, "../test/comcast_logo.jpg",{25,760},{height,20}),
 
+    eg_pdf:set_fill_gray(PDF, 0.0),
+    eg_pdf:set_font(PDF,"Helvetica", 10),
+    moveAndShow(PDF, 30, 705,  "Contact us:"),  
+    moveAndShow(PDF, 110,705,  "www.comcast.com"),  
+    moveAndShow(PDF, 220,705,  "1-800-391-3000"),  
+    
     eg_pdf:save_state(PDF),
     eg_pdf:set_fill_color(PDF,orange),
     eg_pdf:round_top_rect(PDF, {320,675},{250,20}, 10),
@@ -112,18 +118,46 @@ test()->
     moveAndShow(PDF, 325,680,                    "Monthly Statement Summary"),
     moveAndShow(PDF, 325,565,                    "New Charges Summary"),
     eg_pdf:set_fill_gray(PDF, 0.0),
+    eg_pdf:set_font(PDF,"Helvetica", 12),
     moveAndShow(PDF, 25,675,                      "SERVICE LEVEL CORP"),
 
-    eg_pdf:set_font(PDF,"Helvetica", 12),
+    eg_pdf:set_font(PDF,"Helvetica", 10),
     moveAndShow(PDF, 25,650,"For service at:"),
-    moveAndShow(PDF, 25,635,"7006 SUNCREST DR"),
-    moveAndShow(PDF, 25,620,"SALINE MI 48176-9102"),
+    moveAndShow(PDF, 25,640,"7006 SUNCREST DR"),
+    moveAndShow(PDF, 25,630,"SALINE MI 48176-9102"),
     
     eg_pdf:set_font(PDF,"Helvetica", 14),
-    moveAndShow(PDF, 25,600,"News from Comcast"),  
+    moveAndShow(PDF, 25,590,"News from Comcast"),  
 
     eg_test3:zap(PDF, xml(news), 25, 580, 40, 10, 12, 20),
-           
+    
+    eg_pdf:set_font(PDF,"Helvetica", 11),
+    moveAndShow(PDF, 325,660,"Previous Balance"),   
+    moveAndShow(PDF, 325,642,"Payment - 02/16/10 - thank you"),  
+    moveAndShow(PDF, 325,627,"New Charges - see below"),  
+    moveAndShow(PDF, 325,610,"Total Amount Due"),  
+    moveAndShow(PDF, 325,595,"Payment Due By"),  
+    moveAndShow(PDF, 340,545,"Comcast High-Speed Internet"),  
+    moveAndShow(PDF, 325,525,"Total New Charges"),  
+                            
+    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "99.95"),660, "99.95"),
+    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "-99.95"),642,"-99.95"),     
+    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "99.95"),627,"99.95"),     
+    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "$99.95"),610,"$99.95"),     
+    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "03/22/10"),595,"03/22/10"),     
+    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "99.95"),545,"99.95"),
+    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "$99.95"),525,"$99.95"),  
+    
+    eg_pdf:set_fill_gray(PDF, 1.0),
+    eg_pdf:set_font(PDF,"Helvetica", 14),
+    moveAndShow(PDF, 445 - round(eg_pdf:get_string_width(PDF, "Helvetica", 14, "Thank you for being a")/2),495,"Thank you for being a"), 
+    moveAndShow(PDF, 445 - round(eg_pdf:get_string_width(PDF, "Helvetica", 14, "valued Comcast customer!")/2),480,"valued Comcast customer!"),           
+ 
+    eg_pdf:set_fill_gray(PDF, 0.0),
+    eg_pdf:set_font(PDF,"Helvetica", 8),
+    moveAndShowRot(PDF, 585, 500, "016604 1/1", 90),
+    
+                                          
     {Serialised, _PageNo} = eg_pdf:export(PDF),
     ok = file:write_file("../test/comcast_bill.pdf",[Serialised]),
     eg_pdf:delete(PDF).

@@ -135,6 +135,10 @@ Uses the angle given to rotate the graphics coordinate space. Usually you save_s
 
 This draws a rounded rectangle path. Its base is at X,Y and it has a size of W by H. The corner radius is Radius.
 
+##### round_top_rect/4  (PID,{X,Y}, {W,H}, Radius)
+
+This draws a rounded rectangle path with only the top corners rounded. Its base is at X,Y and it has a size of W by H. The corner radius is Radius.
+
 ##### save_state/1 (PID)
 
 This saves the graphics state on the graphics state stack.

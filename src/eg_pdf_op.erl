@@ -74,6 +74,8 @@
          set_word_space/1,
          skew/2,
          text/1,
+         text_rotate/1,
+         text_rotate_position/3,
          textbr/1,
          transform/6,
          translate/2,
@@ -311,6 +313,9 @@ restore_state() ->
 %% Change geometry
 transform(A, B, C, D, E, F)->
     [n2s([A,B,C,D,E,F])," cm\n"].
+    
+text_transform(A, B, C, D, E, F)->
+    [n2s([A,B,C,D,E,F])," Tm\n"].    
 
 translate(X,Y)->
     transform(1,0,0,1,X,Y).
@@ -328,6 +333,25 @@ rotate(Angle)->
     transform(C, S, -S, C, 0, 0).
 
 
+text_rotate(90)->  " 0 1 -1 0 0 0 Tm\n";
+text_rotate(180)-> " 1 0 0 1 0 0 Tm\n";
+text_rotate(270)-> " 0 -1 1 0 0 0 Tm\n";
+text_rotate(Angle)->
+    RadianAngle = Angle * math:pi()/180, 
+    C = math:cos( RadianAngle ),
+    S = math:sin( RadianAngle ),
+    text_transform(C, S, -S, C, 0, 0).
+
+text_rotate_position(X, Y, 90)->  " 0 1 -1 0 " ++ n2s(X) ++ " " ++ n2s(Y) ++ " Tm\n";
+text_rotate_position(X, Y, 180)-> " 1 0 0 1 " ++ n2s(X) ++ " " ++ n2s(Y) ++ " Tm\n";
+text_rotate_position(X, Y, 270)-> " 0 -1 1 0 " ++ n2s(X) ++ " " ++ n2s(Y) ++ " Tm\n";
+text_rotate_position(X, Y, Angle)->
+    RadianAngle = Angle * math:pi()/180, 
+    C = math:cos( RadianAngle ),
+    S = math:sin( RadianAngle ),
+    text_transform(C, S, -S, C, X, Y).
+    
+    
 skew(XScewAngle, YScewAngle)->
     TanA = math:tan(XScewAngle * math:pi()/180),
     TanB = math:tan(YScewAngle * math:pi()/180),

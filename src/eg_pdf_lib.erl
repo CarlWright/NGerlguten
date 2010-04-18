@@ -454,8 +454,7 @@ moveAndShow(PDF, X, Y, Str) ->
 moveAndShowRot(PDF, X, Y, Str, Rot) ->
     eg_pdf:save_state(PDF),
     eg_pdf:begin_text(PDF),
-    eg_pdf:rotate(PDF, Rot),
-    eg_pdf:set_text_pos(PDF, X, Y),
+    eg_pdf:text_rotate_position(PDF, X, Y, Rot),
     eg_pdf:text(PDF, Str),
     eg_pdf:end_text(PDF),
     eg_pdf:restore_state(PDF).

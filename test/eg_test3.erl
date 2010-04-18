@@ -66,7 +66,7 @@ ensure_fonts_are_loaded(PDF, {_,TagMap}) ->
 		  end, TagMap).
 
 %% 
-%% zap only processes on paragraph correctly <p>  to </p>
+%% zap only processes one paragraph correctly <p>  to </p>
 %%
 zap(PDF, Color, Sample, X, Y, Measure, PtSize, Leading, NLines) ->
     Width = Measure*6 + 20,

@@ -93,7 +93,10 @@
          set_word_space/2,
          skew/3,
          text/2,
+         text_rotate/2,
+         text_rotate_position/4,
          textbr/2,
+         text_transform/7,
          transform/7, translate/3
         ]).
 
@@ -388,6 +391,10 @@ restore_state(PID)->
 %% Change geometry
 transform(PID, A, B, C, D, E, F)->
     append_stream(PID, eg_pdf_op:transform(A, B, C, D, E, F)).
+    
+%% Change geometry
+text_transform(PID, A, B, C, D, E, F)->
+    append_stream(PID, eg_pdf_op:text_transform(A, B, C, D, E, F)).
 
 translate(PID, X, Y)->
     append_stream(PID, eg_pdf_op:translate(X,Y)).
@@ -398,6 +405,11 @@ scale(PID, ScaleX, ScaleY) when is_integer(ScaleX), is_integer(ScaleY)->
 rotate(PID, Angle)->
     append_stream(PID, eg_pdf_op:rotate(Angle)).
 
+text_rotate(PID, Angle)->
+    append_stream(PID, eg_pdf_op:text_rotate(Angle)).
+    
+text_rotate_position(PID, X, Y, Angle)->
+    append_stream(PID, eg_pdf_op:text_rotate_position(X, Y, Angle)).
 
 skew(PID, XScewAngle, YScewAngle)->
     append_stream( PID, eg_pdf_op:skew(XScewAngle, YScewAngle) ).
