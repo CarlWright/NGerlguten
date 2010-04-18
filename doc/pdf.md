@@ -262,9 +262,21 @@ This inserts the content of the String into the PDF using the graphics state and
 
 This inserts the content of the String into the text object using the graphics state and font information set at the time. It also ends the line (breaks) and starts a new one.
 
+##### text_rotate/2 (PID, Angle)
+
+Uses the angle given to rotate the text (not graphic) coordinate space. Usually you save_state before and restore_state afterward. 
+
+##### text_rotate_position/4  (PID, X, Y, Angle)
+
+Uses the angle given to rotate the text (not graphic) coordinate space. Usually you save_state before and restore_state afterward. 
+
+##### text_transform/7 (PID, A, B, C, D, E, F)
+
+This A through F sequence of numbers represents any linear transformation from one coordinate system to another for text. You can "translate", "rotate", "scale" and "skew" all in one step. Hold on to your horses!
+
 ##### transform/7 (PID, A, B, C, D, E, F)
 
-This A through F sequence of numbers represents any linear transformation from one coordinate system to another. You can "translate", "rotate", "scale" and "skew" all in one step. Hold on to your horses!
+This A through F sequence of numbers represents any linear transformation from one coordinate system to another for graphics. You can "translate", "rotate", "scale" and "skew" all in one step. Hold on to your horses!
 
 ##### translate/3 (PID, X, Y)
 
