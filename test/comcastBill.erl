@@ -172,6 +172,7 @@ test()->
     moveAndShow(PDF, 80,180,"27800 FRANKLIN RD"),  
     moveAndShow(PDF, 80,170,"SOUTHFIELD MI 48034-2363"),
     
+    moveAndShow(PDF, 55,145,"------- manifest line -------"),
     moveAndShow(PDF, 55,80,"SERVICE LEVEL CORP"),
     moveAndShow(PDF, 55,70,"7006 SUNCREST DRIVE"),
     moveAndShow(PDF, 55,60,"SALINE MI 48176-9102"),
