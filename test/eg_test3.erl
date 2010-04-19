@@ -26,7 +26,7 @@
 
 -module(eg_test3).
 
--export([test/0, norm/0, zap/9, zap/8]).
+-export([test/0, norm/0, zap/9, zap/10]).
     
 -include("../src/eg.hrl").
 
@@ -45,14 +45,14 @@ test() ->
     eg_pdf:set_page(PDF,1),
     eg_pdf_lib:showGrid(PDF, a4),
     box(PDF, moccasin, 50, 300, 225, 350), 
-    zap(PDF, gold, xml(title), 20, 830, 66, 24, 24, 1),
-    zap(PDF, xml(simple), 60, 650, 35, 14, 16, 5),
-    zap(PDF, xml(simple), 60, 560, 30, 14, 16, 5),
-    zap(PDF, whitesmoke, xml(two), 300, 760, 44, 18,20, 3),
-    zap(PDF, xml(romanAndCourier1), 60, 360, 35, 14, 16, 7),
-    zap(PDF, palegreen, xml(complex), 400, 600, 26, 12, 14, 22),
-    zap(PDF, xml(5), 60, 450, 35, 12, 14, 6),
-    zap(PDF, azure, xml(narrow), 280, 650, 16, 8,10, 38),
+    zap(PDF, gold, xml(title), 20, 830, 66, 24, 24, 1, justified),
+    zap(PDF, xml(simple), 60, 650, 35, 14, 16, 5, justified),
+    zap(PDF, xml(simple), 60, 560, 30, 14, 16, 5, justified),
+    zap(PDF, whitesmoke, xml(two), 300, 760, 44, 18,20, 3, justified),
+    zap(PDF, xml(romanAndCourier1), 60, 360, 35, 14, 16, 7, justified),
+    zap(PDF, palegreen, xml(complex), 400, 600, 26, 12, 14, 22, justified),
+    zap(PDF, xml(5), 60, 450, 35, 12, 14, 6, justified),
+    zap(PDF, azure, xml(narrow), 280, 650, 16, 8,10, 38, justified),
     eg_pdf:image(PDF,'../test/joenew.jpg',{50, 650},{width,200}),
     {Serialised, _PageNo} = eg_pdf:export(PDF),
     file:write_file("../test/eg_test3.pdf",[Serialised]),
@@ -68,17 +68,26 @@ ensure_fonts_are_loaded(PDF, {_,TagMap}) ->
 %% 
 %% zap only processes one paragraph correctly <p>  to </p>
 %%
-zap(PDF, Color, Sample, X, Y, Measure, PtSize, Leading, NLines) ->
+zap(PDF, Color, Sample, X, Y, Measure, PtSize, Leading, NLines,Justification) ->
     Width = Measure*6 + 20,
     Ht = NLines * PtSize + 20,
     box(PDF, Color, X, Y-Ht+10, Width, Ht),
-    zap(PDF, Sample, X+10, Y+10, Measure, PtSize, Leading, NLines).
+    zap(PDF, Sample, X+10, Y+10, Measure, PtSize, Leading, NLines, Justification).
     
-zap(PDF, Sample, X, Y, Measure, PtSize, Leading, NLines) ->
+zap(PDF, Sample, X, Y, Measure, PtSize, Leading, NLines, Justification) ->
     %% Measure in picas 
     Len = Measure*6,
-    Xml = parse_xml_para_str(Sample),
-    %% io:format("XML=~p~n",[Xml]),
+    zap1(PDF, eg_xml_lite:parse_all_forms(Sample),X, Y, Len, PtSize, Leading, NLines, Justification).
+
+zap1(PDF, [{xml, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification) ->
+   zap2(PDF, [{xml, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification),
+   ok;
+zap1(PDF, [{xml, Xml} | T], X, Y, Len, PtSize, Leading, NLines, Justification) ->
+  Height =zap2(PDF, [{xml, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification),
+   zap1(PDF, T, X, Y - Height, Len, PtSize, Leading, NLines, Justification).
+
+    
+zap2(PDF, [{xml, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification) ->
     TagMap = eg_xml2richText:default_tagMap(PtSize),
     ensure_fonts_are_loaded(PDF, TagMap),
     Norm = eg_xml2richText:normalise_xml(Xml, TagMap),
@@ -86,7 +95,7 @@ zap(PDF, Sample, X, Y, Measure, PtSize, Leading, NLines) ->
     {p, _, RichText} = Norm,
     Widths = [Len-20|lists:duplicate(NLines-1, Len)],
     Off = [20|lists:duplicate(NLines-1, 0)],
-    case eg_line_break:break_richText(RichText, {justified, Widths}) of
+    case eg_line_break:break_richText(RichText, { Justification, Widths}) of
 	impossible ->
 	    io:format("Cannot break line are widths ok~n");
 	{Lines,_,_} ->
@@ -94,14 +103,10 @@ zap(PDF, Sample, X, Y, Measure, PtSize, Leading, NLines) ->
 						Leading, Widths, Off),
 	    eg_pdf:begin_text(PDF),
 	    eg_pdf:append_stream(PDF, Code),
-	    eg_pdf:end_text(PDF)
-%%	    eg_pdf_lib:draw_box(PDF, X, Y, Len, Leading, NLines)
-    end.
+	    eg_pdf:end_text(PDF),
+	    length(Lines) * Leading
 
-parse_xml_para_str(Str) ->
-    [{xml, XmlPara}] = eg_xml_lite:parse_all_forms(Str),
-    XmlPara.
-
+    end.  
 
 %%----------------------------------------------------------------------
 %% test data sets

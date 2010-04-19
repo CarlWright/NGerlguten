@@ -129,13 +129,16 @@ test()->
     eg_pdf:set_font(PDF,"Helvetica", 16),
     moveAndShow(PDF, 25,595,"News from Comcast"),  
 
-    eg_test3:zap(PDF, xml(news), 25, 585, 40, 10, 12, 20),
+    eg_test3:zap(PDF, xml(news), 25, 585, 40, 10, 12, 20, ragged),
+    
+    eg_pdf:set_font(PDF,"Helvetica-Bold", 10),
+    moveAndShow(PDF, 325,610,"Total Amount Due"),
+    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "$99.95"),610,"$99.95"),   
     
     eg_pdf:set_font(PDF,"Helvetica", 11),
     moveAndShow(PDF, 325,660,"Previous Balance"),   
     moveAndShow(PDF, 325,642,"Payment - 02/16/10 - thank you"),  
     moveAndShow(PDF, 325,627,"New Charges - see below"),  
-    moveAndShow(PDF, 325,610,"Total Amount Due"),  
     moveAndShow(PDF, 325,595,"Payment Due By"),  
     moveAndShow(PDF, 340,545,"Comcast High-Speed Internet"),  
     moveAndShow(PDF, 325,525,"Total New Charges"),  
@@ -143,7 +146,6 @@ test()->
     moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "99.95"),660, "99.95"),
     moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "-99.95"),642,"-99.95"),     
     moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "99.95"),627,"99.95"),     
-    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "$99.95"),610,"$99.95"),     
     moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "03/22/10"),595,"03/22/10"),     
     moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "99.95"),545,"99.95"),
     moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "$99.95"),525,"$99.95"),  
@@ -158,13 +160,13 @@ test()->
     moveAndShowRot(PDF, 585, 500, "016604 1/1", 90),
     
     
-    eg_pdf:set_dash(PDF, dash),
+    eg_pdf:set_dash(PDF, dot),
     eg_pdf:set_stroke_color(PDF,black),
     eg_pdf:set_line_width(PDF,1),
     eg_pdf:line(PDF, 25,255,570,255),   
     
     CouponLine = "Detach and enclose this coupon with your payment. Please write your account number on your check or money order. Do not send cash.",
-    moveAndShow(PDF, 277 - round(eg_pdf:get_string_width(PDF, "Helvetica", 8, CouponLine)/2),2400,CouponLine),      
+    moveAndShow(PDF, 277 - round(eg_pdf:get_string_width(PDF, "Helvetica", 8, CouponLine)/2),240,CouponLine),      
 
     eg_pdf:image(PDF, "../test/comcast_logo.jpg",{50,200},{height,20}),
     
@@ -172,12 +174,12 @@ test()->
     moveAndShow(PDF, 80,180,"27800 FRANKLIN RD"),  
     moveAndShow(PDF, 80,170,"SOUTHFIELD MI 48034-2363"),
     
-    moveAndShow(PDF, 55,145,"------- manifest line -------"),
-    moveAndShow(PDF, 55,80,"SERVICE LEVEL CORP"),
-    moveAndShow(PDF, 55,70,"7006 SUNCREST DRIVE"),
-    moveAndShow(PDF, 55,60,"SALINE MI 48176-9102"),
+    moveAndShow(PDF, 55,150,"------- manifest line -------"),
+    moveAndShow(PDF, 55,130,"SERVICE LEVEL CORP"),
+    moveAndShow(PDF, 55,120,"7006 SUNCREST DRIVE"),
+    moveAndShow(PDF, 55,110,"SALINE MI 48176-9102"),
     
-    eg_pdf:set_font(PDF,"Helvetica", 10),
+    eg_pdf:set_font(PDF,"Helvetica-Bold", 10),
     moveAndShow(PDF, 330,220,"Account Number"),
     moveAndShow(PDF, 450,220,"09588 234102-01-7"),    
     moveAndShow(PDF, 330,200,"Payment Due by"),
@@ -194,14 +196,14 @@ test()->
     eg_pdf:line(PDF, 330,175,550,175), 
     eg_pdf:line(PDF, 455,145,550,145),   
     
-    eg_pdf:set_font(PDF,"Helvetica", 8),
+    eg_pdf:set_font(PDF,"Helvetica", 10),
     moveAndShow(PDF, 330, 130,"Make checks payable to Comcast"), 
     moveAndShow(PDF, 350,90,"COMCAST"),
-    moveAndShow(PDF, 350,80,"PO BOX 3005"),
-    moveAndShow(PDF, 350,70,"SOUTHEASTERN PA"), 
-    moveAndShow(PDF, 350,60,"19398-3005"), 
+    moveAndShow(PDF, 350,81,"PO BOX 3005"),
+    moveAndShow(PDF, 350,72,"SOUTHEASTERN PA"), 
+    moveAndShow(PDF, 350,63,"19398-3005"), 
     
-    eg_pdf:set_font(PDF,"OCR-B-Digits", 8),
+    eg_pdf:set_font(PDF,"OCR-A-Digits", 10),
     moveAndShow(PDF, 280,15,"09588   234102 01 7         0       013135"),
                                                       
     {Serialised, _PageNo} = eg_pdf:export(PDF),
@@ -212,13 +214,12 @@ test()->
 
 
 xml(news) ->
-  "<p>IMPORTANT INFORMATION - Our network enhancement is complete! </p>";
+  "<p>IMPORTANT INFORMATION - Our network enhancement is complete! </p>
   
-xml(2) -> "<p> On 4/21/2010, any TV, including QAN tuner TVx, w\/o a Comcast
+<p> On 4/21/2010, any TV, including QAN tuner TVx, w\/o a Comcast
 Digital device will only be able to receive Limited Basic channels 2-24, 95, 
 96 and 99. Just visit us online at comcast.com/digitnow or call us at 1-877-634-4434
-to get your equipment today.</p>";
-xml(3) -> "<p> All of us at Comcast extend our apreciation and thanks for being our 
+to get your equipment today.</p><p> All of us at Comcast extend our apreciation and thanks for being our 
 customer, your opinion counts!!</p> <p>Please let us know any way we may better 
 serve your needs.</p>".
 
