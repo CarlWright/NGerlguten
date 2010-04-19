@@ -126,10 +126,10 @@ test()->
     moveAndShow(PDF, 25,640,"7006 SUNCREST DR"),
     moveAndShow(PDF, 25,630,"SALINE MI 48176-9102"),
     
-    eg_pdf:set_font(PDF,"Helvetica", 14),
-    moveAndShow(PDF, 25,590,"News from Comcast"),  
+    eg_pdf:set_font(PDF,"Helvetica", 16),
+    moveAndShow(PDF, 25,595,"News from Comcast"),  
 
-    eg_test3:zap(PDF, xml(news), 25, 580, 40, 10, 12, 20),
+    eg_test3:zap(PDF, xml(news), 25, 585, 40, 10, 12, 20),
     
     eg_pdf:set_font(PDF,"Helvetica", 11),
     moveAndShow(PDF, 325,660,"Previous Balance"),   
@@ -157,10 +157,56 @@ test()->
     eg_pdf:set_font(PDF,"Helvetica", 8),
     moveAndShowRot(PDF, 585, 500, "016604 1/1", 90),
     
-                                          
+    
+    eg_pdf:set_dash(PDF, dash),
+    eg_pdf:set_stroke_color(PDF,black),
+    eg_pdf:set_line_width(PDF,1),
+    eg_pdf:line(PDF, 25,255,570,255),   
+    
+    CouponLine = "Detach and enclose this coupon with your payment. Please write your account number on your check or money order. Do not send cash.",
+    moveAndShow(PDF, 277 - round(eg_pdf:get_string_width(PDF, "Helvetica", 8, CouponLine)/2),2400,CouponLine),      
+
+    eg_pdf:image(PDF, "../test/comcast_logo.jpg",{50,200},{height,20}),
+    
+    eg_pdf:set_font(PDF,"Helvetica", 8),    
+    moveAndShow(PDF, 80,180,"27800 FRANKLIN RD"),  
+    moveAndShow(PDF, 80,170,"SOUTHFIELD MI 48034-2363"),
+    
+    moveAndShow(PDF, 55,80,"SERVICE LEVEL CORP"),
+    moveAndShow(PDF, 55,70,"7006 SUNCREST DRIVE"),
+    moveAndShow(PDF, 55,60,"SALINE MI 48176-9102"),
+    
+    eg_pdf:set_font(PDF,"Helvetica", 10),
+    moveAndShow(PDF, 330,220,"Account Number"),
+    moveAndShow(PDF, 450,220,"09588 234102-01-7"),    
+    moveAndShow(PDF, 330,200,"Payment Due by"),
+    moveAndShow(PDF, 450,200,"04/15/10"),    
+    moveAndShow(PDF, 330,180,"Total Amount Due"),
+    moveAndShow(PDF, 450,180,"$99.95"),    
+    moveAndShow(PDF, 330,150,"Amount Enclosed"),
+    moveAndShow(PDF, 450,150,"$"),    
+    
+    eg_pdf:set_dash(PDF, solid),
+    eg_pdf:set_stroke_color(PDF,black),
+    eg_pdf:set_line_width(PDF,1),
+    eg_pdf:line(PDF, 330,195,550,195),
+    eg_pdf:line(PDF, 330,175,550,175), 
+    eg_pdf:line(PDF, 455,145,550,145),   
+    
+    eg_pdf:set_font(PDF,"Helvetica", 8),
+    moveAndShow(PDF, 330, 130,"Make checks payable to Comcast"), 
+    moveAndShow(PDF, 350,90,"COMCAST"),
+    moveAndShow(PDF, 350,80,"PO BOX 3005"),
+    moveAndShow(PDF, 350,70,"SOUTHEASTERN PA"), 
+    moveAndShow(PDF, 350,60,"19398-3005"), 
+    
+    eg_pdf:set_font(PDF,"OCR-B-Digits", 8),
+    moveAndShow(PDF, 280,15,"09588   234102 01 7         0       013135"),
+                                                      
     {Serialised, _PageNo} = eg_pdf:export(PDF),
     ok = file:write_file("../test/comcast_bill.pdf",[Serialised]),
-    eg_pdf:delete(PDF).
+    eg_pdf:delete(PDF),
+    bill_output.
 
 
 
