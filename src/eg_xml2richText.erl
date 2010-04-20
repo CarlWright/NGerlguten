@@ -66,7 +66,9 @@ default_tagMap(Pts) ->
 				   {0,0,1},0)},
 
       {code,   eg_richText:mk_face("Courier", Pts, false, default, 0)},
-      {b,      eg_richText:mk_face("Times-Bold", Pts, true, default, 0)}
+      {b,      eg_richText:mk_face("Times-Bold", Pts, true, default, 0)},
+      {hb,      eg_richText:mk_face("Helvetica-Bold", Pts, true, default, 0)},
+      {helv,   eg_richText:mk_face("Helvetica", Pts, true, default, 0)}
      ]}.
 
 normalise_xml(XML, {StandardTags, TagMap}) ->

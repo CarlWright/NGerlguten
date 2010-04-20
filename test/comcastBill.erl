@@ -128,7 +128,8 @@ test()->
     
     eg_pdf:set_font(PDF,"Helvetica", 16),
     moveAndShow(PDF, 25,595,"News from Comcast"),  
-
+    
+%% zap(PDF, Sample, X, Y, Measure, PtSize, Leading, NLines, Justification)
     eg_test3:zap(PDF, xml(news), 25, 585, 40, 10, 12, 20, ragged),
     
     eg_pdf:set_font(PDF,"Helvetica-Bold", 10),
@@ -205,7 +206,92 @@ test()->
     
     eg_pdf:set_font(PDF,"OCR-A-Digits", 10),
     moveAndShow(PDF, 280,15,"09588   234102 01 7         0       013135"),
-                                                      
+    
+    eg_pdf:new_page(PDF),
+    
+
+    eg_pdf:set_dash(PDF, [1]),
+    eg_pdf:set_stroke_gray(PDF, 0.5), %% black
+    eg_pdf:set_line_width(PDF,1),
+    eg_pdf:round_rect(PDF, {360,705},{210,75}, 5),
+    eg_pdf:path(PDF, stroke),
+    eg_pdf:set_font(PDF,"Helvetica", 10),
+    Base = 760,
+    Increment = 12,
+    moveAndShow(PDF, 370,Base,                    "Account Number"),
+    moveAndShow(PDF, 370,Base - Increment,        "Billing Date"),
+    moveAndShow(PDF, 370,Base - (2 * Increment),  "Total Amount Due"),
+    moveAndShow(PDF, 370,Base - (3 * Increment),  "Payment Due by"),
+    moveAndShow(PDF, 470,Base,                    "09588 355469-01-5"),
+    moveAndShow(PDF, 470,Base - Increment,        "02/28/10"),
+    moveAndShow(PDF, 470,Base - (2 * Increment),  "$99.95"),
+    moveAndShow(PDF, 470,Base - (3 * Increment),  "Page 2 of 2"),  
+    
+    eg_pdf:set_dash(PDF, solid),
+    eg_pdf:set_stroke_color(PDF,dodgerblue),
+    eg_pdf:set_line_width(PDF,2),
+    eg_pdf:line(PDF, 25,700,570,700), 
+    
+    eg_pdf:image(PDF, "../test/comcast_logo.jpg",{25,760},{height,20}),
+
+    eg_pdf:set_fill_gray(PDF, 0.0),
+    eg_pdf:set_font(PDF,"Helvetica-Bold", 10),
+    moveAndShow(PDF, 30, 705,  "Contact us:"),  
+    moveAndShow(PDF, 110,705,  "www.comcast.com"),  
+    moveAndShow(PDF, 220,705,  "1-800-391-3000"),  
+    
+    moveAndShow(PDF, 25,735,"Service Details"),
+    
+    eg_pdf:image(PDF, "../test/HighSpeedInternet.jpg",{25,665},{height,25}),    
+    
+    eg_pdf:save_state(PDF),
+    eg_pdf:set_fill_color(PDF,orange),
+    eg_pdf:round_rect(PDF, {50,665},{250,20}, 10),
+    eg_pdf:path(PDF, fill),
+    eg_pdf:restore_state(PDF), 
+    
+    eg_pdf:set_fill_gray(PDF, 1.0),
+    eg_pdf:set_font(PDF,"Helvetica", 12),
+    moveAndShow(PDF, 55,670,"Comcast High-Speed Internet"),
+    eg_pdf:set_fill_gray(PDF, 0.0),
+    
+    eg_pdf:set_font(PDF,"Helvetica", 10),    
+    moveAndShow(PDF, 25,650,  "Internet Preferred"),  
+    moveAndShow(PDF, 40,640,  "Internet Preferred with"),     
+    moveAndShow(PDF, 40,630,  "Microsoft Communication"),     
+    moveAndShow(PDF, 40,620,  "Services,"),     
+    moveAndShow(PDF, 40,610,  "4 web access E-mailboxes,"),     
+    moveAndShow(PDF, 40,600,  "domain name,"),     
+    moveAndShow(PDF, 40,590,  "starter website,"),
+    moveAndShow(PDF, 25,560,  "CCO Static IP"),
+    moveAndShow(PDF, 25,545,  "PRO Modem"),    
+    
+    moveAndShow(PDF, 180,650,  "03/08 - 04/07"), 
+    moveAndShow(PDF, 180,560,  "03/08 - 04/07"), 
+    moveAndShow(PDF, 180,545,  "03/08 - 04/07"), 
+    
+    moveAndShow(PDF, 300 - eg_pdf:get_string_width(PDF, "Helvetica", 10, "89.95"),650, "89.95"),
+    moveAndShow(PDF, 300 - eg_pdf:get_string_width(PDF, "Helvetica", 10, "10.00"),560, "10.00"),
+    moveAndShow(PDF, 300 - eg_pdf:get_string_width(PDF, "Helvetica", 10, "0.00"),545, "0.00"),
+
+    eg_pdf:set_font(PDF,"Helvetica-Bold", 10),
+    moveAndShow(PDF, 25,525,  "Total Comcast High-Speed Internet"),  
+    moveAndShow(PDF, 300 - eg_pdf:get_string_width(PDF, "Helvetica-Bold", 10, "$99.95"),545, "$99.95"),
+
+    eg_pdf:set_dash(PDF, dot),
+    eg_pdf:set_stroke_color(PDF,black),
+    eg_pdf:set_line_width(PDF,1),
+    eg_pdf:line(PDF, 25,570,300,570),
+    eg_pdf:line(PDF, 25,555,300,555), 
+    eg_pdf:set_dash(PDF, solid),
+    eg_pdf:line(PDF, 25,540,300,540),   
+
+%% zap(PDF, Sample, X, Y, Measure, PtSize, Leading, NLines, Justification)
+
+    eg_test3:zap(PDF, xml(online), 25, 235, 40, 9, 12, 20, ragged),
+    
+    eg_test3:zap(PDF, xml(caption), 310, 235, 40, 9, 12, 20, ragged),    
+                                                          
     {Serialised, _PageNo} = eg_pdf:export(PDF),
     ok = file:write_file("../test/comcast_bill.pdf",[Serialised]),
     eg_pdf:delete(PDF),
@@ -214,14 +300,36 @@ test()->
 
 
 xml(news) ->
-  "<p>IMPORTANT INFORMATION - Our network enhancement is complete! </p>
+  "<p><hb>IMPORTANT INFORMATION</hb><helv> - Our network enhancement is complete! </helv></p>
   
-<p> On 4/21/2010, any TV, including QAN tuner TVx, w\/o a Comcast
+<p><helv> On 4/21/2010, any TV, including QAN tuner TVx, w\/o a Comcast
 Digital device will only be able to receive Limited Basic channels 2-24, 95, 
 96 and 99. Just visit us online at comcast.com/digitnow or call us at 1-877-634-4434
-to get your equipment today.</p><p> All of us at Comcast extend our apreciation and thanks for being our 
-customer, your opinion counts!!</p> <p>Please let us know any way we may better 
-serve your needs.</p>".
+to get your equipment today.</helv></p><p><helv> All of us at Comcast extend our apreciation and thanks for being our 
+customer, your opinion counts!!</helv></p> <p><helv>Please let us know any way we may better 
+serve your needs.</helv></p>";
+
+xml(online) ->
+  "<p><hb>Pay On-Line Using Your Credit Card Or From Your Bank Account:</hb></p>
+  <p><helv>Pay your bill online with any major credit card or from your bank account at comcast.com. 
+  Simply click on \"Pay Your Bill Online\" from the comcast.com  homepage.</helv></p>
+  <p>  </p>
+  <p><hb>Automatic Bill Payments:</hb></p>
+  <p><helv>Sign up for Comcast PayDirect and have your Comcast bill automatically paid from your bank account
+  or charged to a credit card, on-time, every time. No more late payments or having to make a call.
+  Click on \"Pay Your Bill Online\" from the comcast.com home page to sign up easily on-line.</helv></p>";
+  
+xml(caption) ->
+    "<p><helv>Closed Captioning: For immediate assistance call: (800)266-2278, fax (215)286-4700 or go online
+     for email or live chat at www.comcast.com/support.
+    For written complaints contact: Frank Eliason, Comcast Closed Captioning Office, 1701 
+    John F. Kennedy Blvd., Phila., PA 19103-2838, Captioning_Complaints@Comcast.com, fax:
+    (215) 286-4700 or call:(215) 286-4697.</helv></p>
+    <p>  </p>
+    <p><hb>Franchise Authority Information:</hb></p>
+    <p><helv>Pittsfield Township (MI0636)</helv></p>
+    <p><helv>6201 W. Michigan Ave</helv></p>
+    <p><helv>Ann Arbor MI, 48108</helv></p>".
 
 
 

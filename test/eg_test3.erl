@@ -140,11 +140,11 @@ is just simple text. In the next example I will show some
 text with emphasis.</p>";
 xml(two) ->
     "<p>This is normal text, with a small
-ammount of <em>emphasised</em> text.
+amount of <em>emphasised</em> text.
 This example only has two typefaces.</p>";
 xml(romanAndCourier1) ->
     "<p>This is normal text, with a small
-ammount of <code>courier</code> text.
+amount of <code>courier</code> text.
 This example only has two typefaces.</p>";
 xml(complex) ->
     "<p>This is normal text, set 5 picas wide in 12/14 Times Roman.
