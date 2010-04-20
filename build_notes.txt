@@ -1,0 +1,14 @@
+1) Install with make
+
+2) If you can't use "make", you can compile all the .erl files manually. You'll also need to run some of them to create more 
+modules for fonts. You'll need to run eg_afm to prepare font modules and run eg_mk_hyphen to create the hyphenation 
+modules and dictionaries.
+   
+   ------------------------------------------------------------------------------------------
+   
+
+
+
+
+NOTE: 29 March 2010, at present I'm working on a Windows platform so I'm not using "make". The Makefile 
+has not been updated for any changes I've made. Carl Wright
