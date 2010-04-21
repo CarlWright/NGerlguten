@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Module eg_pdf_page</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module eg_pdf_page</h1>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>Page.
+
+
+<h2><a name="description">Description</a></h2><p>Page.</p>
+ 
+  <p>Purpose: Create PDF Pages </p>
+  <p>       Ref. Chapter 3.6.2 Page objects in PDF reference v1.4 </p>
+ 
+  <p>
+  <dl>
+   <dt>/Type</dt>    <dd>/Page</dd>
+   <dt>/Parent</dt> <dd>dictionary, Required; indirect reference. The parent
+       page tree node.</dd>
+   <dt>/LastModified</dt>
+     <dd>date, Required if PieceInfo</dd>
+   <dt>/Resources</dt>
+     <dd>dictionary. Required, inheritable. The resources required by the
+         page.</dd>
+   <dt>/MediaBox</dt>    <dd>rectangle. Required, inheritable. Boundaries
+         of physical medium.</dd>
+   <dt>/CropBox</dt>     <dd>rectangle. Optional, inheritable. Visible region
+         of default user space. Defaults to value of MediaBox</dd>
+   <dt>/BleedBox</dt>
+     <dd>rectangle, Optional. Clipping region for production environment.
+         Defaults to value of CropBox.</dd>
+   <dt>/TrimBox</dt>
+     <dd>rectangle, Optional. Intended dimensions of finished page after
+         trimming.</dd>
+   <dt>/ArtBox</dt><dd>rectangle, Optional.
+        Intended dimensions of the finished page after trimming.</dd>
+   <dt>/BoxColorInfo</dt>
+     <dd>dictionary, Optional. Se PDF reference</dd>
+   <dt>/Contents</dt>      <dd>stream or array. Content stream.</dd>
+   <dt>/Rotate</dt>
+      <dd>integer, Optional, inheritable. The number of degrees the page
+          is rotated cloclwise when displayed.</dd>
+   <dt>/Group</dt>
+     <dd>dictionary, Optional. See PDF reference</dd>
+   <dt>/Thumb</dt> <dd>stream, Optional. Stream object defining the page's
+      thumbnail image.</dd>
+   <dt>/B</dt>     <dd>array, Optional. Array of indirect references to
+        article beads appearing on the page.</dd>
+   <dt>/Dur</dt>   <dd>number, Optional. Display duration in number of
+       seconds during presentations.</dd>
+   <dt>/Trans</dt>     <dd>dictionary, Optional. Transition dictionary
+        for presentations</dd>
+   <dt>/Annots</dt>      <dd>array, Optional. Array of annotation
+    dictionaries.</dd>
+   <dt>/AA</dt> <dd>dictionary, Optional. Additional actions dictionary</dd>
+   <dt>/Metadata</dt> <dd>stream, Optional. Metadata for the page</dd>
+   <dt>/PieceInfo</dt> <dd>dictionary, Optional. See PDF reference.</dd>
+   <dt>/StructParents</dt> <dd>integer, Required if the page contains
+       structural content items.</dd>
+   <dt>/ID</dt> <dd>string, Optional. Digital id of the page parent Web
+      Capture content set.</dd>
+   <dt>/PZ</dt> <dd>number, Optional. Preferred zoom factor.</dd>
+   <dt>/SeparationInfo</dt> <dd>dictionary, Optional. Separation dictionary
+      to generate color separations fopr the page.</dd>
+  </dl>
+  </p>
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#append_page-2">append_page/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#append_page2tree-2">append_page2tree/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#append_to_page-3">append_to_page/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#get_page-2">get_page/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#get_page_contents-2">get_page_contents/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#page-3">page/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#page_tree-5">page_tree/5</a></td><td>Creates a Pages (Page Tree) dictionary.</td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="append_page-2">append_page/2</a></h3>
+<div class="spec">
+<p><tt>append_page(PageContents, Objects) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="append_page2tree-2">append_page2tree/2</a></h3>
+<div class="spec">
+<p><tt>append_page2tree(Ref, PageTreeItem) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="append_to_page-3">append_to_page/3</a></h3>
+<div class="spec">
+<p><tt>append_to_page(S, PageObj, Objects) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="get_page-2">get_page/2</a></h3>
+<div class="spec">
+<p><tt>get_page(PageNo, Objects) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="get_page_contents-2">get_page_contents/2</a></h3>
+<div class="spec">
+<p><tt>get_page_contents(PageObj, Objects) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="page-3">page/3</a></h3>
+<div class="spec">
+<p><tt>page(ParenRef::integer(), ContentRef::integer(), Options) -&gt; <a href="#type-dict">dict()</a></tt>
+<ul class="definitions"><li><tt>Options = [Option]</tt></li>
+<li><tt>Option = {'"LastModified"', <a href="#type-date">date()</a>} | {'"Resources"', <a href="#type-dict">dict()</a>} | {'"Annots"', <a href="#type-array">array()</a>} | {Key, <a href="#type-pdftype">pdftype()</a>}</tt></li>
+</ul></p>
+</div>
+
+<h3 class="function"><a name="page_tree-5">page_tree/5</a></h3>
+<div class="spec">
+<p><tt>page_tree(KidRefs, FontsPtr::<a href="#type-ptr">ptr()</a>, XObjectsPtr::<a href="#type-ptr">ptr()</a>, MediaBox::<a href="#type-rect">rect()</a>, ProcSet) -&gt; <a href="#type-dict">dict()</a></tt>
+<ul class="definitions"><li><tt>KidRefs = [number()]</tt></li>
+<li><tt>ProcSet = imageb | imagec | imagebc</tt></li>
+</ul></p>
+</div><p>Creates a Pages (Page Tree) dictionary</p>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc, Apr 20 2010, 21:45:29.</i></p>
+</body>
+</html>

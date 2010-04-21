@@ -12,3 +12,12 @@ modules and dictionaries.
 
 NOTE: 29 March 2010, at present I'm working on a Windows platform so I'm not using "make". The Makefile 
 has not been updated for any changes I've made. Carl Wright
+
+
+The edoc data can be produced by running "erl" in the base directory and using the following command:
+
+    edoc:application(erlguten,".",[{def,{version,"2.5"}},{dir,"./doc/edoc"]). 
+    
+    Change the version number string to the correct value. The dir entry in the command
+    will put the documentation in /doc/edoc.
+    

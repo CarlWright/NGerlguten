@@ -403,7 +403,7 @@ i(X) -> integer_to_list(X).
 %% -------------------------------------
     
 %% showGrid(PDF, pagesize atom from eg_pdf.erl) 
-%%   adds a grid to the current page page
+%%   adds a grid to the current page 
 
 
 showGrid(PDF, Paper) ->

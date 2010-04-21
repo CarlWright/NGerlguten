@@ -1,0 +1,226 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Module eg_richText</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module eg_richText</h1>
+<ul class="index"><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
+
+
+<h2><a name="types">Data Types</a></h2>
+
+<h3 class="typedecl"><a name="type-inLine">inLine()</a></h3>
+<p><tt>inLine() = <a href="#type-word">word()</a> | <a href="#type-space">space()</a> | <a href="#type-nl">nl()</a></tt></p>
+
+
+<h3 class="typedecl"><a name="type-nl">nl()</a></h3>
+<p><tt>nl() = {nl, Face::<a href="#type-record">record(face)</a>}</tt></p>
+
+
+<h3 class="typedecl"><a name="type-richText">richText()</a></h3>
+<p><tt>richText() = {richText, [<a href="#type-inLine">inLine()</a>]}</tt></p>
+
+
+<h3 class="typedecl"><a name="type-space">space()</a></h3>
+<p><tt>space() = {space, Width::<a href="#type-thousendth_pt">thousendth_pt()</a>, Face::<a href="#type-record">record(face)</a>}</tt></p>
+
+
+<h3 class="typedecl"><a name="type-thousendth_pt">thousendth_pt()</a></h3>
+<p><tt>thousendth_pt() = integer()</tt></p>
+
+
+<h3 class="typedecl"><a name="type-word">word()</a></h3>
+<p><tt>word() = {word, Width::<a href="#type-thousendth_pt">thousendth_pt()</a>, Face::<a href="#type-record">record(face)</a>, Str::string()}</tt></p>
+
+
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#classify_inline-1">classify_inline/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#cloan_space-1">cloan_space/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#cloan_word-2">cloan_word/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#color-1">color/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#font-1">font/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#fontFromFace-1">fontFromFace/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#is_breakable-1">is_breakable/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#is_face_breakable-1">is_face_breakable/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#is_nl-1">is_nl/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#is_space-1">is_space/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#is_word-1">is_word/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#lineWidth-1">lineWidth/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#mk_face-5">mk_face/5</a></td><td></td></tr>
+<tr><td valign="top"><a href="#mk_fixedStr-2">mk_fixedStr/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#mk_nl-1">mk_nl/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#mk_space-1">mk_space/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#mk_test_word-1">mk_test_word/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#mk_word-2">mk_word/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#numberOfSpaces-1">numberOfSpaces/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#pointSize-1">pointSize/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#richText2str-1">richText2str/1</a></td><td>  This takes a deep list of tuples and replaces tuples with
+         equivalents, i.e.</td></tr>
+<tr><td valign="top"><a href="#str2richText-1">str2richText/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#str2richText-2">str2richText/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#str2richText-6">str2richText/6</a></td><td>  convert string to "word" sequence containing word font/size info.</td></tr>
+<tr><td valign="top"><a href="#string-1">string/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#test-1">test/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#width-1">width/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#widthExcludingSpaces-1">widthExcludingSpaces/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#width_of-3">width_of/3</a></td><td></td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="classify_inline-1">classify_inline/1</a></h3>
+<div class="spec">
+<p><tt>classify_inline(X1) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="cloan_space-1">cloan_space/1</a></h3>
+<div class="spec">
+<p><tt>cloan_space(X1) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="cloan_word-2">cloan_word/2</a></h3>
+<div class="spec">
+<p><tt>cloan_word(X1, Str) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="color-1">color/1</a></h3>
+<div class="spec">
+<p><tt>color(X1) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="font-1">font/1</a></h3>
+<div class="spec">
+<p><tt>font(X1) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="fontFromFace-1">fontFromFace/1</a></h3>
+<div class="spec">
+<p><tt>fontFromFace(F) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="is_breakable-1">is_breakable/1</a></h3>
+<div class="spec">
+<p><tt>is_breakable(X1) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="is_face_breakable-1">is_face_breakable/1</a></h3>
+<div class="spec">
+<p><tt>is_face_breakable(F) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="is_nl-1">is_nl/1</a></h3>
+<div class="spec">
+<p><tt>is_nl(X) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="is_space-1">is_space/1</a></h3>
+<div class="spec">
+<p><tt>is_space(X) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="is_word-1">is_word/1</a></h3>
+<div class="spec">
+<p><tt>is_word(X) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="lineWidth-1">lineWidth/1</a></h3>
+<div class="spec">
+<p><tt>lineWidth(Toks) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="mk_face-5">mk_face/5</a></h3>
+<div class="spec">
+<p><tt>mk_face(Font, PointSize, Breakable, Color, VoffSet) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="mk_fixedStr-2">mk_fixedStr/2</a></h3>
+<div class="spec">
+<p><tt>mk_fixedStr(Face, Str) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="mk_nl-1">mk_nl/1</a></h3>
+<div class="spec">
+<p><tt>mk_nl(Face) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="mk_space-1">mk_space/1</a></h3>
+<div class="spec">
+<p><tt>mk_space(Face) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="mk_test_word-1">mk_test_word/1</a></h3>
+<div class="spec">
+<p><tt>mk_test_word(Str) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="mk_word-2">mk_word/2</a></h3>
+<div class="spec">
+<p><tt>mk_word(Face, Str) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="numberOfSpaces-1">numberOfSpaces/1</a></h3>
+<div class="spec">
+<p><tt>numberOfSpaces(Toks) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="pointSize-1">pointSize/1</a></h3>
+<div class="spec">
+<p><tt>pointSize(X1) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="richText2str-1">richText2str/1</a></h3>
+<div class="spec">
+<p><tt>richText2str(X1::{richText, L}) -&gt; flattened_rich_text</tt></p>
+</div><p>  This takes a deep list of tuples and replaces tuples with
+         equivalents, i.e. " " for {space,_, _}, "\n" for {nl,_}, etc.</p>
+
+<h3 class="function"><a name="str2richText-1">str2richText/1</a></h3>
+<div class="spec">
+<p><tt>str2richText(Str) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="str2richText-2">str2richText/2</a></h3>
+<div class="spec">
+<p><tt>str2richText(Str, Pts) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="str2richText-6">str2richText/6</a></h3>
+<div class="spec">
+<p><tt>str2richText(Font, Point, Voff, Color, Break, Str) -&gt; <a href="#type-richText">richText()</a></tt></p>
+</div><p>  convert string to "word" sequence containing word font/size info</p>
+
+<h3 class="function"><a name="string-1">string/1</a></h3>
+<div class="spec">
+<p><tt>string(X1) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="test-1">test/1</a></h3>
+<div class="spec">
+<p><tt>test(X1) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="width-1">width/1</a></h3>
+<div class="spec">
+<p><tt>width(X1) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="widthExcludingSpaces-1">widthExcludingSpaces/1</a></h3>
+<div class="spec">
+<p><tt>widthExcludingSpaces(Toks) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="width_of-3">width_of/3</a></h3>
+<div class="spec">
+<p><tt>width_of(Font, PointSize, Str) -&gt; any()</tt></p>
+</div>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc, Apr 20 2010, 21:45:20.</i></p>
+</body>
+</html>

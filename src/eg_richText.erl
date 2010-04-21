@@ -111,6 +111,11 @@ that my favorite color is blue.
 Have a nice day,
 from Mr. C. Computer.").
 
+%% ----------------------------------------------------------------------------
+%% @spec  richText2str({richText, L})-> flattened_rich_text
+%% @doc   This takes a deep list of tuples and replaces tuples with 
+%%        equivalents, i.e. " " for {space,_, _}, "\n" for {nl,_}, etc.
+%% @end------------------------------------------------------------------------
 richText2str({richText, L}) ->
     eg_pdf_op:flatten(lists:map(fun inline2str/1, L)).
 
@@ -200,9 +205,11 @@ width_of(Font, PointSize, Str) ->
 
 
 %%----------------------------------------------------------------------
-%% sizeof(FontIndex, Str)
-%%   Computes width of Str which is of type FontIndex
-%%   Size is correctly adjusted for kerning information
+%% @spec sizeof(FontIndex, Str) ->  size_in_points
+%% @doc Computes width of Str which is of type FontIndex
+%%      Size is correctly adjusted for kerning information
+%% @end------------------------------------------------------------------------
+
 
 sizeof(Font, Str) ->
     Widths = lists:map(fun(I) -> char_width(Font, I) end, Str),

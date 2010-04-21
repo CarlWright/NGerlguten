@@ -1,0 +1,246 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Module eg_pdf_lib</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module eg_pdf_lib</h1>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>ErlGuten PDF library routines.
+
+
+<h2><a name="description">Description</a></h2>ErlGuten PDF library routines
+<h2><a name="types">Data Types</a></h2>
+
+<h3 class="typedecl"><a name="type-pdfobject">pdfobject()</a></h3>
+<p><tt>pdfobject() = {<a href="#type-objkey">objkey()</a>, <a href="#type-pdftype">pdftype()</a>}</tt>
+<ul class="definitions"><li><tt><a name="type-objkey">objkey()</a> = {obj, Ref, Gen}</tt></li>
+<li><tt>Ref = integer()</tt></li>
+<li><tt>Gen = 0</tt></li>
+</ul></p>
+
+
+<h3 class="typedecl"><a name="type-pdfobjects">pdfobjects()</a></h3>
+<p><tt>pdfobjects() = [<a href="#type-pdfobject">pdfobject()</a>]</tt></p>
+
+
+<h3 class="typedecl"><a name="type-pdftype">pdftype()</a></h3>
+<p><tt>pdftype() = <a href="#type-dict">dict()</a> | <a href="#type-stream">stream()</a> | <a href="#type-ptr">ptr()</a> | <a href="#type-name">name()</a> | <a href="#type-array">array()</a> | <a href="#type-pdfstring">pdfstring()</a> | <a href="#type-boolean">boolean()</a> | <a href="#type-date">date()</a> | number() | <a href="#type-null">null()</a></tt>
+<ul class="definitions"><li><tt><a name="type-dict">dict()</a> = {dict, [{string(), <a href="#type-pdftype">pdftype()</a>}]}</tt></li>
+<li><tt><a name="type-stream">stream()</a> = {stream, <a href="#type-dict">dict()</a>, <a href="#type-deeplist">deeplist()</a> | binary()} | {stream, <a href="#type-deeplist">deeplist()</a> | binary()}</tt></li>
+<li><tt><a name="type-name">name()</a> = {name, string}</tt></li>
+<li><tt><a name="type-ptr">ptr()</a> = {ptr, Ref, Gen}</tt></li>
+<li><tt><a name="type-array">array()</a> = {array, [<a href="#type-pdftype">pdftype()</a>]}</tt></li>
+<li><tt><a name="type-boolean">boolean()</a> = true | false</tt></li>
+<li><tt><a name="type-null">null()</a> = null</tt></li>
+<li><tt><a name="type-date">date()</a> = {date, Date}</tt></li>
+<li><tt>Date = {Year, Month, Day} | {{Year, Month, Day}, {Hour, Min, Sec}}</tt></li>
+<li><tt>Ref = integer()</tt></li>
+<li><tt><a name="type-pdfstring">pdfstring()</a> = {string, string()} | {hexstring, string()}</tt></li>
+<li><tt><a name="type-deeplist">deeplist()</a> = <a href="#type-deeplist">deeplist()</a> | string()</tt></li>
+</ul></p>
+
+
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#add_object-2">add_object/2</a></td><td>Makes a new object from PDFItem, and adds it to Objects .</td></tr>
+<tr><td valign="top"><a href="#code128-1">code128/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#delete_object-2">delete_object/2</a></td><td>deletes a PDF object.</td></tr>
+<tr><td valign="top"><a href="#draw_box-6">draw_box/6</a></td><td></td></tr>
+<tr><td valign="top"><a href="#export-2">export/2</a></td><td>Make a pdf document ready for export to
+  file or any other media (network etc.).</td></tr>
+<tr><td valign="top"><a href="#find_in_dict-2">find_in_dict/2</a></td><td>Finds a item in a PDF dictionary with Key.</td></tr>
+<tr><td valign="top"><a href="#get_next_ref-1">get_next_ref/1</a></td><td>returns next available Reference count.</td></tr>
+<tr><td valign="top"><a href="#get_objects_of_type-2">get_objects_of_type/2</a></td><td>Returns a list of objects with dictionary key "Type" = Type
+  PDF object types are ("Pages", "Page", "Font", etc).</td></tr>
+<tr><td valign="top"><a href="#get_ref-1">get_ref/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#is_pdf_object_type-2">is_pdf_object_type/2</a></td><td>Returns true if the object has the type name Type, otherwise false.</td></tr>
+<tr><td valign="top"><a href="#make_object-2">make_object/2</a></td><td>Returns a PDF Object with Reference number Ref and PDFItem.</td></tr>
+<tr><td valign="top"><a href="#make_object_key-1">make_object_key/1</a></td><td>Returns an Object Key with Reference number Ref.</td></tr>
+<tr><td valign="top"><a href="#moveAndShow-4">moveAndShow/4</a></td><td></td></tr>
+<tr><td valign="top"><a href="#moveAndShow-5">moveAndShow/5</a></td><td></td></tr>
+<tr><td valign="top"><a href="#moveAndShowRight-5">moveAndShowRight/5</a></td><td></td></tr>
+<tr><td valign="top"><a href="#moveAndShowRot-5">moveAndShowRot/5</a></td><td></td></tr>
+<tr><td valign="top"><a href="#pdf_item-1">pdf_item/1</a></td><td>Returns the PDFItem for the Object.</td></tr>
+<tr><td valign="top"><a href="#pdf_item-2">pdf_item/2</a></td><td>Returns the PDFItem for the Object corresponding to Key.</td></tr>
+<tr><td valign="top"><a href="#pdf_object_dict_item-2">pdf_object_dict_item/2</a></td><td>Returns the value corresponding to Key from a PDF Objects dictionary.</td></tr>
+<tr><td valign="top"><a href="#search_object-2">search_object/2</a></td><td>Find PDFItem related object reference.</td></tr>
+<tr><td valign="top"><a href="#serialise-1">serialise/1</a></td><td>Returns a serialised object as a deep list of strings.</td></tr>
+<tr><td valign="top"><a href="#serialise2bin-1">serialise2bin/1</a></td><td>Returns a serialised object as a binary.</td></tr>
+<tr><td valign="top"><a href="#showGrid-2">showGrid/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#store_in_dict-2">store_in_dict/2</a></td><td>Stores a new item in a PDF dictionary, replacing the old
+  one if it exists.</td></tr>
+<tr><td valign="top"><a href="#store_object-2">store_object/2</a></td><td>Returns a copy of Objects1 with Objects added or, if the object's
+  reference already is present, replacing the old object.</td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="add_object-2">add_object/2</a></h3>
+<div class="spec">
+<p><tt>add_object(PDFItem::<a href="#type-pdftype">pdftype()</a>, Objects::<a href="#type-pdfobjects">pdfobjects()</a>) -&gt; {Ref, NewObjects}</tt>
+<ul class="definitions"><li><tt>Ref = integer()</tt></li>
+<li><tt>NewObjects = <a href="#type-pdfobjects">pdfobjects()</a></tt></li>
+</ul></p>
+</div><p>Makes a new object from PDFItem, and adds it to Objects .
+  Returns the Reference number for the added object and the new Object list</p>
+
+<h3 class="function"><a name="code128-1">code128/1</a></h3>
+<div class="spec">
+<p><tt>code128(String0) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="delete_object-2">delete_object/2</a></h3>
+<div class="spec">
+<p><tt>delete_object(Key::<a href="#type-objkey">objkey()</a>, Objects::<a href="#type-pdfobjects">pdfobjects()</a>) -&gt; <a href="#type-pdfobjects">pdfobjects()</a></tt>
+<ul class="definitions"><li><tt>Key = <a href="#type-objkey">objkey()</a> | <a href="#type-ptr">ptr()</a> | integer()</tt></li>
+</ul></p>
+</div><p>deletes a PDF object</p>
+
+<h3 class="function"><a name="draw_box-6">draw_box/6</a></h3>
+<div class="spec">
+<p><tt>draw_box(PDF, X, Y, Measure, Lines, MaxRows) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="export-2">export/2</a></h3>
+<div class="spec">
+<p><tt>export(InfoRef::integer(), Objects::<a href="#type-pdfobjects">pdfobjects()</a>) -&gt; binary()</tt></p>
+</div><p>Make a pdf document ready for export to
+  file or any other media (network etc.).</p>
+
+<h3 class="function"><a name="find_in_dict-2">find_in_dict/2</a></h3>
+<div class="spec">
+<p><tt>find_in_dict(Key::string(), Dict::<a href="#type-dict">dict()</a>) -&gt; <a href="#type-pdftype">pdftype()</a> | undefined</tt></p>
+</div><p>Finds a item in a PDF dictionary with Key</p>
+
+<h3 class="function"><a name="get_next_ref-1">get_next_ref/1</a></h3>
+<div class="spec">
+<p><tt>get_next_ref(Objects::<a href="#type-pdfobjects">pdfobjects()</a>) -&gt; Ref</tt>
+<ul class="definitions"><li><tt>Ref = integer()</tt></li>
+</ul></p>
+</div><p>returns next available Reference count</p>
+
+<h3 class="function"><a name="get_objects_of_type-2">get_objects_of_type/2</a></h3>
+<div class="spec">
+<p><tt>get_objects_of_type(Type::string(), Objects::<a href="#type-pdfobjects">pdfobjects()</a>) -&gt; <a href="#type-pdfobjects">pdfobjects()</a></tt></p>
+</div><p>Returns a list of objects with dictionary key "Type" = Type
+  PDF object types are ("Pages", "Page", "Font", etc).</p>
+
+<h3 class="function"><a name="get_ref-1">get_ref/1</a></h3>
+<div class="spec">
+<p><tt>get_ref(Object::<a href="#type-pdfobject">pdfobject()</a>) -&gt; Ref</tt>
+<ul class="definitions"><li><tt>Ref = integer()</tt></li>
+</ul></p>
+</div>
+
+<h3 class="function"><a name="is_pdf_object_type-2">is_pdf_object_type/2</a></h3>
+<div class="spec">
+<p><tt>is_pdf_object_type(Type::string(), Object::<a href="#type-pdfobject">pdfobject()</a>) -&gt; true | false</tt></p>
+</div><p>Returns true if the object has the type name Type, otherwise false.
+  PDF object types are ("Pages", "Page", "Font", etc).</p>
+
+<h3 class="function"><a name="make_object-2">make_object/2</a></h3>
+<div class="spec">
+<p><tt>make_object(Ref::integer(), PDFItem::<a href="#type-pdftype">pdftype()</a>) -&gt; <a href="#type-pdfobject">pdfobject()</a></tt></p>
+</div><p>Returns a PDF Object with Reference number Ref and PDFItem</p>
+
+<h3 class="function"><a name="make_object_key-1">make_object_key/1</a></h3>
+<div class="spec">
+<p><tt>make_object_key(Ref::integer()) -&gt; <a href="#type-objkey">objkey()</a></tt></p>
+</div><p>Returns an Object Key with Reference number Ref</p>
+
+<h3 class="function"><a name="moveAndShow-4">moveAndShow/4</a></h3>
+<div class="spec">
+<p><tt>moveAndShow(PDF, X, Y, Str) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="moveAndShow-5">moveAndShow/5</a></h3>
+<div class="spec">
+<p><tt>moveAndShow(PDF, X, Y, Str, Scale) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="moveAndShowRight-5">moveAndShowRight/5</a></h3>
+<div class="spec">
+<p><tt>moveAndShowRight(PDF, X2, X, Y, Str) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="moveAndShowRot-5">moveAndShowRot/5</a></h3>
+<div class="spec">
+<p><tt>moveAndShowRot(PDF, X, Y, Str, Rot) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="pdf_item-1">pdf_item/1</a></h3>
+<div class="spec">
+<p><tt>pdf_item(Object::<a href="#type-pdfobject">pdfobject()</a>) -&gt; <a href="#type-pdftype">pdftype()</a></tt></p>
+</div><p>Returns the PDFItem for the Object.</p>
+
+<h3 class="function"><a name="pdf_item-2">pdf_item/2</a></h3>
+<div class="spec">
+<p><tt>pdf_item(Key::<a href="#type-objkey">objkey()</a>, Objects::<a href="#type-pdfobjects">pdfobjects()</a>) -&gt; <a href="#type-pdftype">pdftype()</a></tt></p>
+</div><p>Returns the PDFItem for the Object corresponding to Key.
+  If no object is found and exception is generated.</p>
+
+<h3 class="function"><a name="pdf_object_dict_item-2">pdf_object_dict_item/2</a></h3>
+<div class="spec">
+<p><tt>pdf_object_dict_item(Key::string(), Object::<a href="#type-pdfobject">pdfobject()</a>) -&gt; ObjectType</tt>
+<ul class="definitions"><li><tt>ObjectType = <a href="#type-pdftype">pdftype()</a> | undefined | not_dict</tt></li>
+</ul></p>
+</div><p>Returns the value corresponding to Key from a PDF Objects dictionary.
+  ("Pages", "Page", "Font", etc).
+  If the Key is missing undefined is returned
+  If the Object is not a dictionary not_dict is returned</p>
+
+<h3 class="function"><a name="search_object-2">search_object/2</a></h3>
+<div class="spec">
+<p><tt>search_object(Ref::Key, Objects::<a href="#type-pdfobjects">pdfobjects()</a>) -&gt; {value, Object} | false</tt>
+<ul class="definitions"><li><tt>Key = <a href="#type-objkey">objkey()</a> | <a href="#type-ptr">ptr()</a> | integer()</tt></li>
+<li><tt>Object = <a href="#type-pdfobject">pdfobject()</a></tt></li>
+</ul></p>
+</div><p>Find PDFItem related object reference.
+  All pdftypes are <code>{Key, Value}</code> tuples where the Key indicates
+  the type.</p>
+
+<h3 class="function"><a name="serialise-1">serialise/1</a></h3>
+<div class="spec">
+<p><tt>serialise(Object::<a href="#type-pdfobject">pdfobject()</a>) -&gt; <a href="#type-deeplist">deeplist()</a></tt>
+<ul class="definitions"><li><tt><a name="type-deeplist">deeplist()</a> = <a href="#type-deeplist">deeplist()</a> | string()</tt></li>
+</ul></p>
+</div><p>Returns a serialised object as a deep list of strings</p>
+
+<h3 class="function"><a name="serialise2bin-1">serialise2bin/1</a></h3>
+<div class="spec">
+<p><tt>serialise2bin(L::Objects) -&gt; binary()</tt>
+<ul class="definitions"><li><tt>Objects = <a href="#type-pdfobject">pdfobject()</a> | [<a href="#type-pdfobject">pdfobject()</a>]</tt></li>
+</ul></p>
+</div><p>Returns a serialised object as a binary</p>
+
+<h3 class="function"><a name="showGrid-2">showGrid/2</a></h3>
+<div class="spec">
+<p><tt>showGrid(PDF, Paper) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="store_in_dict-2">store_in_dict/2</a></h3>
+<div class="spec">
+<p><tt>store_in_dict(A::{Key, Value}, Dict::<a href="#type-dict">dict()</a>) -&gt; <a href="#type-dict">dict()</a></tt>
+<ul class="definitions"><li><tt>Key = string()</tt></li>
+<li><tt>Value = <a href="#type-pdftype">pdftype()</a></tt></li>
+</ul></p>
+</div><p>Stores a new item in a PDF dictionary, replacing the old
+  one if it exists.</p>
+
+<h3 class="function"><a name="store_object-2">store_object/2</a></h3>
+<div class="spec">
+<p><tt>store_object(Object::Objects, Objects1::<a href="#type-pdfobjects">pdfobjects()</a>) -&gt; <a href="#type-pdfobjects">pdfobjects()</a></tt>
+<ul class="definitions"><li><tt>Objects = Object | [Object]</tt></li>
+<li><tt>Object = <a href="#type-pdfobject">pdfobject()</a></tt></li>
+</ul></p>
+</div><p>Returns a copy of Objects1 with Objects added or, if the object's
+  reference already is present, replacing the old object.</p>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc, Apr 20 2010, 21:45:20.</i></p>
+</body>
+</html>

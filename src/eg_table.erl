@@ -59,7 +59,7 @@
 %%   but at the limit might really penalise another column with lots
 %%   of text.
 
-%% 3. Convert the lext into RTF lines for each cell
+%% 3. Convert the text into RTF lines for each cell
 %% 4. For each row work out the number of lines required 
 %%    (largest number of lines).
 %% 5. Output the table, drwing lines as we go
@@ -67,11 +67,9 @@
 %% TODO - Parameterise by: Font size, Spacing around text, table width
 %%        Clever algorithm to arrange column widths
 %%        Do page breaks in the middle of a table
-%% @spec table(PDF, Rows, X, Y) ->
+%% @spec table(PDF, Rows, X, Y, SO) ->
 %%          Total_Y
-% table(PDF, Rows, S) ->
-%     table(PDF, Rows, 45, S#st.y
-%         ).
+
 
 table(PDF, Rows, X, W0, S0) ->
     S = space_before(10, S0),
