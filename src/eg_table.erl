@@ -2,18 +2,13 @@
 
 
 
--export ([table/7]).
+-export ([table/7, table_from_xml/7]).
 
--record(doc_info, {system    = " ",
-                   type      = " ",
-                   reference = " ",
-                   author    = " ",
-                   version   = " ",
-                   date      = " "}).
+
 
 % State during main output routine
 -record(st,
-        {doc_info = #doc_info{},
+        {
          toc_num = [], % toc after page numbering
          toc = [],     % toc before page numbering
          y = 735,      % How far up the current page; starting position is 700
@@ -24,6 +19,15 @@
          pending_images = []
         }).
            
+  
+        
+table_from_xml(PDF, XML, X, Width, Start, Bottom, FontSize) ->
+  Parsed = eg_xml_lite:parse_all_forms(XML),
+  Rows = lists:map(fun({xml,Z}) -> Z end, Parsed),
+  table(PDF, Rows, X, Width, Start, Bottom, FontSize).
+  
+  
+  
         
 %% Creating tables
 %%

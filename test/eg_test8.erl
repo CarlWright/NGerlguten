@@ -35,7 +35,7 @@ test()->
     PDF = eg_pdf:new(),
     eg_pdf:set_pagesize(PDF,letter),
     eg_pdf:set_page(PDF,1),
-    eg_pdf:set_font(PDF, "Helvetica", 12),
+    
     Rows = [{row,[],
         [{cell,[],[{b,[], [{raw, "Version"}]}]},
          {cell,[],[{b,[], [{raw, "Status"}]}]}]}
@@ -45,6 +45,29 @@ test()->
            {cell,[],[{raw, "Ready"}]}]}],
     
    Var = eg_table:table(PDF, Rows, 50, 450,700,50,10),
+
+    A = "<row><cell>Heading 1</cell><cell>Heading 2</cell><cell>Heading 3</cell></row>
+      <row><cell>Content 1</cell><cell>Content 2</cell><cell>Content 3</cell></row>",
+    B = eg_xml_lite:parse_all_forms(A),
+    [{xml,C},{xml,D}] = B,
+    Var2 = eg_table:table(PDF, [C,D], 120,300,500,50,10),
+
+    A1 = "<row><cell>Escape Sequence</cell><cell>Value</cell></row>
+      <row><cell>\\b</cell><cell>Backspace</cell></row>
+      <row><cell>\\d</cell><cell>Delete</cell></row>
+      <row><cell>\\e</cell><cell>Escape</cell></row>
+      <row><cell>\\f</cell><cell>Form Feed</cell></row>
+      <row><cell>\\n</cell><cell>New line</cell></row>
+      <row><cell>\\r</cell><cell>Carriage Return</cell></row>
+      <row><cell>\\s</cell><cell>Space</cell></row>
+      <row><cell>\\t</cell><cell>Tab</cell></row>
+      <row><cell>\\v</cell><cell>Vertical Tab</cell></row>
+      <row><cell>\\NNN \\NN \\N</cell><cell>Octal characters (N is 0..7)</cell></row>
+      <row><cell>\\^a..\\^z or \\^A..\\^Z</cell><cell>Ctrl+A to Ctrl+Z</cell></row>
+      <row><cell>\\'</cell><cell>Single quote</cell></row>",
+
+    Var3 = eg_table:table_from_xml(PDF, A1, 120,400,350,50,10),
+
 
     {Serialised, _PageNo} = eg_pdf:export(PDF),
     file:write_file("../test/eg_test8.pdf",[Serialised]),
