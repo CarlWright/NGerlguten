@@ -38,13 +38,13 @@ test()->
     eg_pdf:set_font(PDF, "Helvetica", 12),
     Rows = [{row,[],
         [{cell,[],[{b,[], [{raw, "Version"}]}]},
-         {cell,[],[{b,[], [{raw, "Status"}]}]}
+         {cell,[],[{b,[], [{raw, "Status"}]}]}]}
         ,
         {row,[],
           [{cell,[],[{raw, "0.1"}]},
-           {cell,[],[{raw, "Status"}]}]}]}],
+           {cell,[],[{raw, "Ready"}]}]}],
     
-   Var = eg_table:table(PDF, Rows, 50, 700, "Hello Joe from Gutenburg",10),
+   Var = eg_table:table(PDF, Rows, 50, 450,700,50,10),
 
     {Serialised, _PageNo} = eg_pdf:export(PDF),
     file:write_file("../test/eg_test8.pdf",[Serialised]),

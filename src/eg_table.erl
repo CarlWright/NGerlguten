@@ -2,7 +2,7 @@
 
 
 
--export ([table/6]).
+-export ([table/7]).
 
 -record(doc_info, {system    = " ",
                    type      = " ",
@@ -71,11 +71,12 @@
 %%          Total_Y
 
 
-table(PDF, Rows, X, W0, S0, FontSize) ->
+table(PDF, Rows, X, Width, Start, Bottom, FontSize) ->
+    S0 = #st{y=Start, min_y = Bottom },
     S = space_before(10, S0),
     Cols = max_length(Rows,0),      % Number of cols is max cols of all rows.
-    Col_width = W0 div Cols,
-    W = W0 - 5*Cols,
+    Col_width = Width div Cols,
+    W = Width - 5*Cols,
 
     RTF_words = lists:map(fun(Row) -> 
                                 row2rtf(Row, lists:duplicate(Cols, W),FontSize) 
@@ -165,8 +166,8 @@ table(PDF, Rows, X, W0, S0, FontSize) ->
     %% only a top line, and because it don't look good to start it at
     %% the bottom.
     case S#st.y - 26 < S#st.min_y of
-      false -> not_fitting;
-      true -> rows(PDF, Heights, RTFRows, X, I7, Cols, false, S, FontSize)
+      true -> not_fitting;
+      false -> rows(PDF, Heights, RTFRows, X, I7, Cols, false, S, FontSize)
     end.
               
 
