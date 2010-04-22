@@ -1,6 +1,5 @@
 %%==========================================================================
-%% Copyright (C) 2003 Joe Armstrong
-%%              2010 Carl Wright
+%% Copyright (C)  2010 Carl Wright
 %%
 %% Permission is hereby granted, free of charge, to any person obtaining a
 %% copy of this software and associated documentation files (the
@@ -21,8 +20,8 @@
 %% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 %% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
-%% Authors:   Joe Armstrong <joe@sics.se>
-%% Purpose: Grid planning sheet
+%% Authors:   Carl Wright <wright@servicelevel.net>
+%% Purpose: Test eg_table module.
 %%==========================================================================
 
 -module(eg_test8).
@@ -35,6 +34,8 @@ test()->
     PDF = eg_pdf:new(),
     eg_pdf:set_pagesize(PDF,letter),
     eg_pdf:set_page(PDF,1),
+
+ 
     
     Rows = [{row,[],
         [{cell,[],[{b,[], [{raw, "Version"}]}]},
@@ -43,14 +44,18 @@ test()->
         {row,[],
           [{cell,[],[{raw, "0.1"}]},
            {cell,[],[{raw, "Ready"}]}]}],
+           
+           
     
    Var = eg_table:table(PDF, Rows, 50, 450,700,50,10),
 
     A = "<row><cell>Heading 1</cell><cell>Heading 2</cell><cell>Heading 3</cell></row>
       <row><cell>Content 1</cell><cell>Content 2</cell><cell>Content 3</cell></row>",
-    B = eg_xml_lite:parse_all_forms(A),
-    [{xml,C},{xml,D}] = B,
+    B = eg_xml_lite:parse_all_forms(A),   % parse the xml stream
+    [{xml,C},{xml,D}] = B,                % remove the stuff that "table" doesn't want
     Var2 = eg_table:table(PDF, [C,D], 120,300,500,50,10),
+    
+    
 
     A1 = "<row><cell>Escape Sequence</cell><cell>Value</cell></row>
       <row><cell>\\b</cell><cell>Backspace</cell></row>
@@ -67,9 +72,18 @@ test()->
       <row><cell>\\'</cell><cell>Single quote</cell></row>",
 
     Var3 = eg_table:table_from_xml(PDF, A1, 120,400,350,50,10),
-
+    
+    Smaller = "<row><cell>Escape Sequence</cell><cell>Value</cell></row>
+      <row><cell>\\b</cell><cell>Backspace</cell></row>
+      <row><cell>\\d</cell><cell>Delete</cell></row>
+      <row><cell>\\e</cell><cell>Escape</cell></row>",  
+      
+    Var4 = eg_table:table_from_xml(PDF, Smaller, 350,150,700,50,10),
+    Var5 = eg_table:table_from_xml(PDF, Smaller, 350,250,550,50,14),
+    Var6 = eg_table:table_from_xml(PDF, Smaller, 350,300,300,50,18), 
 
     {Serialised, _PageNo} = eg_pdf:export(PDF),
     file:write_file("../test/eg_test8.pdf",[Serialised]),
-    eg_pdf:delete(PDF).
+    eg_pdf:delete(PDF),
+    test_done.
 

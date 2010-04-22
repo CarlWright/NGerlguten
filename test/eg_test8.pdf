@@ -5,29 +5,39 @@
 endobj
 2 0 obj
 <<
+/Type  /Font 
+/Subtype  /Type1 
+/Name  /F12 
+/BaseFont  /Times-Roman 
+/Encoding  /MacRomanEncoding 
 >>
 endobj
 3 0 obj
 <<
+/F12  2 0 R 
+>>
+endobj
+4 0 obj
+<<
 /Type  /Pages 
 /Count  1 
 /MediaBox  [  0  0  612  792  ] 
-/Kids  [  5 0 R  ] 
+/Kids  [  6 0 R  ] 
 /Resources <<
-/Font  2 0 R 
+/Font  3 0 R 
 /XObject  1 0 R 
 /ProcSet  [  /PDF  /Text  ] 
 >>
 
 >>
 endobj
-4 0 obj
+5 0 obj
 <<
-/Length  4389 
+/Length  7326 
 >>
 
 stream
-50 690 72 1  re  f  50 690 1 -15  re  f  
+ /F12 10 Tf 50 690 72 1  re  f  50 690 1 -15  re  f  
 BT
  1 0 0 1 53 690 Tm 0  -10 TD /F14 10 Tf 0 Tw [(V)100(ersion)0] TJ  
 ET
@@ -43,7 +53,7 @@ ET
 BT
  1 0 0 1 91 675 Tm 0  -10 TD /F12 10 Tf 0 Tw [(Ready)0] TJ  
 ET
- 121 675 1 -15  re  f  50 660 72 1  re  f  120 490 142 1  re  f  120 490 1 -15  re  f  
+ 121 675 1 -15  re  f  50 660 72 1  re  f   /F12 10 Tf 120 490 142 1  re  f  120 490 1 -15  re  f  
 BT
  1 0 0 1 123 490 Tm 0  -10 TD /F12 10 Tf 0 Tw [(Heading)0( )0(1)0] TJ  
 ET
@@ -67,7 +77,7 @@ ET
 BT
  1 0 0 1 217 475 Tm 0  -10 TD /F12 10 Tf 0 Tw [(Content)0( )0(3)0] TJ  
 ET
- 261 475 1 -15  re  f  120 460 142 1  re  f  120 340 196 1  re  f  120 340 1 -15  re  f  
+ 261 475 1 -15  re  f  120 460 142 1  re  f   /F12 10 Tf 120 340 196 1  re  f  120 340 1 -15  re  f  
 BT
  1 0 0 1 123 340 Tm 0  -10 TD /F12 10 Tf 0 Tw [(Escape)0( )0(Sequence)0] TJ  
 ET
@@ -171,26 +181,122 @@ ET
 BT
  1 0 0 1 204 160 Tm 0  -10 TD /F12 10 Tf 0 Tw [(Single)0( )0(quote)0] TJ  
 ET
- 315 160 1 -15  re  f  120 145 196 1  re  f  
+ 315 160 1 -15  re  f  120 145 196 1  re  f   /F12 10 Tf 350 690 125 1  re  f  350 690 1 -15  re  f  
+BT
+ 1 0 0 1 353 690 Tm 0  -10 TD /F12 10 Tf 0 Tw [(Escape)0( )0(Sequence)0] TJ  
+ET
+ 425 690 1 -15  re  f  
+BT
+ 1 0 0 1 428 690 Tm 0  -10 TD /F12 10 Tf 0 Tw [(V)111(alue)0] TJ  
+ET
+ 474 690 1 -15  re  f  350 675 125 1  re  f  350 675 1 -15  re  f  
+BT
+ 1 0 0 1 353 675 Tm 0  -10 TD /F12 10 Tf 0 Tw [(\\b)0] TJ  
+ET
+ 425 675 1 -15  re  f  
+BT
+ 1 0 0 1 428 675 Tm 0  -10 TD /F12 10 Tf 0 Tw [(Backspace)0] TJ  
+ET
+ 474 675 1 -15  re  f  350 660 125 1  re  f  350 660 1 -15  re  f  
+BT
+ 1 0 0 1 353 660 Tm 0  -10 TD /F12 10 Tf 0 Tw [(\\d)0] TJ  
+ET
+ 425 660 1 -15  re  f  
+BT
+ 1 0 0 1 428 660 Tm 0  -10 TD /F12 10 Tf 0 Tw [(Delete)0] TJ  
+ET
+ 474 660 1 -15  re  f  350 645 125 1  re  f  350 645 1 -15  re  f  
+BT
+ 1 0 0 1 353 645 Tm 0  -10 TD /F12 10 Tf 0 Tw [(\\e)0] TJ  
+ET
+ 425 645 1 -15  re  f  
+BT
+ 1 0 0 1 428 645 Tm 0  -10 TD /F12 10 Tf 0 Tw [(Escape)0] TJ  
+ET
+ 474 645 1 -15  re  f  350 630 125 1  re  f   /F12 10 Tf 350 540 170 1  re  f  350 540 1 -19  re  f  
+BT
+ 1 0 0 1 353 540 Tm 0  -14 TD /F12 14 Tf 0 Tw [(Escape)0( )0(Sequence)0] TJ  
+ET
+ 453 540 1 -19  re  f  
+BT
+ 1 0 0 1 456 540 Tm 0  -14 TD /F12 14 Tf 0 Tw [(V)111(alue)0] TJ  
+ET
+ 519 540 1 -19  re  f  350 521 170 1  re  f  350 521 1 -19  re  f  
+BT
+ 1 0 0 1 353 521 Tm 0  -14 TD /F12 14 Tf 0 Tw [(\\b)0] TJ  
+ET
+ 453 521 1 -19  re  f  
+BT
+ 1 0 0 1 456 521 Tm 0  -14 TD /F12 14 Tf 0 Tw [(Backspace)0] TJ  
+ET
+ 519 521 1 -19  re  f  350 502 170 1  re  f  350 502 1 -19  re  f  
+BT
+ 1 0 0 1 353 502 Tm 0  -14 TD /F12 14 Tf 0 Tw [(\\d)0] TJ  
+ET
+ 453 502 1 -19  re  f  
+BT
+ 1 0 0 1 456 502 Tm 0  -14 TD /F12 14 Tf 0 Tw [(Delete)0] TJ  
+ET
+ 519 502 1 -19  re  f  350 483 170 1  re  f  350 483 1 -19  re  f  
+BT
+ 1 0 0 1 353 483 Tm 0  -14 TD /F12 14 Tf 0 Tw [(\\e)0] TJ  
+ET
+ 453 483 1 -19  re  f  
+BT
+ 1 0 0 1 456 483 Tm 0  -14 TD /F12 14 Tf 0 Tw [(Escape)0] TJ  
+ET
+ 519 483 1 -19  re  f  350 464 170 1  re  f   /F12 10 Tf 350 290 214 1  re  f  350 290 1 -23  re  f  
+BT
+ 1 0 0 1 353 290 Tm 0  -18 TD /F12 18 Tf 0 Tw [(Escape)0( )0(Sequence)0] TJ  
+ET
+ 480 290 1 -23  re  f  
+BT
+ 1 0 0 1 483 290 Tm 0  -18 TD /F12 18 Tf 0 Tw [(V)111(alue)0] TJ  
+ET
+ 563 290 1 -23  re  f  350 267 214 1  re  f  350 267 1 -23  re  f  
+BT
+ 1 0 0 1 353 267 Tm 0  -18 TD /F12 18 Tf 0 Tw [(\\b)0] TJ  
+ET
+ 480 267 1 -23  re  f  
+BT
+ 1 0 0 1 483 267 Tm 0  -18 TD /F12 18 Tf 0 Tw [(Backspace)0] TJ  
+ET
+ 563 267 1 -23  re  f  350 244 214 1  re  f  350 244 1 -23  re  f  
+BT
+ 1 0 0 1 353 244 Tm 0  -18 TD /F12 18 Tf 0 Tw [(\\d)0] TJ  
+ET
+ 480 244 1 -23  re  f  
+BT
+ 1 0 0 1 483 244 Tm 0  -18 TD /F12 18 Tf 0 Tw [(Delete)0] TJ  
+ET
+ 563 244 1 -23  re  f  350 221 214 1  re  f  350 221 1 -23  re  f  
+BT
+ 1 0 0 1 353 221 Tm 0  -18 TD /F12 18 Tf 0 Tw [(\\e)0] TJ  
+ET
+ 480 221 1 -23  re  f  
+BT
+ 1 0 0 1 483 221 Tm 0  -18 TD /F12 18 Tf 0 Tw [(Escape)0] TJ  
+ET
+ 563 221 1 -23  re  f  350 198 214 1  re  f  
 endstream
-endobj
-5 0 obj
-<<
-/Type  /Page 
-/Parent  3 0 R 
-/Contents  4 0 R 
->>
 endobj
 6 0 obj
 <<
-/Type  /Catalog 
-/Pages  3 0 R 
+/Type  /Page 
+/Parent  4 0 R 
+/Contents  5 0 R 
 >>
 endobj
 7 0 obj
 <<
+/Type  /Catalog 
+/Pages  4 0 R 
+>>
+endobj
+8 0 obj
+<<
 /Creator  (Erlang) 
-/CreationDate (D:20100422125917)
+/CreationDate (D:20100422184441)
 /Producer  (erlguten-3.1) 
 /Author  () 
 /Title  () 
@@ -199,21 +305,22 @@ endobj
 >>
 endobj
 xref
-0 8
+0 9
 0000000000 65535 f 
 0000000009 00000 n 
 0000000030 00000 n 
-0000000051 00000 n 
-0000000229 00000 n 
-0000004673 00000 n 
-0000004742 00000 n 
-0000004795 00000 n 
+0000000151 00000 n 
+0000000185 00000 n 
+0000000363 00000 n 
+0000007744 00000 n 
+0000007813 00000 n 
+0000007866 00000 n 
 trailer
 <<
-/Size 8
-/Root 6 0 R
-/Info 7 0 R
+/Size 9
+/Root 7 0 R
+/Info 8 0 R
 >>
 startxref
-4963
+8034
 %%EOF

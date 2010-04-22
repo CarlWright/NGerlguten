@@ -1,22 +1,41 @@
+%%==========================================================================
+%% Copyright (C) 2004 Sean Hinde
+%%               2010 Carl Wright
+%%
+%% Permission is hereby granted, free of charge, to any person obtaining a
+%% copy of this software and associated documentation files (the
+%% "Software"), to deal in the Software without restriction, including
+%% without limitation the rights to use, copy, modify, merge, publish,
+%% distribute, sublicense, and/or sell copies of the Software, and to permit
+%% persons to whom the Software is furnished to do so, subject to the
+%% following conditions:
+%% 
+%% The above copyright notice and this permission notice shall be included
+%% in all copies or substantial portions of the Software.
+%% 
+%% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+%% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+%% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+%% NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+%% DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+%% OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+%% USE OR OTHER DEALINGS IN THE SOFTWARE.
+%%
+%% Authors: Sean Hinde <sean.hinde@mac.com>, Carl Wright <wright@servicelevel.net>
+%% Purpose: Add API call to create a table in a document.
+%%==========================================================================
+
 -module (eg_table).
 
-
-
 -export ([table/7, table_from_xml/7]).
-
 
 
 % State during main output routine
 -record(st,
         {
-         toc_num = [], % toc after page numbering
-         toc = [],     % toc before page numbering
          y = 735,      % How far up the current page; starting position is 700
          min_y = 60,   % Bottom margin - bottom edge of page to last text line
-         max_y = 735,  % Top margin - bottom edge of page to top of text area
-         page = 1,     % Current Page Number
-         fig = 1,      % Current figure number
-         pending_images = []
+         max_y = 735  % Top margin - bottom edge of page to top of text area
         }).
            
   
@@ -76,6 +95,8 @@ table_from_xml(PDF, XML, X, Width, Start, Bottom, FontSize) ->
 
 
 table(PDF, Rows, X, Width, Start, Bottom, FontSize) ->
+    eg_pdf:set_font(PDF,"Times-Roman", 10),   %% when set_font is not done first, no font catalog
+                                              %% goes into the output and formatting is erratic.
     S0 = #st{y=Start, min_y = Bottom },
     S = space_before(10, S0),
     Cols = max_length(Rows,0),      % Number of cols is max cols of all rows.
