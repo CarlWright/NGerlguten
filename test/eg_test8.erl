@@ -44,7 +44,7 @@ test()->
           [{cell,[],[{raw, "0.1"}]},
            {cell,[],[{raw, "Status"}]}]}]}],
     
-   Var = eg_table:table(PDF, Rows, 50, 700, "Hello Joe from Gutenburg"),
+   Var = eg_table:table(PDF, Rows, 50, 700, "Hello Joe from Gutenburg",10),
 
     {Serialised, _PageNo} = eg_pdf:export(PDF),
     file:write_file("../test/eg_test8.pdf",[Serialised]),

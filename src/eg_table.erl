@@ -1,8 +1,8 @@
 -module (eg_table).
 
 
--define(font_size, 10).
--export ([table/5]).
+
+-export ([table/6]).
 
 -record(doc_info, {system    = " ",
                    type      = " ",
@@ -71,14 +71,14 @@
 %%          Total_Y
 
 
-table(PDF, Rows, X, W0, S0) ->
+table(PDF, Rows, X, W0, S0, FontSize) ->
     S = space_before(10, S0),
     Cols = max_length(Rows,0),      % Number of cols is max cols of all rows.
     Col_width = W0 div Cols,
     W = W0 - 5*Cols,
 
     RTF_words = lists:map(fun(Row) -> 
-                                row2rtf(Row, lists:duplicate(Cols, W)) 
+                                row2rtf(Row, lists:duplicate(Cols, W),FontSize) 
                         end, Rows),
 
     %% Find the longest single word in each column. Start with a minimum col
@@ -152,7 +152,7 @@ table(PDF, Rows, X, W0, S0) ->
 
     RTFRows = lists:map(fun(Row) ->
                                 %% io:format("RTFRow = ~p~n",[Row]),
-                                row2rtf(Row, I6)
+                                row2rtf(Row, I6, FontSize)
                         end, Rows),
     % io:format("RTFRows = ~p~n",[RTFRows]),
     Heights = lists:map(fun(Row) -> max_row_lines(Row,0) end, RTFRows),
@@ -164,16 +164,15 @@ table(PDF, Rows, X, W0, S0) ->
     %% Don't start a table near the bottom of a page so we don't get
     %% only a top line, and because it don't look good to start it at
     %% the bottom.
-    S1 = if S#st.y - 26 < S#st.min_y ->
-                 new_page(PDF, false, S);
-            true ->
-                 S
-         end,
-    S2 = rows(PDF, Heights, RTFRows, X, I7, Cols, false, S1),
-    %% Now we've finished the table, flush any pending images from
-    %% before the start of the table
-    images(PDF, S2).
+    case S#st.y - 26 < S#st.min_y of
+      false -> not_fitting;
+      true -> rows(PDF, Heights, RTFRows, X, I7, Cols, false, S, FontSize)
+    end.
+              
+
     
+    
+     
     
 %% Insert some vertical space unless we are at the top of the page
 space_before(Pts, S) ->
@@ -193,24 +192,24 @@ max_length([], Max) ->
     Max.
     
     
-row2rtf({row, _, Row}, Col_widths) ->
-    TagMap = {[cell], [{default, eg_richText:mk_face("Times-Roman",?font_size,
+row2rtf({row, _, Row}, Col_widths, FontSize) ->
+    TagMap = {[cell], [{default, eg_richText:mk_face("Times-Roman",FontSize,
                                                      true,default,0)},
-                       {em,      eg_richText:mk_face("Times-Italic",?font_size,
+                       {em,      eg_richText:mk_face("Times-Italic",FontSize,
                                                      true,default,0)},
-                       {code,    eg_richText:mk_face("Courier",?font_size,
+                       {code,    eg_richText:mk_face("Courier",FontSize,
                                                      true,default,0)},
-                       {b,       eg_richText:mk_face("Times-Bold",?font_size,
+                       {b,       eg_richText:mk_face("Times-Bold",FontSize,
                                                      true,default,0)}]},
     row2rtf1(Row, Col_widths, TagMap);
-row2rtf({header, _, Row}, Col_widths) ->
-    TagMap = {[cell], [{default, eg_richText:mk_face("Times-Bold",?font_size,
+row2rtf({header, _, Row}, Col_widths,FontSize) ->
+    TagMap = {[cell], [{default, eg_richText:mk_face("Times-Bold",FontSize,
                                                      true,default,0)},
-                       {em,      eg_richText:mk_face("Times-Bold",?font_size,
+                       {em,      eg_richText:mk_face("Times-Bold",FontSize,
                                                      true,default,0)},
-                       {code,    eg_richText:mk_face("Courier-Bold",?font_size,
+                       {code,    eg_richText:mk_face("Courier-Bold",FontSize,
                                                      true,default,0)},
-                       {b,       eg_richText:mk_face("Times-Bold",?font_size,
+                       {b,       eg_richText:mk_face("Times-Bold",FontSize,
                                                      true,default,0)}]},
     row2rtf1(Row, Col_widths, TagMap).
 
@@ -329,17 +328,17 @@ max_row_lines([], Max) ->
     Max.
 
 
-rows(PDF, [H|T],[Row|Rows],X,Col_widths, Cols, Mid_row, S) ->
+rows(PDF, [H|T],[Row|Rows],X,Col_widths, Cols, Mid_row, S,FontSize) ->
     %% TODO - Work out when to draw top line - i.e. when we are really
     %% at the start of a row even in a multipage row
     if Mid_row == false ->
             eg_pdf:rectangle(PDF, X,S#st.y,lists:sum(Col_widths) + 1,1, fill);
        true -> ok
     end,
-    if S#st.y - (H*?font_size) =< S#st.min_y ->
-            This_page_lines = (S#st.y - S#st.min_y) div ?font_size,
+    if S#st.y - (H*FontSize) =< S#st.min_y ->
+            This_page_lines = (S#st.y - S#st.min_y) div FontSize,
             {TPR, NPR} = split_row(This_page_lines, Row),
-            S1 = row(PDF, TPR, X, Col_widths, This_page_lines, Cols, S),
+            S1 = row(PDF, TPR, X, Col_widths, This_page_lines, Cols, S, FontSize),
             %% io:format("NPR = ~p~n", [NPR]),
             %% Draw a line at the bottom as 
             if NPR == [] ->
@@ -350,122 +349,21 @@ rows(PDF, [H|T],[Row|Rows],X,Col_widths, Cols, Mid_row, S) ->
             Mid_row_2 = NPR /= [],
             %% We need a new page, but don't want pending images
             %% appearing in the middle of the table hence 'false'.
-            S2 = new_page(PDF, false, S1),
+            %% S2 = new_page(PDF, false, S1, FontSize),
             rows(PDF, [H - This_page_lines|T], 
-                         [NPR|Rows], X, Col_widths, Cols, Mid_row_2, S2);
+                         [NPR|Rows], X, Col_widths, Cols, Mid_row_2, S1, FontSize);
        true ->
             Y = S#st.y,
-            S1 = row(PDF, Row, X,Col_widths,H, Cols, S),
+            S1 = row(PDF, Row, X,Col_widths,H, Cols, S, FontSize),
             rows(PDF, T, Rows, X, Col_widths, Cols, false,
-                 S1#st{y = Y - (H*?font_size)-5})
+                 S1#st{y = Y - (H*FontSize)-5},FontSize)
     end;
-rows(PDF, [], [], X, Col_widths, _Cols, _Mid_row, S) ->
+rows(PDF, [], [], X, Col_widths, _Cols, _Mid_row, S, _) ->
     %% Draw final line under table
     eg_pdf:rectangle(PDF, X,S#st.y,lists:sum(Col_widths) + 1,1, fill),
     S.
 
-images(PDF, S) ->
-    images(PDF, S#st.pending_images, S).
 
-images(PDF, [{img, Path}|T], S) ->
-    S1 = image(PDF, Path, S#st{pending_images = T}),
-    io:format("Length = ~p~n",[{length(S1#st.pending_images),
-                                length(S#st.pending_images)}]),
-    if length(S1#st.pending_images) == length(S#st.pending_images) ->
-            eg_pdf:new_page(PDF),
-            io:format("New page~n"),
-            header(PDF, S1),
-            footer(PDF),
-            images(PDF, [{img, Path}|T], S1#st{page = S1#st.page + 1,
-                                               y = S1#st.max_y});
-       true ->
-            images(PDF, T, S1#st{pending_images = T})
-    end;
-images(_PDF, [], S) ->
-    S.
-
- 
-%% Output an image if there is room.  If the image will fit widthways
-%% without scaling based on 1 pixel per Pt then put it like that,
-%% otherwise scale it down to size.  If the image is too long to fit
-%% on the current page then queue it to appear on the next available
-%% page.
-image(PDF, Path, S0) ->
-    S = space_before(10, S0),
-    case eg_pdf_image:get_head_info(Path) of
-        {jpeg_head,{W, H, _Ncomponents, _Data_precision}} ->
-           {W0, H0} = if (W =< 435) ->
-                              {W, H};
-                         true ->
-                              {trunc(W*W/435),trunc(H*W/435)}
-                      end,
-            {W1, H1} = if (H0 < 660) ->
-                               {W0, H0};
-                          true ->
-                              {trunc(W0*H0/660),trunc(H0*H0/660)}
-                      end,
-            io:format("W1, H1}: ~p~n",[{W1, H1, S#st.y}]),
-            if H1 > (S#st.y - S#st.min_y - 20) ->
-                       S#st{pending_images = [{img, Path}|S#st.pending_images]};
-               true ->
-                    X = 218 - trunc(W1/2) + 50,
-                    io:format("Image~n"),
-                    eg_pdf:image(PDF, Path, {X, S#st.y-H1}, {width, W1}),
-                    eg_pdf:begin_text(PDF),
-                    eg_pdf:set_text_pos(PDF, X + W1/2, S#st.y-H1 - 8),
-                    eg_pdf:text(PDF, "Figure " ++ eg_pdf_op:n2s(S#st.fig)),
-                    eg_pdf:end_text(PDF),
-                    S#st{y = S#st.y - H1 - 20,
-                         fig = S#st.fig + 1}
-            end;
-        _Other ->
-            io:format("Error, "
-                      "image format not supported or image not found: ~p~n",
-                      [Path]),
-            S
-    end.
-
-new_page(PDF, Images, S) ->
-    io:format("Page = ~p~n", [S#st.page+1]),
-    eg_pdf:new_page(PDF),
-    header(PDF, S),
-    footer(PDF),
-    if (S#st.pending_images == []) or (Images == false) ->
-            %{_, Bin} = process_info(self(), backtrace),
-            %io:format("New page = ~p~n",[binary_to_list(Bin)]),
-            S#st{page = S#st.page + 1,
-                 y = S#st.max_y};
-       true ->
-            images(PDF, S#st.pending_images, S#st{page = S#st.page + 1,
-                                                  y = S#st.max_y})
-    end.
-    
-    
-header(PDF, #st{doc_info = I}) ->
-    header(PDF, I#doc_info.system, I#doc_info.type).
-
-header(PDF, Title, Subtitle) ->
-    eg_pdf:image(PDF,'../test/tmobile.jpg',{50,790},{height,29}),
-
-%     eg_pdf:set_fill_gray(PDF,0.75),
-%     eg_pdf:rectangle(PDF, 40,780,515,2, fill),
-%     eg_pdf:set_fill_gray(PDF,0.0),
-
-    %% Header
-    eg_pdf:begin_text(PDF),
-    {L1, W1, O1} = xml2lines("<p><b>" ++ Title ++"</b></p>",200,14,1,
-                             preformatted),
-    lines2pdf(PDF, 345,818,L1, 14, W1, O1, right_justified),
-    
-    {L2, W2, O2} = xml2lines("<p><b>" ++ Subtitle++ "</b></p>",200,14,1,
-                             preformatted),
-    lines2pdf(PDF, 345,802,L2, 14, W2, O2, right_justified),
-     eg_pdf:end_text(PDF).
-
-footer(PDF) ->
-    eg_pdf:set_fill_gray(PDF,0.75),
-    eg_pdf:rectangle(PDF, 40,45,515,2, fill),
-    eg_pdf:set_fill_gray(PDF,0.0).
 
 lws([{Lines, _, _}|T], N, A) ->
     Lw = lw(Lines, 0),
@@ -556,61 +454,20 @@ is_fixed([]) ->
     true.
 
 
-row(PDF, [{Lines, Width, Off}|Cells], X, [Col_width|T], Height, Cols, S) ->
-    eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*?font_size)-5, fill),
+row(PDF, [{Lines, Width, Off}|Cells], X, [Col_width|T], Height, Cols, S, FontSize) ->
+    eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*FontSize)-5, fill),
     eg_pdf:begin_text(PDF),
-    lines2pdf(PDF, X+3,S#st.y,Lines, ?font_size, Width, Off, justified),
+    lines2pdf(PDF, X+3,S#st.y,Lines, FontSize, Width, Off, justified),
     eg_pdf:end_text(PDF),
-    row(PDF, Cells, X+Col_width, T, Height, Cols-1, S);
-row(PDF, [], X, [], Height, 0, S) ->
-    eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*?font_size)-5, fill),
+    row(PDF, Cells, X+Col_width, T, Height, Cols-1, S, FontSize);
+row(PDF, [], X, [], Height, 0, S, FontSize) ->
+    eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*FontSize)-5, fill),
     S;
-row(PDF, [], X, [Col_width|T], Height, Cols, S) ->
-    eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*?font_size)-5, fill),
-    row(PDF, [], X+Col_width, T, Height, Cols-1, S).
-
-%% Generic routines for paragraph formatting
-%%
-
-xml2lines(Para, Len, PtSize, NLines, Justification) ->
-    Xml = parse_xml_para_str(Para),
-    %% io:format("XML: ~p~n",[Xml]),
-    lines(Xml, Len, PtSize, NLines, Justification).
+row(PDF, [], X, [Col_width|T], Height, Cols, S, FontSize) ->
+    eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*FontSize)-5, fill),
+    row(PDF, [], X+Col_width, T, Height, Cols-1, S, FontSize).
 
 
-lines(Xml, Len, _PtSize, NLines, Justification) ->
-    TagMap = {[p], 
-              [{default, eg_richText:mk_face("Times-Roman",?font_size,
-                                             true,default,0)},
-               {em,      eg_richText:mk_face("Times-Italic",?font_size,
-                                             true,default,0)},
-               {code,    eg_richText:mk_face("Courier",?font_size,
-                                             true,default,0)},
-               {b,       eg_richText:mk_face("Times-Bold",?font_size,
-                                             true,default,0)}]},
-    %%io:format("TagMap: ~p~n",[TagMap]),
-   % ensure_fonts_are_loaded(PDF, TagMap),
-    Norm = eg_xml2richText:normalise_xml(Xml, TagMap),
-    {p, _, RichText} = Norm,
-    %% io:format("Norm: ~p~n",[Norm]),
-    Widths = lists:duplicate(NLines, Len),
-    Off = lists:duplicate(NLines, 0),
-    case eg_line_break:break_richText(RichText, {Justification, Widths}) of
-        impossible ->
-            io:format("Cannot break line are widths ok~n"),
-            {[],[],[]};
-        {Lines,_A,_B} ->
-            %% io:format("Lines = ~p~n",[Lines]),
-            %io:format("Other things = ~p~n",[{A,B}]),
-            {Lines, Widths, Off}
-    end.
-  
-  
-
-parse_xml_para_str(Str) ->
-    [{xml, XmlPara}] = eg_xml_lite:parse_all_forms(Str),
-    XmlPara.
-  
 
 %% Split a table row into two rows where the first has no more
 %% than Height number of lines in any cell, and the second row

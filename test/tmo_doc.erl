@@ -489,8 +489,8 @@ item(PDF, Indent, Width, [{para, _, _Para} | _T] = P, Type, S0) ->
                     Type + 1;
                Type == bulleted ->
                     eg_pdf:set_text_pos(PDF, 80, S#st.y-14),
-                    eg_pdf:set_font(PDF, "Times-Roman", 16),
-                    eg_pdf:text(PDF, [225]),              % Bullet Char
+                    eg_pdf:set_font(PDF, "ZapfDingbats", 10),
+                    eg_pdf:text(PDF, [108]),              % Bullet Char
                     bulleted
             end,
     eg_pdf:end_text(PDF),
@@ -514,8 +514,8 @@ item(PDF, Indent, Width, Item0, Type, S0) ->
                     Type + 1;
                Type == bulleted ->
                     eg_pdf:set_text_pos(PDF, 80, S#st.y-14),
-                    eg_pdf:set_font(PDF, "Times-Roman", 16),
-                    eg_pdf:text(PDF, [225]),              % Bullet Char
+                    eg_pdf:set_font(PDF, "ZapfDingbats", 10),
+                    eg_pdf:text(PDF, [108]),              % Bullet Char
                     bulleted
             end,
     eg_pdf:end_text(PDF),
