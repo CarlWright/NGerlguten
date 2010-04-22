@@ -111,7 +111,7 @@ table(PDF, Rows, X, Width, Start, Bottom, FontSize) ->
     %% size of 20000 milliPts. This gives reasonable minimum column widths
     Longest_words = tuple_to_list(
                       longest_words(RTF_words, erlang:make_tuple(Cols, 28000))),
-    io:format("Longest word = ~p~n",[Longest_words]),
+    %% io:format("Longest word = ~p~n",[Longest_words]),
     Min_tab_width = lists:sum(Longest_words) + Cols * 5000,
     if Min_tab_width div 1000 + Cols > W -> % round up each col to next Pt
             io:format("*** Warning *** "
@@ -124,7 +124,7 @@ table(PDF, Rows, X, Width, Start, Bottom, FontSize) ->
     %% Sum the total length of text in each column. This gives a
     %% general measure of the size of a column.
     Volumes = word_volumes(RTF_words, erlang:make_tuple(Cols, 0)),
-    io:format("Volumes = ~p~n",[Volumes]),
+    %% io:format("Volumes = ~p~n",[Volumes]),
 
     %% Find the longest single cell in each column. This does two
     %% things - it allows us to contract the whole table width if all
@@ -133,10 +133,10 @@ table(PDF, Rows, X, Width, Start, Bottom, FontSize) ->
     %% some columns are all one liners...
 
     Max_cell_widths = longest_cell(Volumes, erlang:make_tuple(Cols, 0)),
-    io:format("Max Cell Widths = ~p~n",[Max_cell_widths]),
+    %% io:format("Max Cell Widths = ~p~n",[Max_cell_widths]),
 
     Col_volume = sum_cells(Volumes, lists:duplicate(Cols, 0)),
-    io:format("Column volumes = ~p~n",[Col_volume]),
+    %% io:format("Column volumes = ~p~n",[Col_volume]),
 
     %% Try to share the column widths out respecting the minimums,
     %% but in proportion to the Volumes
@@ -145,16 +145,16 @@ table(PDF, Rows, X, Width, Start, Bottom, FontSize) ->
     I1 = lists:map(fun(Col) ->
                            Col / lists:sum(Col_volume) * W * 1000
                    end, Col_volume),
-    io:format("I1 = ~p~n",[I1]),
+    %% io:format("I1 = ~p~n",[I1]),
 
     %% 2. Increase any columns which have been given less than their minimum
     {I2, Lost} = ensure_minimums(I1, Longest_words, 0, []),
-    io:format("I2 = ~p~n",[{Lost, I2}]),
+    %% io:format("I2 = ~p~n",[{Lost, I2}]),
 
     %% 3. Try to give out any reductions amongst the other columns,
     %% not allowing them to go below minimum.
     I3 = distribute_reduction(I2, Longest_words, Lost),
-    io:format("I3 = ~p~n",[I3]),
+    %% io:format("I3 = ~p~n",[I3]),
 
 
     %% 4. Reduce any cols which have been given more space than they
@@ -174,7 +174,7 @@ table(PDF, Rows, X, Width, Start, Bottom, FontSize) ->
                       (Val) ->
                            round(Val / 1000) + 1
                    end, I5bis),
-    io:format("I6 = ~w~n",[I6]),
+    %% io:format("I6 = ~w~n",[I6]),
 
     RTFRows = lists:map(fun(Row) ->
                                 %% io:format("RTFRow = ~p~n",[Row]),
@@ -324,23 +324,23 @@ distribute_reduction([], [], _Sum, _Lost) ->
 %% columns are fixed, or
 
 expand(Init, Max_cell_widths, W) ->
-    io:format("Init = ~p~n",[{Init, Max_cell_widths, W}]),
+    %% io:format("Init = ~p~n",[{Init, Max_cell_widths, W}]),
     {I1, Gained} = ensure_maximums(Init, Max_cell_widths, 0, []),
-    io:format("I1 Gained = ~p~n",[{Gained, I1}]),
+    %% io:format("I1 Gained = ~p~n",[{Gained, I1}]),
     Sum = lists:foldl(fun({fixed, Col}, Sum) ->
                               Sum + Col;
                          (Col, Sum) ->
                               Sum + Col
                       end, 0, I1),
-    io:format("Sum = ~p~n",[Sum]),
+   %%  io:format("Sum = ~p~n",[Sum]),
     Fixed = is_fixed(Init),
-    io:format("Fixed = ~p~n",[Sum]),
-    io:format("W = ~p~n",[W]),
+    %% io:format("Fixed = ~p~n",[Sum]),
+    %% io:format("W = ~p~n",[W]),
     if (Sum >= W - 1) or Fixed ->
             I1;
        true ->
             I2 = distribute_increase(I1, Sum, W),
-            io:format("I2 Increase = ~p~n",[I2]),
+            %% io:format("I2 Increase = ~p~n",[I2]),
             expand(I2, Max_cell_widths, W)
     end.
 
@@ -445,7 +445,7 @@ sum_vals([], []) ->
 ensure_maximums([{fixed, H}|T], [_Max_needed|T1], Gain, Res) ->
     ensure_maximums(T, T1, Gain, Res ++ [{fixed, H}]);
 ensure_maximums([H|T], [Max_needed|T1], Gain, Res) ->
-    io:format("ensure_maximums - ~p~n",[{Gain , H , Max_needed}]),
+    %% io:format("ensure_maximums - ~p~n",[{Gain , H , Max_needed}]),
     if Max_needed =< H ->
             ensure_maximums(T, T1, Gain + H - Max_needed,
                             Res ++ [{fixed, Max_needed}]);
@@ -467,7 +467,7 @@ distribute_increase1([{fixed, Col}|T], Gain, To_share) ->
     [{fixed, Col}|distribute_increase1(T, Gain, To_share)];
 distribute_increase1([Col|T], Gain, To_share) ->
     Inc = Col/To_share * Gain,
-    io:format("Inc = ~p~n",[{Col, To_share, Gain}]),
+    %% io:format("Inc = ~p~n",[{Col, To_share, Gain}]),
     [Col + Inc|distribute_increase1(T, Gain, To_share)];
 distribute_increase1([],_,_) ->
     [].

@@ -1,5 +1,9 @@
 The tests 
 =========
+
+### comcastBill
+
+When you rune comcastBill:test(), you get a two page PDF which reproduces my Comcast bill for internet services.
 ### eg_test1
 
 When you run eg_test1:test(), it  produces a four page PDF (eg_test1.pdf) using the pdf module function calls. It illustrates most features of the pdf module.
@@ -25,6 +29,19 @@ If you run eg_test5:test(X) where is X is a number from 1 to 7 you get the tuple
 
 When you run eg_test6:test(), it produces a page of PDF. This is a very simple page produced by calls to the pdf module.
 
+### eg_test7
+
+When you run eg_test8_test(), it produces the same output as eg_test1, but it assembles a pdf document directly by building it from pdf "objects"
+ rather than going through the pdf.erl API (and its pdf process). This test mostly producess the same output as eg_test1.erl._
+
+### eg_test8
+
+When you run eg_test8:test(), it produces a page of PDF. This tests the eg_table module by putting size tables on the page.
+
+### eg_test12
+
+When you run eg_test12:test(), it produces a 4 page PDF that looks much the same as the results of eg_test1.
+
 ### eg_tmo_test
 
 When you run eg:tmo_test:file(), it produces a 9 page PDF from the file process.xml. The contents are some Erlang software development standards. This code produces the PDF based on the content of the XML file. Within this test program are functions to produce tables in a PDF. It produces the revision history table on the second page and it is used to format the section headings between the lines. This is a sophisticated example of using the pdf modules to format a document.
@@ -36,7 +53,3 @@ When you run tmo_doc:file(), you get an output file that at first glance looks t
 ### kd_test1
 
 When you run kd_test1:test(), it produces a 1 page PDF. It is a commercial bill in Swedish for a some recording, I think. It does a good job of including a graphics to show the vendor's logo. It looks interesting.
-
-### eg_test12
-
-When you run eg_test12:test(), it produces a 4 page PDF that looks much the same as the results of eg_test1.
