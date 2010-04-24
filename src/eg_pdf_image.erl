@@ -32,7 +32,7 @@
 
 -export([mk_images/4, get_head_info/1, process_header/1]).
 
--include("eg.hrl").
+-include("../include/eg.hrl").
 
 %% ============================================================================
 

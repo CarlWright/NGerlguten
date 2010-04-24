@@ -29,7 +29,7 @@
 	 normalise_xml/3, 
 	 default_tagMap/1]).
 
--include("eg.hrl").
+-include("../include/eg.hrl").
 
 %% -define(DEBUG, true).
 

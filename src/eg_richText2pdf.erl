@@ -29,7 +29,7 @@
 %% There is a bug in this code: Blanks *inside*
 %% strings are subject to expansion caused by the Tw operator
 
--export([richText2pdf/8]).
+-export([richText2pdf/9]).
 
 
 -record(pdf, {color = default,
@@ -60,36 +60,36 @@ dbg_io(_,_) -> ok.
 %%            as the usage of Rot adds a 'Tm' (transformation matrix) in the pdf
 %%            source, which may only be used inside a 'text object' (chp 5.3 
 %%            in pdf reference manual 1.4 and 1.7)
-richText2pdf(X, Y0, Type, Rot, Lines, Leading, Widths, Offsets) ->
+richText2pdf(PID, X, Y0, Type, Rot, Lines, Leading, Widths, Offsets) ->
     Y = Y0 - Leading,
     P = start(),
     P2 = case Type of
 	     justified ->
 		 {Cos, Sin, P1} = init_rotation_matrix(X, Y0, Rot, P),
-		 make_justified(X,Y,Leading,Lines,Offsets,Widths,P1);
+		 make_justified(PID, X,Y,Leading,Lines,Offsets,Widths,P1);
 	     Style when Style == left_justified;
 			Style == right_justified;
 			Style == centered ->
 		 {Cos, Sin, P1} = init_rotation_matrix(X, Y0, Rot, P),
-		 make_para(X, Y, Leading, Lines,Offsets,Widths,Style,P1)
+		 make_para(PID, X, Y, Leading, Lines,Offsets,Widths,Style,P1)
     end,
     finalise(P2).
 
-make_justified(X, Y, Leading, [], _, _, P) -> P;
-make_justified(X, Y, Leading, [H], [O|_], [W|_], P) -> 
-    line2pdf(X+O,Y,H,W,last_line_justified, P);
-make_justified(X, Y, Leading, [H|T], [O|O1] = O0, [W|W1] = W0, P) -> 
+make_justified(PID, X, Y, Leading, [], _, _, P) -> P;
+make_justified(PID, X, Y, Leading, [H], [O|_], [W|_], P) -> 
+    line2pdf(PID, X+O,Y,H,W,last_line_justified, P);
+make_justified(PID, X, Y, Leading, [H|T], [O|O1] = O0, [W|W1] = W0, P) -> 
     {O2, W2} = last_offset_width(O0, W0),
-    P1 = line2pdf(X+O,Y,H,W,justified,P),
-    make_justified(X, Y-Leading, Leading, T, O2, W2, P1).
+    P1 = line2pdf(PID, X+O,Y,H,W,justified,P),
+    make_justified(PID, X, Y-Leading, Leading, T, O2, W2, P1).
 
-make_para(X, Y, Leading, [], _, _, _, P) -> P;
-make_para(X, Y, Leading, [H], [O|_], [W|_], Style, P) -> 
-    line2pdf(X+O,Y,H,W,Style, P);
-make_para(X, Y, Leading, [H|T], [O|O1] = O0, [W|W1] = W0, Style, P) -> 
+make_para(PID, X, Y, Leading, [], _, _, _, P) -> P;
+make_para(PID, X, Y, Leading, [H], [O|_], [W|_], Style, P) -> 
+    line2pdf(PID, X+O,Y,H,W,Style, P);
+make_para(PID, X, Y, Leading, [H|T], [O|O1] = O0, [W|W1] = W0, Style, P) -> 
     {O2, W2} = last_offset_width(O0, W0),
-    P1 = line2pdf(X+O,Y,H,W,Style,P),
-    make_para(X, Y-Leading, Leading, T, O2, W2, Style, P1).
+    P1 = line2pdf(PID, X+O,Y,H,W,Style,P),
+    make_para(PID, X, Y-Leading, Leading, T, O2, W2, Style, P1).
 
 last_offset_width([O|O1],[W|W1]) ->
     O2 = if O1 == [] -> [O];
@@ -100,7 +100,7 @@ last_offset_width([O|O1],[W|W1]) ->
          end,
     {O2, W2}.
 
-line2pdf(X, Y, {richText, Line}, Len, Style, P) ->
+line2pdf(PID, X, Y, {richText, Line}, Len, Style, P) ->
     TotWidth = eg_richText:lineWidth(Line)/1000,
     NS       = eg_richText:numberOfSpaces(Line),
     case Style of
@@ -115,63 +115,63 @@ line2pdf(X, Y, {richText, Line}, Len, Style, P) ->
 	    %% dbg_io("Line=~p~n",[Line]),
 	    %% dbg_io("NS=~p Tw=~p Len=~p TotWidth=~p~n",
 	    %% [NS,Tw,Len,TotWidth]),
-	    make_line(X, Y, Line, Tw, P);
+	    make_line(PID, X, Y, Line, Tw, P);
 	last_line_justified ->
 	    %% The last line of a justfied para has to be handled with care
 	    %% It might happen that the line needs to be squashed ...
 	    if 
 		TotWidth > Len ->
-		    line2pdf(X, Y, {richText, Line}, Len, justified, P);
+		    line2pdf(PID, X, Y, {richText, Line}, Len, justified, P);
 		true ->
-		    line2pdf(X, Y, {richText, Line}, Len, left_justified, P)
+		    line2pdf(PID, X, Y, {richText, Line}, Len, left_justified, P)
 	    end;
 	left_justified ->
-	    make_line(X, Y, Line, 0, P);
+	    make_line(PID, X, Y, Line, 0, P);
 	right_justified ->
 	    Excess = Len - TotWidth,
-	    make_line(X+Excess, Y, Line, 0, P);
+	    make_line(PID, X+Excess, Y, Line, 0, P);
 	centered ->
             %% dbg_io("Len = ~p~n",[Len]),
             %% dbg_io("TotWidth = ~p~n",[TotWidth]),
 	    Offset = round(Len - TotWidth) div 2,
             
             %% dbg_io("Offset = ~p~n",[Offset]),
-	    make_line(X+Offset, Y, Line, 0, P)
+	    make_line(PID, X+Offset, Y, Line, 0, P)
     end.
 
-make_line(X, Y, Line, Tw, P) ->
+make_line(PID, X, Y, Line, Tw, P) ->
     %% dbg_io("make line~p at pos=~p ~p~n",[Line,X,Y]),
     P1 = add_move(X, Y, P),
-    make_line(Line, Tw, P1).
+    make_line(PID, Line, Tw, P1).
 
-make_line([H|T], Tw, P) ->
+make_line(PID,[H|T], Tw, P) ->
     case eg_richText:classify_inline(H) of
 	space ->
 	    {Font,Size} = get_font_info(H),
-	    P1 = ensure_face(Font, Size, P),
+	    P1 = ensure_face(PID, Font, Size, P),
 	    P2 = ensure_tw(Tw, P1),
-	    make_line(T, Tw, add_space(Font, P2));
+	    make_line(PID, T, Tw, add_space(Font, P2));
 	word ->
 	    {Font,Size} = get_font_info(H),
 	    Str = eg_richText:string(H),
 	    %% dbg_io("Outputting Word=~p Font=~p oldFont=~p~n",
 	    %% [H,Font,P#pdf.face]),
-	    P1 = ensure_face(Font, Size, P),
+	    P1 = ensure_face(PID, Font, Size, P),
 	    P2 = ensure_tw(Tw, P1),
 	    Color = eg_richText:color(H),
 	    P3 = ensure_color(Color, P2),
-	    make_line(T, Tw, add_string(Font, Str, P3));
+	    make_line(PID, T, Tw, add_string(Font, Str, P3));
 	fixedStr ->
 	    {Font,Size} = get_font_info(H),
 	    Str = eg_richText:string(H),
-	    P1 = ensure_face(Font, Size, P),
+	    P1 = ensure_face(PID, Font, Size, P),
 	    P2 = ensure_tw(0, P1),
-	    make_line(T, Tw, add_string(Font, Str, P2));
+	    make_line(PID, T, Tw, add_string(Font, Str, P2));
 	_ ->
 	    dbg_io("Don't know how to make a line with a: ~p~n",[H]),
-	    make_line(T, Tw, P)
+	    make_line(PID, T, Tw, P)
     end;
-make_line([], _, P) ->
+make_line(PID, [], _, P) ->
     P.
 
 get_font_info(X) ->
@@ -215,13 +215,14 @@ add_move(X, Y, P) ->
 	    add_code(C, P1#pdf{xy={X,Y}})
     end.
 
-ensure_face(Font, Pts, P) ->
+ensure_face(PID, Font, Pts, P) ->
     case P#pdf.face of
 	{Font, Pts} ->
 	    P;
 	{_, _} ->
 	    P1 = close_tj(P),
 	    P2 = P1#pdf{face={Font,Pts}},
+	    eg_pdf:ensure_font_gets_loaded(PID, Font:fontName()),
 	    Index = Font:index(),
 	    add_code("/F" ++ eg_pdf_op:i2s(Index) ++ " " ++
                      eg_pdf_op:i2s(Pts) ++ " Tf ", P2)

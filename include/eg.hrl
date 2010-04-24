@@ -85,7 +85,7 @@
 -record(face, {font, pointSize, vOffset, color, breakable}).
 
 -record(table,
-    { def_font="Times-Roman",      % Default font choice
+    { def_font="Times-Bold",      % Default font choice
       em_font="Times-Bold",       % font for <em> tag 
       b_font="Times-Bold",        % font for <b> tag
       code_font="Courier-Bold"}). % font for <code> tag

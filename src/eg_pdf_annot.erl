@@ -69,7 +69,7 @@
 
 -module(eg_pdf_annot).
 
--include("eg.hrl").
+-include("../include/eg.hrl").
 
 
 -export([new_text/2, new_text/3, new_open_text/2, new_open_text/3, 

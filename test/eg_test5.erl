@@ -81,7 +81,7 @@ demo(PDF, Rot, X, Y, PointSize, Leading, Offset, Width) ->
     Off = [Offset|lists:duplicate(30,0)],
     {Lines,_,_} = eg_line_break:break_richText(text(1,Rot,PointSize), 
 					       {justified, Widths}),
-    Code = eg_richText2pdf:richText2pdf(X, Y, justified, Rot, Lines, 
+    Code = eg_richText2pdf:richText2pdf(PDF, X, Y, justified, Rot, Lines, 
 					Leading, Widths, Off),
     io:format("Code=~p~n",[Code]),
     eg_pdf:append_stream(PDF, Code).

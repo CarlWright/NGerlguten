@@ -26,8 +26,8 @@
 %%==========================================================================
 
 -module (eg_table).
-
--export ([table/7, table_from_xml/7]).
+-include("../include/eg.hrl").
+-export ([table/8, table_from_xml/8]).
 
 
 % State during main output routine
@@ -40,10 +40,10 @@
            
   
         
-table_from_xml(PDF, XML, X, Width, Start, Bottom, FontSize) ->
+table_from_xml(PDF, XML, X, Width, Start, Bottom, FontSize, FontChoice) ->
   Parsed = eg_xml_lite:parse_all_forms(XML),
   Rows = lists:map(fun({xml,Z}) -> Z end, Parsed),
-  table(PDF, Rows, X, Width, Start, Bottom, FontSize).
+  table(PDF, Rows, X, Width, Start, Bottom, FontSize, FontChoice).
   
   
   
@@ -94,7 +94,7 @@ table_from_xml(PDF, XML, X, Width, Start, Bottom, FontSize) ->
 %%          Total_Y
 
 
-table(PDF, Rows, X, Width, Start, Bottom, FontSize) ->
+table(PDF, Rows, X, Width, Start, Bottom, FontSize,FontChoice) ->
     eg_pdf:set_font(PDF,"Times-Roman", 10),   %% when set_font is not done first, no font catalog
                                               %% goes into the output and formatting is erratic.
     S0 = #st{y=Start, min_y = Bottom },
@@ -104,7 +104,7 @@ table(PDF, Rows, X, Width, Start, Bottom, FontSize) ->
     W = Width - 5*Cols,
 
     RTF_words = lists:map(fun(Row) -> 
-                                row2rtf(Row, lists:duplicate(Cols, W),FontSize) 
+                                row2rtf(Row, lists:duplicate(Cols, W),FontSize,FontChoice) 
                         end, Rows),
 
     %% Find the longest single word in each column. Start with a minimum col
@@ -178,7 +178,7 @@ table(PDF, Rows, X, Width, Start, Bottom, FontSize) ->
 
     RTFRows = lists:map(fun(Row) ->
                                 %% io:format("RTFRow = ~p~n",[Row]),
-                                row2rtf(Row, I6, FontSize)
+                                row2rtf(Row, I6, FontSize,FontChoice)
                         end, Rows),
     % io:format("RTFRows = ~p~n",[RTFRows]),
     Heights = lists:map(fun(Row) -> max_row_lines(Row,0) end, RTFRows),
@@ -192,7 +192,7 @@ table(PDF, Rows, X, Width, Start, Bottom, FontSize) ->
     %% the bottom.
     case S#st.y - 26 < S#st.min_y of
       true -> not_fitting;
-      false -> rows(PDF, Heights, RTFRows, X, I7, Cols, false, S, FontSize)
+      false -> rows(PDF, Heights, RTFRows, X, I7, Cols, false, S, FontSize, FontChoice)
     end.
               
 
@@ -218,24 +218,24 @@ max_length([], Max) ->
     Max.
     
     
-row2rtf({row, _, Row}, Col_widths, FontSize) ->
-    TagMap = {[cell], [{default, eg_richText:mk_face("Times-Roman",FontSize,
+row2rtf({row, _, Row}, Col_widths, FontSize, FontChoice) ->
+    TagMap = {[cell], [{default, eg_richText:mk_face(FontChoice#table.def_font,FontSize,
                                                      true,default,0)},
-                       {em,      eg_richText:mk_face("Times-Italic",FontSize,
+                       {em,      eg_richText:mk_face(FontChoice#table.em_font,FontSize,
                                                      true,default,0)},
-                       {code,    eg_richText:mk_face("Courier",FontSize,
+                       {code,    eg_richText:mk_face(FontChoice#table.code_font,FontSize,
                                                      true,default,0)},
-                       {b,       eg_richText:mk_face("Times-Bold",FontSize,
+                       {b,       eg_richText:mk_face(FontChoice#table.b_font,FontSize,
                                                      true,default,0)}]},
     row2rtf1(Row, Col_widths, TagMap);
-row2rtf({header, _, Row}, Col_widths,FontSize) ->
-    TagMap = {[cell], [{default, eg_richText:mk_face("Times-Bold",FontSize,
+row2rtf({header, _, Row}, Col_widths,FontSize, FontChoice) ->
+    TagMap = {[cell], [{default, eg_richText:mk_face(FontChoice#table.def_font,FontSize,
                                                      true,default,0)},
-                       {em,      eg_richText:mk_face("Times-Bold",FontSize,
+                       {em,      eg_richText:mk_face(FontChoice#table.em_font,FontSize,
                                                      true,default,0)},
-                       {code,    eg_richText:mk_face("Courier-Bold",FontSize,
+                       {code,    eg_richText:mk_face(FontChoice#table.code_font,FontSize,
                                                      true,default,0)},
-                       {b,       eg_richText:mk_face("Times-Bold",FontSize,
+                       {b,       eg_richText:mk_face(FontChoice#table.b_font,FontSize,
                                                      true,default,0)}]},
     row2rtf1(Row, Col_widths, TagMap).
 
@@ -354,7 +354,7 @@ max_row_lines([], Max) ->
     Max.
 
 
-rows(PDF, [H|T],[Row|Rows],X,Col_widths, Cols, Mid_row, S,FontSize) ->
+rows(PDF, [H|T],[Row|Rows],X,Col_widths, Cols, Mid_row, S,FontSize, FontChoice) ->
     %% TODO - Work out when to draw top line - i.e. when we are really
     %% at the start of a row even in a multipage row
     if Mid_row == false ->
@@ -364,7 +364,7 @@ rows(PDF, [H|T],[Row|Rows],X,Col_widths, Cols, Mid_row, S,FontSize) ->
     if S#st.y - (H*FontSize) =< S#st.min_y ->
             This_page_lines = (S#st.y - S#st.min_y) div FontSize,
             {TPR, NPR} = split_row(This_page_lines, Row),
-            S1 = row(PDF, TPR, X, Col_widths, This_page_lines, Cols, S, FontSize),
+            S1 = row(PDF, TPR, X, Col_widths, This_page_lines, Cols, S, FontSize, FontChoice),
             %% io:format("NPR = ~p~n", [NPR]),
             %% Draw a line at the bottom as 
             if NPR == [] ->
@@ -377,14 +377,14 @@ rows(PDF, [H|T],[Row|Rows],X,Col_widths, Cols, Mid_row, S,FontSize) ->
             %% appearing in the middle of the table hence 'false'.
             %% S2 = new_page(PDF, false, S1, FontSize),
             rows(PDF, [H - This_page_lines|T], 
-                         [NPR|Rows], X, Col_widths, Cols, Mid_row_2, S1, FontSize);
+                         [NPR|Rows], X, Col_widths, Cols, Mid_row_2, S1, FontSize, FontChoice);
        true ->
             Y = S#st.y,
-            S1 = row(PDF, Row, X,Col_widths,H, Cols, S, FontSize),
+            S1 = row(PDF, Row, X,Col_widths,H, Cols, S, FontSize, FontChoice),
             rows(PDF, T, Rows, X, Col_widths, Cols, false,
-                 S1#st{y = Y - (H*FontSize)-5},FontSize)
+                 S1#st{y = Y - (H*FontSize)-5},FontSize, FontChoice)
     end;
-rows(PDF, [], [], X, Col_widths, _Cols, _Mid_row, S, _) ->
+rows(PDF, [], [], X, Col_widths, _Cols, _Mid_row, S, _FontSize, _FontChoice) ->
     %% Draw final line under table
     eg_pdf:rectangle(PDF, X,S#st.y,lists:sum(Col_widths) + 1,1, fill),
     S.
@@ -480,18 +480,18 @@ is_fixed([]) ->
     true.
 
 
-row(PDF, [{Lines, Width, Off}|Cells], X, [Col_width|T], Height, Cols, S, FontSize) ->
+row(PDF, [{Lines, Width, Off}|Cells], X, [Col_width|T], Height, Cols, S, FontSize, FontChoice) ->
     eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*FontSize)-5, fill),
     eg_pdf:begin_text(PDF),
     lines2pdf(PDF, X+3,S#st.y,Lines, FontSize, Width, Off, justified),
     eg_pdf:end_text(PDF),
-    row(PDF, Cells, X+Col_width, T, Height, Cols-1, S, FontSize);
-row(PDF, [], X, [], Height, 0, S, FontSize) ->
+    row(PDF, Cells, X+Col_width, T, Height, Cols-1, S, FontSize, FontChoice);
+row(PDF, [], X, [], Height, 0, S, FontSize, FontChoice) ->
     eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*FontSize)-5, fill),
     S;
-row(PDF, [], X, [Col_width|T], Height, Cols, S, FontSize) ->
+row(PDF, [], X, [Col_width|T], Height, Cols, S, FontSize, FontChoice) ->
     eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*FontSize)-5, fill),
-    row(PDF, [], X+Col_width, T, Height, Cols-1, S, FontSize).
+    row(PDF, [], X+Col_width, T, Height, Cols-1, S, FontSize, FontChoice).
 
 
 
@@ -515,7 +515,7 @@ split_row(Height, Cells) ->
 lines2pdf(PDF, X,Y,Lines, Leading, Widths, Off, Justification) ->
     %% io:format("Input = ~p~n",[{X, Y, Justification, 0, Lines, 
 %%                               Leading, Widths, Off}]),
-    Code = eg_richText2pdf:richText2pdf(X, Y, Justification, 0, Lines, 
+    Code = eg_richText2pdf:richText2pdf(PDF,X, Y, Justification, 0, Lines, 
                                         Leading, Widths, Off),
     %io:format("Code = ~p~n",[Code]),
     eg_pdf:append_stream(PDF, Code).

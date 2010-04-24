@@ -27,7 +27,7 @@
 
 -module(eg_pdf_assemble).
 
--include("eg.hrl").
+-include("../include/eg.hrl").
 
 -export([make_pdf_file/5,
 	 pdfloop/2
@@ -359,7 +359,7 @@ add_start_xref(F, XrefStartPos) ->
 pdfloop(PDFC, Stream)->
     receive
 	{ensure_font, Fontname} ->
-	    {F,_,_} = handle_setfont(PDFC#pdfContext.fonts, Fontname),
+	    F = ensure_font( eg_font_map:handler(Fontname), PDFC#pdfContext.fonts),
 	    pdfloop(PDFC#pdfContext{fonts=F}, Stream);
 	{stream, {append_text, String}}->
 	    StrToB = list_to_binary(convert(PDFC#pdfContext.font_handler, String)),
@@ -482,14 +482,17 @@ handle_setfont(FontList, FontName)->
 	    Index = Handler:index(),
 	    %% io:format("handler for ~s is ~p index:~p~n",
 	    %% [FontName,Handler,Index]),
+		  {ensure_font(Handler,FontList), "F"++ eg_pdf_op:i2s(Index), Handler}
+    end.
+    
+ensure_font(Handler, FontList) ->
 	    case lists:member(Handler, FontList) of
 		true ->
-		    {FontList, "F"++ eg_pdf_op:i2s(Index), Handler};
+		    FontList;
 		false ->
-		    {[Handler|FontList], "F"++ eg_pdf_op:i2s(Index), Handler}
-	    end
-    end.
-
+		    [Handler|FontList]
+	    end.
+  
 handle_image(ImageDict, FilePath, Size, ProcSet)->
     case dict:find(FilePath, ImageDict) of
 	{ok, #image{alias=Alias, width=W, height=H}} ->

@@ -32,7 +32,7 @@
 
 -import(lists, [map/2]).
 
--include("eg.hrl").
+-include("../include/eg.hrl").
 
 test() -> format("../test/test1.map").
 

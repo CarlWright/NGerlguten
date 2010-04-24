@@ -39,8 +39,7 @@
 -export([make_partitions/2]). % for testing only
                               % this export can be removed later
 
--include("eg.hrl").
-
+-include("../include/eg.hrl").
 %% -define(DEBUG, true).
 
 -ifdef(DEBUG).

@@ -28,7 +28,7 @@
 
 -export([test/0, norm/0, zap/9, zap/10]).
     
--include("../src/eg.hrl").
+-include("../include/eg.hrl").
 
 %% ============================================================================
 
@@ -99,7 +99,7 @@ zap2(PDF, [{xml, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification) ->
 	impossible ->
 	    io:format("Cannot break line are widths ok~n");
 	{Lines,_,_} ->
-	    Code = eg_richText2pdf:richText2pdf(X, Y, justified, 0, Lines, 
+	    Code = eg_richText2pdf:richText2pdf(PDF, X, Y, justified, 0, Lines, 
 						Leading, Widths, Off),
 	    eg_pdf:begin_text(PDF),
 	    eg_pdf:append_stream(PDF, Code),

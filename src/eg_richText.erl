@@ -86,7 +86,7 @@
 	]).
 
 
--include("eg.hrl").
+-include("../include/eg.hrl").
 
 
 %% -define(DEBUG, true).

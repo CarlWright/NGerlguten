@@ -29,7 +29,7 @@
 
 %% Purpose: Generate PDF documents main api
 
--include("eg.hrl").
+-include("../include/eg.hrl").
 
 -export([append_stream/2,
          arc/5,
