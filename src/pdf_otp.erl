@@ -10,7 +10,6 @@
 -behaviour(gen_server).
 
 %% API
--export([start_link/0]).
 
 
 -define(SERVER, pdf_otp).
@@ -115,7 +114,8 @@ init_pdf_context()->
 
 %% Spawn pdf building process
 new()->
-    spawn_link(fun() -> eg_pdf_assemble:pdfloop(init_pdf_context(), <<>>) end).
+    {ok, PDF} = start_link( [init_pdf_context(), <<>>] ),
+    PDF.
 
 %% Export to PDF file format 
 %% return: {PDFDoc::binary(), PageNo::integer()} | exit(Reason)
@@ -166,19 +166,19 @@ get_page_no(PID)->
 %% --- Info -----
 
 set_author(PID,Author)->
-      gen_server:call(PID, {info, {author, Author}}, infinity).
+      gen_server:cast(PID, {info, {author, Author}} ).
 
 set_title(PID,Title)->
-    gen_server:call(PID, {info, {title, Title}}, infinity).
+    gen_server:cast(PID, {info, {title, Title}} ).
 
 set_subject(PID,Subject)->
-    gen_server:call(PID, {info, {subject, Subject}}, infinity).
+    gen_server:cast(PID, {info, {subject, Subject}} ).
     
 set_date(PID,Year,Month,Day)->
-    gen_server:call(PID, {date, {Year,Month,Day}}, infinity).
+    gen_server:cast(PID, {date, {Year,Month,Day}} ).
     
 set_keywords(PID, Keywords)->
-    gen_server:call(PID, {keywords, Keywords}, infinity).
+    gen_server:cast(PID, {keywords, Keywords} ).
 
 
 
@@ -526,8 +526,8 @@ inBuiltFonts() ->
 %% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
 %% Description: Starts the server
 %%--------------------------------------------------------------------
-start_link() ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+start_link(Init) ->
+    gen_server:start_link({local,pdf}, ?MODULE, Init, []).
 
 %%====================================================================
 %% gen_server callbacks
@@ -540,8 +540,8 @@ start_link() ->
 %%                         {stop, Reason}
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
-init([]) ->
-    {ok, #state{}}.
+init(Init) ->
+    {ok, Init}.
 
 %%--------------------------------------------------------------------
 %% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
@@ -555,11 +555,7 @@ init([]) ->
     	
 handle_call({get_page_no}, _From, [PDFC, Stream]) ->	        
 	    {reply, {page, PDFC#pdfContext.currentpage}, [PDFC, Stream]};
-	    
-handle_call({info,Info}, _From, [PDFC, Stream]) ->	      
-	    NewInfo = pdf_handle_info(PDFC#pdfContext.info, Info),
-	    {reply, ok, [PDFC#pdfContext{info=NewInfo}, Stream]};
-	    
+
 handle_call({get_new_page}, _From, [PDFC, Stream]) ->	      
 	    {Add, PageNo} = 
     		handle_newpage(PDFC#pdfContext.pages,
@@ -590,22 +586,26 @@ handle_call({export}, _From, [PDFC, Stream]) ->
 %% Description: Handling cast messages
 %%--------------------------------------------------------------------
 	    	    
-handle_cast({mediabox, Mediabox},  [PDFC, Stream]) ->	
-	    {reply, ok, [PDFC#pdfContext{mediabox=Mediabox}, Stream]};
+handle_cast({mediabox, Mediabox}, [PDFC, Stream]) ->	
+	    {noreply, [PDFC#pdfContext{mediabox=Mediabox}, Stream]};
 	    	    
 handle_cast({delete},  [PDFC, Stream]) ->	
-	    gen_server:terminate(all_done,[PDFC, Stream]);
+	    {stop, normal, [PDFC, Stream]};
 	    	    
 handle_cast({font, {set, Fontname, Size}}, [PDFC, Stream]) ->	
       {F,Alias,Fhand} = handle_setfont(PDFC#pdfContext.fonts, Fontname),
       S = list_to_binary(eg_pdf_op:set_font_by_alias(Alias, Size)),
       Binary = <<Stream/binary, S/binary>>,
-      {reply, ok, [PDFC#pdfContext{fonts=F,font_handler=Fhand}, Binary]};
+      {noreply, [PDFC#pdfContext{fonts=F,font_handler=Fhand}, Binary]};
       
+handle_cast({info,Info}, [PDFC, Stream]) ->	      
+	    NewInfo = pdf_handle_info(PDFC#pdfContext.info, Info),
+	    {noreply,  [PDFC#pdfContext{info=NewInfo}, Stream]};
+	          
 handle_cast({stream, {append, String}}, [PDFC, Stream]) ->	    
 	    B = list_to_binary(convert(PDFC#pdfContext.font_handler, String)),
 	    Binary = <<Stream/binary, B/binary, <<" ">>/binary>>,
-	    {reply, ok, [PDFC, Binary]};
+	    {noreply, [PDFC, Binary]};
 	     
 handle_cast({image, FilePath, Size}, [PDFC, Stream]) ->	    
 	    {I,IMG,{W,H},ProcSet} = handle_image(PDFC#pdfContext.images, 
@@ -613,24 +613,25 @@ handle_cast({image, FilePath, Size}, [PDFC, Stream]) ->
 						 PDFC#pdfContext.procset),
 	    S = list_to_binary(eg_pdf_op:set_image(W,H, IMG)),
 	    Binary = <<Stream/binary, S/binary>>,
-	    {reply, ok, [PDFC#pdfContext{images=I,procset=ProcSet}, Binary]};	    
+	    {noreply, [PDFC#pdfContext{images=I,procset=ProcSet}, Binary]};	    
     
 handle_cast({page_script, Script}, [PDFC, Stream]) ->	
 	    %% io:format("New script ~p\n", [Script]),
 	    NewScript = handle_pagescript(PDFC#pdfContext.scripts,
 					  PDFC#pdfContext.currentpage,
 					  Script),
-	    {reply, ok, [PDFC#pdfContext{scripts=NewScript}, Stream]};
+	    {noreply, [PDFC#pdfContext{scripts=NewScript}, Stream]};
 
 handle_cast({page,{set,PageNo}}, [PDFC, Stream]) ->	
 	    {NewPages,[NewStream]} = handle_setpage(PDFC#pdfContext.pages,PageNo,
 						  PDFC#pdfContext.currentpage, 
 						  [Stream]),
-	    {reply, ok, [PDFC#pdfContext{pages=NewPages,currentpage=PageNo}, NewStream]};	    
+	    {noreply, [PDFC#pdfContext{pages=NewPages,currentpage=PageNo}, NewStream]};	    
   
 handle_cast({ensure_font, Fontname}, [PDFC, Stream]) ->	      
 	    F = ensure_font( eg_font_map:handler(Fontname), PDFC#pdfContext.fonts),
-	    {reply, ok, [PDFC#pdfContext{fonts=F}, Stream]}.
+	    {noreply, [PDFC#pdfContext{fonts=F}, Stream]}.
+	    
 %%--------------------------------------------------------------------
 %% Function: handle_info(Info, State) -> {noreply, State} |
 %%                                       {noreply, State, Timeout} |
