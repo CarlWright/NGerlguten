@@ -1,36 +1,37 @@
 
 			-*- html -*-
 
-	ErlGuten overview page
+	NGerlGuten overview page
 
-@title ErlGuten - a typesetting system for producing PDF from XML
+@title Next Generation ErlGuten - a typesetting system for producing PDF from XML
 
 @author Joe Armstrong
 @author Mikael Karlsson
 @author Johan Bevemyr
 @author Sean Hinde
 @author Håkan Stenholm
+@author Carl Wright
 @copyright 2003-2010 Joe Armstrong, Mikael Karlsson, Johan Bevemyr,
-Sean Hinde, Håkan Stenholm
+Sean Hinde, Håkan Stenholm, Carl Wright
 @version {@version}
 
-@doc ErlGuten is a typesetting system for producing PDF from XML.
+@doc NGerlGuten is a typesetting system for producing PDF from XML.
 
-Erlguten is free software published under the MIT license.
+NGerlGuten is free software published under the MIT license.
 
 The word ErlGuten is built from <a href="http://www.erlang.org/">Erlang</a>
 plus <a href="http://www.gutenberg.de/english/index.htm">Gutenberg</a>.
 
-The goal of ErlGuten is to produce <i>typographic quality</i> output - this
+The goal of NGerlGuten is to produce <i>typographic quality</i> output - this
 means that we aim at the highest quality possible for the typeset text. The
-ErlGuten text justification algorithms produce paragraph-optimized text with
+NGerlGuten text justification algorithms produce paragraph-optimized text with
 fully kerned data, normally the production of such text cannot be done by
 everyday word-processing programs but requires the use of dedicated
 typesetting programs.
 
 == Gallery ==
 
-Here you can see the inputs to ErlGuten and the corresponding output.
+Here you can see the inputs to NGerlGuten and the corresponding output.
 
 <center>
 <table border="1">
@@ -63,7 +64,7 @@ href="http://www.erlang.org/">www.erlang.org</a>.
 
 === Release information ===
 
-This is release 2.5 of ErlGuten. Following release 2.1, it has been
+This is release 2.6 of NGerlGuten. Release 2.5 thru 2.1 were
 maintained for the last years at Klarna AB (formerly Kreditor). It is now
 published under the MIT license, with permission from all the authors.
 The previous release (2.1) can be found at 
@@ -71,7 +72,7 @@ The previous release (2.1) can be found at
 
 === Future releases ===
 
-Future releases of ErlGuten will need to address the following problems:
+Future releases of NGerlGuten will need to address the following problems:
 
 <ul> 
 <li>Font embedding - so far we can only use the PDF embedded type 1

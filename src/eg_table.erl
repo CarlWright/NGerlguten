@@ -90,7 +90,7 @@ table_from_xml(PDF, XML, X, Width, Start, Bottom, FontSize, FontChoice) ->
 %% TODO - Parameterise by: Font size, Spacing around text, table width
 %%        Clever algorithm to arrange column widths
 %%        Do page breaks in the middle of a table
-%% @spec table(PDF, Rows, X, Y, SO) ->
+%% spec table(PDF, Rows, X, Y, SO) ->
 %%          Total_Y
 
 
