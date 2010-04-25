@@ -571,7 +571,7 @@ output_lines(PDF, Lines, Widths, Off, Indent, Width, Just, S) ->
     Y_req = length(Lines) * (?font_size + 2),
     %% io:format("Input1 = ~p~n",[{Off, Y, Y_req, Lines, Min_y}]),
     if Y_req =< (Y - Min_y)  ->
-            Code = eg_richText2pdf:richText2pdf(Indent, Y, Just, 0, Lines, 
+            Code = eg_richText2pdf:richText2pdf(PDF, Indent, Y, Just, 0, Lines, 
                                                 (?font_size+2), Widths, Off),
             %% io:format("Code = ~p~n",[Code]),
             eg_pdf:begin_text(PDF),
@@ -584,7 +584,7 @@ output_lines(PDF, Lines, Widths, Off, Indent, Width, Just, S) ->
                                  true -> Left div (?font_size+2)
                               end,
             {TPL, NPL} = lists:split(This_page_lines, Lines),
-            Code = eg_richText2pdf:richText2pdf(Indent, Y, Just, 0, TPL, 
+            Code = eg_richText2pdf:richText2pdf(PDF, Indent, Y, Just, 0, TPL, 
                                                 (?font_size+2), Widths, Off),
             %% io:format("Code = ~p~n",[Code]),
             eg_pdf:begin_text(PDF),
@@ -1220,7 +1220,7 @@ lines(Xml, Len, _PtSize, NLines, Justification) ->
 lines2pdf(PDF, X,Y,Lines, Leading, Widths, Off, Justification) ->
     %% io:format("Input = ~p~n",[{X, Y, Justification, 0, Lines, 
 %%                               Leading, Widths, Off}]),
-    Code = eg_richText2pdf:richText2pdf(X, Y, Justification, 0, Lines, 
+    Code = eg_richText2pdf:richText2pdf(PDF, X, Y, Justification, 0, Lines, 
                                         Leading, Widths, Off),
     %io:format("Code = ~p~n",[Code]),
     eg_pdf:append_stream(PDF, Code).
