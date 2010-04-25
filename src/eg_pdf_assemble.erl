@@ -361,10 +361,6 @@ pdfloop(PDFC, Stream)->
 	{ensure_font, Fontname} ->
 	    F = ensure_font( eg_font_map:handler(Fontname), PDFC#pdfContext.fonts),
 	    pdfloop(PDFC#pdfContext{fonts=F}, Stream);
-	{stream, {append_text, String}}->
-	    StrToB = list_to_binary(convert(PDFC#pdfContext.font_handler, String)),
-	    Binary = <<Stream/binary, StrToB/binary, <<" ">>/binary>>,
-	    pdfloop(PDFC, Binary);
 	{stream, {append, String}}->
 	    B = list_to_binary(convert(PDFC#pdfContext.font_handler, String)),
 	    Binary = <<Stream/binary, B/binary, <<" ">>/binary>>,

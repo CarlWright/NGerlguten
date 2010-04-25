@@ -87,7 +87,7 @@ table_from_xml(PDF, XML, X, Width, Start, Bottom, FontSize, FontChoice) ->
 %%    (largest number of lines).
 %% 5. Output the table, drwing lines as we go
 %%
-%% TODO - Parameterise by: Font size, Spacing around text, table width
+%% TODO - Parameterise by:  Spacing around text, table width, row background
 %%        Clever algorithm to arrange column widths
 %%        Do page breaks in the middle of a table
 %% spec table(PDF, Rows, X, Y, SO) ->

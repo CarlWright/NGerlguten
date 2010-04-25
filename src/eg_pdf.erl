@@ -266,11 +266,11 @@ end_text(PID)  -> append_stream(PID, eg_pdf_op:end_text() ).
      
 break_text(PID)-> append_stream(PID, eg_pdf_op:break_text() ).
     
-text(PID, Text) ->  append_stream_text(PID, eg_pdf_op:text(Text) ).
+text(PID, Text) ->  append_stream(PID, eg_pdf_op:text(Text) ).
 
-textbr(PID,Text)-> append_stream_text(PID, eg_pdf_op:textbr(Text) ).
+textbr(PID,Text)-> append_stream(PID, eg_pdf_op:textbr(Text) ).
     
-kernedtext(PID, Text)-> append_stream_text(PID, eg_pdf_op:kernedtext(Text) ).
+kernedtext(PID, Text)-> append_stream(PID, eg_pdf_op:kernedtext(Text) ).
 
 set_text_pos(PID, X, Y)->  append_stream(PID, eg_pdf_op:set_text_pos(X,Y)).
 		      
@@ -496,8 +496,6 @@ image1(PID, FilePath, {size,Size})->
 append_stream(PID, String)->
     PID ! {stream, {append, String}}.
 
-append_stream_text(PID, String)->
-    PID ! {stream, {append_text, String}}.
 
 
 

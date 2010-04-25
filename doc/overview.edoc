@@ -64,15 +64,15 @@ href="http://www.erlang.org/">www.erlang.org</a>.
 
 === Release information ===
 
-This is release 2.6 of NGerlGuten. Release 2.5 thru 2.1 were
-maintained for the last years at Klarna AB (formerly Kreditor). It is now
+This is release 2.6 of NGerlGuten. 
+
+Release 2.5 thru 2.1 were
+maintained for the last few years at Klarna AB (formerly Kreditor). It is now
 published under the MIT license, with permission from all the authors.
 The previous release (2.1) can be found at 
 [http://www.sics.se/~joe/erlguten-2.1/erlguten.html].
 
-=== Future releases ===
-
-Future releases of NGerlGuten will need to address the following problems:
+=== Ideas for Future releases ===
 
 <ul> 
 <li>Font embedding - so far we can only use the PDF embedded type 1
