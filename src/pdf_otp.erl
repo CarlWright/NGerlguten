@@ -12,6 +12,9 @@
 %% API
 -export([start_link/0]).
 
+
+-define(SERVER, pdf_otp).
+
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
    terminate/2, code_change/3]).
@@ -117,17 +120,16 @@ new()->
 %% Export to PDF file format 
 %% return: {PDFDoc::binary(), PageNo::integer()} | exit(Reason)
 export(PID)->
-    PID ! {export, self()},
-    receive
-	{export, PDFDoc, PageNo}->
-	    {PDFDoc, PageNo};
-	{'EXIT', PID, Reason} ->
-	    exit(Reason)
-    end.
+  case gen_server:call(PID, {export}, infinity) of
+  	{export, PDFDoc, PageNo}->
+  	    {PDFDoc, PageNo};
+  	{'EXIT', PID, Reason} ->
+  	    exit(Reason)
+  end.
 
 %% clear up - delete pdf building process
 delete(PID)->
-    PID ! delete,
+    gen_server:terminate(all_done,exit),
     done.
 
 
@@ -135,47 +137,49 @@ delete(PID)->
 %% Note page 1 is already created  by default and  current page set 
 %% to it after creation of PDF context.
 new_page(PID)->
-    PID ! {page, {new, self()}},
-    receive
-	{page,PageNo}->
-	    PageNo;
-	{'EXIT', PID, Reason} ->
-	    exit(Reason)
+   case gen_server:call( PID, {get_new_page}, infinity) of
+    	{page,PageNo}->
+    	    PageNo;
+    	{'EXIT', PID, Reason} ->
+    	    exit(Reason)
     end.
 
+
+
 page_script(PID, Script) ->
-    PID ! {page_script, Script}.
+    gen_server:cast(PID, {page_script, Script}).
+
 
 %% Go to a page already created.    
 set_page(PID, PageNo)->
-    PID ! {page,{set, PageNo}}.
+    gen_server:cast(PID, {page,{set, PageNo}}).
 
 %% Useful for page numbering functions etc.
 get_page_no(PID)->
-    PID ! {page, {get_no, self()}},
-    receive
-	{page,PageNo}->
-	    PageNo;
-	{'EXIT', PID, Reason} ->
-	    exit(Reason)
+   case gen_server:call( PID, {get_page_no}, infinity) of
+    	{page,PageNo}->
+    	    PageNo;
+    	{'EXIT', PID, Reason} ->
+    	    exit(Reason)
     end.
     
 %% --- Info -----
 
 set_author(PID,Author)->
-    PID ! {info,{author, Author}}.
+      gen_server:call(PID, {info, {author, Author}}, infinity).
 
 set_title(PID,Title)->
-    PID ! {info,{title, Title}}.
+    gen_server:call(PID, {info, {title, Title}}, infinity).
 
 set_subject(PID,Subject)->
-    PID ! {info,{subject, Subject}}.
-
+    gen_server:call(PID, {info, {subject, Subject}}, infinity).
+    
 set_date(PID,Year,Month,Day)->
-    PID ! {info,{date, {Year,Month,Day}}}.
-
+    gen_server:call(PID, {date, {Year,Month,Day}}, infinity).
+    
 set_keywords(PID, Keywords)->
-    PID ! {info,{keywords, Keywords}}.
+    gen_server:call(PID, {keywords, Keywords}, infinity).
+
 
 
 %% --- Page ---
@@ -217,18 +221,19 @@ pagesize(tabloid)        -> pagesize( 792, 1224 ).
 pagesize(Width, Height) -> {0,0,Width,Height}.
 
 set_pagesize(PID, Size)-> 
-    PID ! {mediabox, pagesize(Size) }.
+  gen_server:cast(PID, {mediabox, pagesize(Size) }).
+
 
 set_pagesize(PID, Width, Height) -> 
-    PID ! {mediabox, pagesize(Width, Height)} .
+  gen_server:cast(PID, {mediabox, pagesize(Width, Height) }).
 
 %% -- Fonts --
 
 set_font(PID, Fontname, Size)->
-    PID ! {font, {set, Fontname, Size}}.
+    gen_server:cast(PID, {font, {set, Fontname, Size}}).
 
 ensure_font_gets_loaded(PID, FontName) ->
-    PID ! {ensure_font, FontName}.
+    gen_server:cast(PID, {ensure_font, FontName}).
 
 
 %% -- This function is a bit expensive, but will stick to the public interface.
@@ -479,14 +484,14 @@ image1(PID, FilePath, {height, H}) ->
 image1(PID, FilePath, {W, H}) when is_integer(W), is_integer(H)->
     image1(PID, FilePath, {size,{W,H}});
 image1(PID, FilePath, {size,Size})->
-    gen_server:call(PID, {image, FilePath, Size}, infinity).
+    gen_server:cast(PID, {image, FilePath, Size}).
    % PID ! {image, FilePath, Size}.
 
 
 
 %% Internals
 append_stream(PID, String)->
-    PID ! {stream, {append, String}}.
+    gen_server:cast(PID, {stream, {append, String}}).
 
 
 
@@ -547,93 +552,35 @@ init([]) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
-handle_call(_Request, _From, State) ->
-    Reply = ok,
-    {reply, Reply, State}.
-    
-    
-pdfloop(PDFC, Stream)->
-    receive
-	{ensure_font, Fontname} ->
-	    F = ensure_font( eg_font_map:handler(Fontname), PDFC#pdfContext.fonts),
-	    pdfloop(PDFC#pdfContext{fonts=F}, Stream);
-	    
-	{stream, {append, String}}->
-	    B = list_to_binary(convert(PDFC#pdfContext.font_handler, String)),
-	    Binary = <<Stream/binary, B/binary, <<" ">>/binary>>,
-	    pdfloop(PDFC, Binary);
-	    
-	{page_script, Script} ->
-	    %% io:format("New script ~p\n", [Script]),
-	    NewScript = handle_pagescript(PDFC#pdfContext.scripts,
-					  PDFC#pdfContext.currentpage,
-					  Script),
-	    pdfloop(PDFC#pdfContext{scripts=NewScript}, Stream);
-	    
-	{font, {set, Fontname, Size}}->
-	    {F,Alias,Fhand} = handle_setfont(PDFC#pdfContext.fonts, Fontname),
-	    S = list_to_binary(eg_pdf_op:set_font_by_alias(Alias, Size)),
-	    Binary = <<Stream/binary, S/binary>>,
-	    pdfloop(PDFC#pdfContext{fonts=F,font_handler=Fhand}, Binary);
-	    
-	{image, FilePath, Size}->
-	    {I,IMG,{W,H},ProcSet} = handle_image(PDFC#pdfContext.images, 
-						 FilePath, Size, 
-						 PDFC#pdfContext.procset),
-	    S = list_to_binary(eg_pdf_op:set_image(W,H, IMG)),
-	    Binary = <<Stream/binary, S/binary>>,
-	    pdfloop(PDFC#pdfContext{images=I,procset=ProcSet}, Binary);
-	    
-	{page,{new, PID}}->
-	    {Add, PageNo} = 
-		handle_newpage(PDFC#pdfContext.pages,
-			       PDFC#pdfContext.currentpage,
-			       [Stream]),
-	    PID ! {page, PageNo},
-	    pdfloop(PDFC#pdfContext{pages=Add, currentpage=PageNo}, <<>>);
-	    
-    	{page,{set,PageNo}}->
-	    {NewPages,[NewStream]} = handle_setpage(PDFC#pdfContext.pages,PageNo,
-						  PDFC#pdfContext.currentpage, 
-						  [Stream]),
-	    pdfloop(PDFC#pdfContext{pages=NewPages,currentpage=PageNo}, NewStream);	
-	    	
-handle_call({page,{get_no, PID}, _From, [PDFC, Stream]) ->	        
-	    PID ! {page, PDFC#pdfContext.currentpage},
-	    {reply, Serialised, [PDFC, Stream]};
-
+    	
+handle_call({get_page_no}, _From, [PDFC, Stream]) ->	        
+	    {reply, {page, PDFC#pdfContext.currentpage}, [PDFC, Stream]};
 	    
 handle_call({info,Info}, _From, [PDFC, Stream]) ->	      
-	{info,Info}->
-	    NewInfo = handle_info(PDFC#pdfContext.info, Info),
-	    pdfloop(PDFC#pdfContext{info=NewInfo}, Stream);
+	    NewInfo = pdf_handle_info(PDFC#pdfContext.info, Info),
+	    {reply, ok, [PDFC#pdfContext{info=NewInfo}, Stream]};
 	    
-	{mediabox, Mediabox}->
-	    pdfloop(PDFC#pdfContext{mediabox=Mediabox}, Stream);	
+handle_call({get_new_page}, _From, [PDFC, Stream]) ->	      
+	    {Add, PageNo} = 
+    		handle_newpage(PDFC#pdfContext.pages,
+    			       PDFC#pdfContext.currentpage,
+    			       [Stream]),
+    {reply, {page, PageNo}, [PDFC#pdfContext{pages=Add, currentpage=PageNo}, <<>>]};
 	        
-	{export,PID} ->
+handle_call({export,PID}, _From, [PDFC, Stream]) ->	
 	    %% add last page if necessary before exporting
 	    PDF = case Stream of 
-		      <<>> ->		    
-			  PageNo = PDFC#pdfContext.pages,
-			  handle_export(PDFC);
-		      _ ->
-			  {Add, PageNo} = handle_newpage(
-					    PDFC#pdfContext.pages,
-					    PDFC#pdfContext.currentpage,
-					    [Stream]),
-			  handle_export(PDFC#pdfContext{pages=Add})
-	    end,
-	    PID ! {export, PDF, PageNo},
-	    pdfloop(PDFC, Stream);
-	    
-	delete ->
-	    done;
-	    
-	X ->
-	    io:format("Not yet implemented:~p~n", [X]),
-	    pdfloop(PDFC, Stream)
-    end.
+      		      <<>> ->		    
+      			  PageNo = PDFC#pdfContext.pages,
+      			  handle_export(PDFC);
+      		      _ ->
+      			  {Add, PageNo} = handle_newpage(
+      					    PDFC#pdfContext.pages,
+      					    PDFC#pdfContext.currentpage,
+      					    [Stream]),
+      			  handle_export(PDFC#pdfContext{pages=Add})
+      	    end,
+	    {reply, {export, PDF, PageNo}, [PDFC, Stream]}.
 
 
 %%--------------------------------------------------------------------
@@ -642,9 +589,45 @@ handle_call({info,Info}, _From, [PDFC, Stream]) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling cast messages
 %%--------------------------------------------------------------------
-handle_cast(_Msg, State) ->
-    {noreply, State}.
+	    	    
+handle_cast({mediabox, Mediabox},  [PDFC, Stream]) ->	
+	    {reply, ok, [PDFC#pdfContext{mediabox=Mediabox}, Stream]};
+	    
+handle_cast({font, {set, Fontname, Size}}, [PDFC, Stream]) ->	
+      {F,Alias,Fhand} = handle_setfont(PDFC#pdfContext.fonts, Fontname),
+      S = list_to_binary(eg_pdf_op:set_font_by_alias(Alias, Size)),
+      Binary = <<Stream/binary, S/binary>>,
+      {reply, ok, [PDFC#pdfContext{fonts=F,font_handler=Fhand}, Binary]};
+      
+handle_cast({stream, {append, String}}, [PDFC, Stream]) ->	    
+	    B = list_to_binary(convert(PDFC#pdfContext.font_handler, String)),
+	    Binary = <<Stream/binary, B/binary, <<" ">>/binary>>,
+	    {reply, ok, [PDFC, Binary]};
+	     
+handle_cast({image, FilePath, Size}, [PDFC, Stream]) ->	    
+	    {I,IMG,{W,H},ProcSet} = handle_image(PDFC#pdfContext.images, 
+						 FilePath, Size, 
+						 PDFC#pdfContext.procset),
+	    S = list_to_binary(eg_pdf_op:set_image(W,H, IMG)),
+	    Binary = <<Stream/binary, S/binary>>,
+	    {reply, ok, [PDFC#pdfContext{images=I,procset=ProcSet}, Binary]};	    
+    
+handle_cast({page_script, Script}, [PDFC, Stream]) ->	
+	    %% io:format("New script ~p\n", [Script]),
+	    NewScript = handle_pagescript(PDFC#pdfContext.scripts,
+					  PDFC#pdfContext.currentpage,
+					  Script),
+	    {reply, ok, [PDFC#pdfContext{scripts=NewScript}, Stream]};
 
+handle_cast({page,{set,PageNo}}, [PDFC, Stream]) ->	
+	    {NewPages,[NewStream]} = handle_setpage(PDFC#pdfContext.pages,PageNo,
+						  PDFC#pdfContext.currentpage, 
+						  [Stream]),
+	    {reply, ok, [PDFC#pdfContext{pages=NewPages,currentpage=PageNo}, NewStream]};	    
+  
+handle_cast({ensure_font, Fontname}, [PDFC, Stream]) ->	      
+	    F = ensure_font( eg_font_map:handler(Fontname), PDFC#pdfContext.fonts),
+	    {reply, ok, [PDFC#pdfContext{fonts=F}, Stream]}.
 %%--------------------------------------------------------------------
 %% Function: handle_info(Info, State) -> {noreply, State} |
 %%                                       {noreply, State, Timeout} |
@@ -1101,15 +1084,15 @@ imageBC(Ncomp,{B,C}) when Ncomp > 2 -> {B,imagec}.
 
 
 
-handle_info(I,{author,Author})->
+pdf_handle_info(I,{author,Author})->
     I#info{author=Author};
-handle_info(I,{title,Title}) ->
+pdf_handle_info(I,{title,Title}) ->
     I#info{title=Title};
-handle_info(I,{subject,Subject}) ->
+pdf_handle_info(I,{subject,Subject}) ->
     I#info{subject=Subject};
-handle_info(I,{date,{Year,Month,Day}})->
+pdf_handle_info(I,{date,{Year,Month,Day}})->
     I#info{creationDate={Year,Month,Day}};
-handle_info(I,{keywords,Keywords}) ->
+pdf_handle_info(I,{keywords,Keywords}) ->
     I#info{keywords=Keywords}.
 
 
