@@ -129,8 +129,8 @@ export(PID)->
 
 %% clear up - delete pdf building process
 delete(PID)->
-    gen_server:terminate(all_done,exit),
-    done.
+    gen_server:cast(PID,{delete}).
+
 
 
 %% Add current page context to PDF document and start on a new page 
@@ -567,7 +567,7 @@ handle_call({get_new_page}, _From, [PDFC, Stream]) ->
     			       [Stream]),
     {reply, {page, PageNo}, [PDFC#pdfContext{pages=Add, currentpage=PageNo}, <<>>]};
 	        
-handle_call({export,PID}, _From, [PDFC, Stream]) ->	
+handle_call({export}, _From, [PDFC, Stream]) ->	
 	    %% add last page if necessary before exporting
 	    PDF = case Stream of 
       		      <<>> ->		    
@@ -592,7 +592,10 @@ handle_call({export,PID}, _From, [PDFC, Stream]) ->
 	    	    
 handle_cast({mediabox, Mediabox},  [PDFC, Stream]) ->	
 	    {reply, ok, [PDFC#pdfContext{mediabox=Mediabox}, Stream]};
-	    
+	    	    
+handle_cast({delete},  [PDFC, Stream]) ->	
+	    gen_server:terminate(all_done,[PDFC, Stream]);
+	    	    
 handle_cast({font, {set, Fontname, Size}}, [PDFC, Stream]) ->	
       {F,Alias,Fhand} = handle_setfont(PDFC#pdfContext.fonts, Fontname),
       S = list_to_binary(eg_pdf_op:set_font_by_alias(Alias, Size)),
@@ -657,28 +660,6 @@ code_change(_OldVsn, State, _Extra) ->
 %%--------------------------------------------------------------------
 %%% Internal functions
 %%--------------------------------------------------------------------
-%% This is for backwards compatibility with pre-image test files
-make_pdf_file(OutFile, Info, Fonts, Pages, MediaBox) ->
-    make_pdf_file(OutFile, Info, Fonts, [], Pages, MediaBox,{[],[]}).
-
-make_pdf_file(OutFile, Info, Fonts, Images, Pages, MediaBox, ProcSet) ->
-    {Root, Ninfo, Os} = build_pdf(Info, Fonts, Images,Pages,MediaBox,ProcSet),
-    {ok, F} = file:open(OutFile, [binary,raw,write]),
-    file:write(F, header()),
-    {ok, Pos0} = file:position(F, cur),
-    %% io:format("Os=~p~n", [Os]),
-    {Posns, _} = lists:mapfoldl(fun(I, Pos) -> 
-				  {{obj,Index,_},_} = I,
-				  Data = eg_pdf_lib:serialise(I),
-				  file:write(F, Data),
-				  {ok, Pos1} = file:position(F, cur),
-				  {{Index,Pos}, Pos1}
-			  end, Pos0, Os),
-   %% io:format("Posn=~p~n",[Posns]),
-    XrefStartPos = add_xref(F, Posns),
-    add_trailer(F, Posns, Root, Ninfo),
-    add_start_xref(F, XrefStartPos),
-    file:close(F).
 
 build_pdf(Info, Fonts, Images, Pages, MediaBox, ProcSet) ->
     %% io:format("build pdf Fonts=~p~n",[Fonts]),

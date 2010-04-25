@@ -3,7 +3,7 @@ The tests
 
 ### comcastBill
 
-When you rune comcastBill:test(), you get a two page PDF which reproduces my Comcast bill for internet services.
+When you run comcastBill:test(), you get a two page PDF which reproduces my Comcast bill for internet services.
 ### eg_test1
 
 When you run eg_test1:test(), it  produces a four page PDF (eg_test1.pdf) using the pdf module function calls. It illustrates most features of the pdf module.

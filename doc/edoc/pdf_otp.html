@@ -1,16 +1,17 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-<title>Module eg_pdf</title>
+<title>Module pdf_otp</title>
 <link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
 </head>
 <body bgcolor="white">
 <div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
 <hr>
 
-<h1>Module eg_pdf</h1>
+<h1>Module pdf_otp</h1>
 <ul class="index"><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
 
+<p><b>Behaviours:</b> <a href="gen_server.html"><tt>gen_server</tt></a>.</p>
 
 <h2><a name="index">Function Index</a></h2>
 <table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#append_stream-2">append_stream/2</a></td><td></td></tr>
@@ -23,6 +24,7 @@
 <tr><td valign="top"><a href="#bezier_y-3">bezier_y/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#break_text-1">break_text/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#circle-3">circle/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#code_change-3">code_change/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#color-1">color/1</a></td><td> R,G,B = 0-255.</td></tr>
 <tr><td valign="top"><a href="#default_face-0">default_face/0</a></td><td></td></tr>
 <tr><td valign="top"><a href="#delete-1">delete/1</a></td><td></td></tr>
@@ -34,10 +36,14 @@
 <tr><td valign="top"><a href="#get_string_width-3">get_string_width/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#get_string_width-4">get_string_width/4</a></td><td></td></tr>
 <tr><td valign="top"><a href="#grid-3">grid/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#handle_call-3">handle_call/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#handle_cast-2">handle_cast/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#handle_info-2">handle_info/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#image-2">image/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#image-3">image/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#image-4">image/4</a></td><td></td></tr>
 <tr><td valign="top"><a href="#inBuiltFonts-0">inBuiltFonts/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#init-1">init/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#kernedtext-2">kernedtext/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#line-2">line/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#line-3">line/3</a></td><td></td></tr>
@@ -94,6 +100,8 @@
 <tr><td valign="top"><a href="#set_title-2">set_title/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#set_word_space-2">set_word_space/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#skew-3">skew/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#start_link-0">start_link/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#terminate-2">terminate/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#text-2">text/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#text_rotate-2">text_rotate/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#text_rotate_position-4">text_rotate_position/4</a></td><td></td></tr>
@@ -155,6 +163,11 @@
 <p><tt>circle(PID, X2, R) -&gt; any()</tt></p>
 </div>
 
+<h3 class="function"><a name="code_change-3">code_change/3</a></h3>
+<div class="spec">
+<p><tt>code_change(OldVsn, State, Extra) -&gt; any()</tt></p>
+</div>
+
 <h3 class="function"><a name="color-1">color/1</a></h3>
 <div class="spec">
 <p><tt>color(Color::atom() | {R, G, B}) -&gt; {R, G, B}</tt></p>
@@ -212,6 +225,21 @@
 <p><tt>grid(PID, XList, YList) -&gt; any()</tt></p>
 </div>
 
+<h3 class="function"><a name="handle_call-3">handle_call/3</a></h3>
+<div class="spec">
+<p><tt>handle_call(X1, From, X3) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="handle_cast-2">handle_cast/2</a></h3>
+<div class="spec">
+<p><tt>handle_cast(X1, X2) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="handle_info-2">handle_info/2</a></h3>
+<div class="spec">
+<p><tt>handle_info(Info, State) -&gt; any()</tt></p>
+</div>
+
 <h3 class="function"><a name="image-2">image/2</a></h3>
 <div class="spec">
 <p><tt>image(PID, FilePath) -&gt; any()</tt></p>
@@ -230,6 +258,11 @@
 <h3 class="function"><a name="inBuiltFonts-0">inBuiltFonts/0</a></h3>
 <div class="spec">
 <p><tt>inBuiltFonts() -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="init-1">init/1</a></h3>
+<div class="spec">
+<p><tt>init(X1) -&gt; any()</tt></p>
 </div>
 
 <h3 class="function"><a name="kernedtext-2">kernedtext/2</a></h3>
@@ -510,6 +543,16 @@
 <h3 class="function"><a name="skew-3">skew/3</a></h3>
 <div class="spec">
 <p><tt>skew(PID, XScewAngle, YScewAngle) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="start_link-0">start_link/0</a></h3>
+<div class="spec">
+<p><tt>start_link() -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="terminate-2">terminate/2</a></h3>
+<div class="spec">
+<p><tt>terminate(Reason, State) -&gt; any()</tt></p>
 </div>
 
 <h3 class="function"><a name="text-2">text/2</a></h3>

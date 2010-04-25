@@ -15,7 +15,7 @@
 Sean Hinde, Håkan Stenholm, Carl Wright
 @version {@version}
 
-@doc NGerlGuten is a typesetting system for producing PDF from XML.
+@doc <img src="../NextGenErlguten_logo.png" width="537" height="88"></img><br/> NGerlGuten is a typesetting system for producing PDF from XML.
 
 NGerlGuten is free software published under the MIT license.
 
