@@ -361,21 +361,25 @@ pdfloop(PDFC, Stream)->
 	{ensure_font, Fontname} ->
 	    F = ensure_font( eg_font_map:handler(Fontname), PDFC#pdfContext.fonts),
 	    pdfloop(PDFC#pdfContext{fonts=F}, Stream);
+	    
 	{stream, {append, String}}->
 	    B = list_to_binary(convert(PDFC#pdfContext.font_handler, String)),
 	    Binary = <<Stream/binary, B/binary, <<" ">>/binary>>,
 	    pdfloop(PDFC, Binary);
+	    
 	{page_script, Script} ->
 	    %% io:format("New script ~p\n", [Script]),
 	    NewScript = handle_pagescript(PDFC#pdfContext.scripts,
 					  PDFC#pdfContext.currentpage,
 					  Script),
 	    pdfloop(PDFC#pdfContext{scripts=NewScript}, Stream);
+	    
 	{font, {set, Fontname, Size}}->
 	    {F,Alias,Fhand} = handle_setfont(PDFC#pdfContext.fonts, Fontname),
 	    S = list_to_binary(eg_pdf_op:set_font_by_alias(Alias, Size)),
 	    Binary = <<Stream/binary, S/binary>>,
 	    pdfloop(PDFC#pdfContext{fonts=F,font_handler=Fhand}, Binary);
+	    
 	{image, FilePath, Size}->
 	    {I,IMG,{W,H},ProcSet} = handle_image(PDFC#pdfContext.images, 
 						 FilePath, Size, 
@@ -383,6 +387,7 @@ pdfloop(PDFC, Stream)->
 	    S = list_to_binary(eg_pdf_op:set_image(W,H, IMG)),
 	    Binary = <<Stream/binary, S/binary>>,
 	    pdfloop(PDFC#pdfContext{images=I,procset=ProcSet}, Binary);
+	    
 	{page,{new, PID}}->
 	    {Add, PageNo} = 
 		handle_newpage(PDFC#pdfContext.pages,
@@ -390,19 +395,24 @@ pdfloop(PDFC, Stream)->
 			       [Stream]),
 	    PID ! {page, PageNo},
 	    pdfloop(PDFC#pdfContext{pages=Add, currentpage=PageNo}, <<>>);
+	    
     	{page,{set,PageNo}}->
 	    {NewPages,[NewStream]} = handle_setpage(PDFC#pdfContext.pages,PageNo,
 						  PDFC#pdfContext.currentpage, 
 						  [Stream]),
-	    pdfloop(PDFC#pdfContext{pages=NewPages,currentpage=PageNo}, NewStream);		    
+	    pdfloop(PDFC#pdfContext{pages=NewPages,currentpage=PageNo}, NewStream);		
+	        
 	{page,{get_no, PID}} ->
 	    PID ! {page, PDFC#pdfContext.currentpage},
-	    pdfloop(PDFC, Stream);    
+	    pdfloop(PDFC, Stream);  
+	      
 	{info,Info}->
 	    NewInfo = handle_info(PDFC#pdfContext.info, Info),
 	    pdfloop(PDFC#pdfContext{info=NewInfo}, Stream);
+	    
 	{mediabox, Mediabox}->
-	    pdfloop(PDFC#pdfContext{mediabox=Mediabox}, Stream);	    
+	    pdfloop(PDFC#pdfContext{mediabox=Mediabox}, Stream);	
+	        
 	{export,PID} ->
 	    %% add last page if necessary before exporting
 	    PDF = case Stream of 
@@ -418,8 +428,10 @@ pdfloop(PDFC, Stream)->
 	    end,
 	    PID ! {export, PDF, PageNo},
 	    pdfloop(PDFC, Stream);
+	    
 	delete ->
 	    done;
+	    
 	X ->
 	    io:format("Not yet implemented:~p~n", [X]),
 	    pdfloop(PDFC, Stream)
