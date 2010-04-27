@@ -309,23 +309,38 @@ grid(PID,XList,YList)->  append_stream(PID, eg_pdf_op:grid(XList,YList)).
 %% Bezier paths should be stroked/closed/filled with separate
 %% command.
 
+
+%% @doc bezier/5 (PID,{X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4}) <br/><br/>
+%%   This moves to X1,Y1 point as its start and then creates a cubic Bezier curve to X4,Y4 using the points in between as the control points. Bezier paths should be stroked/closed/filled with a separate command.
+
 bezier(PID,{X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4})->
     append_stream(PID, eg_pdf_op:bezier({X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4})).
+    
+%% @doc bezier/9 (PID,X1,Y1,X2,Y2,X3,Y3,X4,Y4) <br/><br/>
+%% This moves to X1,Y1 point as its start and then creates a cubic Bezier curve to X4,Y4 using the points in between as the control points. Bezier paths should be stroked/closed/filled with a separate command.
+
 bezier(PID,X1,Y1,X2,Y2,X3,Y3,X4,Y4)->
     bezier(PID,{X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4}).
+    
+%% @doc bezier_c/4 (PID,{X1,Y1},{X2,Y2},{X3,Y3}) <br/><br/>
+%% This takes the current point as its start and then creates a cubic Bezier curve to Point3 using the points in between as the control points. Bezier paths should be stroked/closed/filled with a separate command.
 
 bezier_c(PID,Point1,Point2,Point3)->
     append_stream(PID, eg_pdf_op:bezier_c(Point1,Point2,Point3)).
 
+%% @doc bezier_v/3 (PID,{X1,Y1},{X2,Y2} ) <br/><br/>
+%% This takes the current point as its start and then creates a cubic Bezier curve to Point2 using the current point and Point1 as the control points. Bezier paths should be stroked/closed/filled with a separate command.
+
 bezier_v(PID, Point1, Point2 )->
     append_stream(PID, eg_pdf_op:bezier_v(Point1, Point2)).
+
+%% @doc bezier_y/3  (PID, {X1,Y1},{X3,Y3}) <br/><br/>
+%% This takes the current point as its start and then creates a cubic Bezier curve to Point3 using the Point1 and Point3 as the control points. Bezier paths should be stroked/closed/filled with a separate command.
 
 bezier_y(PID, Point1, Point3)->
     append_stream(PID, eg_pdf_op:bezier_y(Point1, Point3)).
 
-%% XXX NOT DONE !!!
-arc(_PID,_X1,_Y1,_X2,_Y2)->
-    throw({arc,'TODO'}).
+
 
 circle(PID, {X,Y}, R)->
     append_stream(PID, eg_pdf_op:circle( {X,Y}, R)).

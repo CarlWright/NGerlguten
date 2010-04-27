@@ -11,18 +11,19 @@
 <h1>Module eg_pdf</h1>
 <ul class="index"><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>
 
+<p><b>Behaviours:</b> <a href="gen_server.html"><tt>gen_server</tt></a>.</p>
 
 <h2><a name="index">Function Index</a></h2>
 <table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#append_stream-2">append_stream/2</a></td><td></td></tr>
-<tr><td valign="top"><a href="#arc-5">arc/5</a></td><td></td></tr>
 <tr><td valign="top"><a href="#begin_text-1">begin_text/1</a></td><td></td></tr>
-<tr><td valign="top"><a href="#bezier-5">bezier/5</a></td><td></td></tr>
-<tr><td valign="top"><a href="#bezier-9">bezier/9</a></td><td></td></tr>
-<tr><td valign="top"><a href="#bezier_c-4">bezier_c/4</a></td><td></td></tr>
-<tr><td valign="top"><a href="#bezier_v-3">bezier_v/3</a></td><td></td></tr>
-<tr><td valign="top"><a href="#bezier_y-3">bezier_y/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#bezier-5">bezier/5</a></td><td>bezier/5 (PID,{X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4}).</td></tr>
+<tr><td valign="top"><a href="#bezier-9">bezier/9</a></td><td>bezier/9 (PID,X1,Y1,X2,Y2,X3,Y3,X4,Y4).</td></tr>
+<tr><td valign="top"><a href="#bezier_c-4">bezier_c/4</a></td><td>bezier_c/4 (PID,{X1,Y1},{X2,Y2},{X3,Y3}).</td></tr>
+<tr><td valign="top"><a href="#bezier_v-3">bezier_v/3</a></td><td>bezier_v/3 (PID,{X1,Y1},{X2,Y2} ).</td></tr>
+<tr><td valign="top"><a href="#bezier_y-3">bezier_y/3</a></td><td>bezier_y/3  (PID, {X1,Y1},{X3,Y3}).</td></tr>
 <tr><td valign="top"><a href="#break_text-1">break_text/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#circle-3">circle/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#code_change-3">code_change/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#color-1">color/1</a></td><td> R,G,B = 0-255.</td></tr>
 <tr><td valign="top"><a href="#default_face-0">default_face/0</a></td><td></td></tr>
 <tr><td valign="top"><a href="#delete-1">delete/1</a></td><td></td></tr>
@@ -34,10 +35,14 @@
 <tr><td valign="top"><a href="#get_string_width-3">get_string_width/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#get_string_width-4">get_string_width/4</a></td><td></td></tr>
 <tr><td valign="top"><a href="#grid-3">grid/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#handle_call-3">handle_call/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#handle_cast-2">handle_cast/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#handle_info-2">handle_info/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#image-2">image/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#image-3">image/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#image-4">image/4</a></td><td></td></tr>
 <tr><td valign="top"><a href="#inBuiltFonts-0">inBuiltFonts/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#init-1">init/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#kernedtext-2">kernedtext/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#line-2">line/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#line-3">line/3</a></td><td></td></tr>
@@ -94,6 +99,7 @@
 <tr><td valign="top"><a href="#set_title-2">set_title/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#set_word_space-2">set_word_space/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#skew-3">skew/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#terminate-2">terminate/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#text-2">text/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#text_rotate-2">text_rotate/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#text_rotate_position-4">text_rotate_position/4</a></td><td></td></tr>
@@ -110,11 +116,6 @@
 <p><tt>append_stream(PID, String) -&gt; any()</tt></p>
 </div>
 
-<h3 class="function"><a name="arc-5">arc/5</a></h3>
-<div class="spec">
-<p><tt>arc(PID, X1, Y1, X2, Y2) -&gt; any()</tt></p>
-</div>
-
 <h3 class="function"><a name="begin_text-1">begin_text/1</a></h3>
 <div class="spec">
 <p><tt>begin_text(PID) -&gt; any()</tt></p>
@@ -123,27 +124,32 @@
 <h3 class="function"><a name="bezier-5">bezier/5</a></h3>
 <div class="spec">
 <p><tt>bezier(PID, X2, X3, X4, X5) -&gt; any()</tt></p>
-</div>
+</div><p>bezier/5 (PID,{X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4}) <br><br>
+    This moves to X1,Y1 point as its start and then creates a cubic Bezier curve to X4,Y4 using the points in between as the control points. Bezier paths should be stroked/closed/filled with a separate command.</p>
 
 <h3 class="function"><a name="bezier-9">bezier/9</a></h3>
 <div class="spec">
 <p><tt>bezier(PID, X1, Y1, X2, Y2, X3, Y3, X4, Y4) -&gt; any()</tt></p>
-</div>
+</div><p>bezier/9 (PID,X1,Y1,X2,Y2,X3,Y3,X4,Y4) <br><br>
+  This moves to X1,Y1 point as its start and then creates a cubic Bezier curve to X4,Y4 using the points in between as the control points. Bezier paths should be stroked/closed/filled with a separate command.</p>
 
 <h3 class="function"><a name="bezier_c-4">bezier_c/4</a></h3>
 <div class="spec">
 <p><tt>bezier_c(PID, Point1, Point2, Point3) -&gt; any()</tt></p>
-</div>
+</div><p>bezier_c/4 (PID,{X1,Y1},{X2,Y2},{X3,Y3}) <br><br>
+  This takes the current point as its start and then creates a cubic Bezier curve to Point3 using the points in between as the control points. Bezier paths should be stroked/closed/filled with a separate command.</p>
 
 <h3 class="function"><a name="bezier_v-3">bezier_v/3</a></h3>
 <div class="spec">
 <p><tt>bezier_v(PID, Point1, Point2) -&gt; any()</tt></p>
-</div>
+</div><p>bezier_v/3 (PID,{X1,Y1},{X2,Y2} ) <br><br>
+  This takes the current point as its start and then creates a cubic Bezier curve to Point2 using the current point and Point1 as the control points. Bezier paths should be stroked/closed/filled with a separate command.</p>
 
 <h3 class="function"><a name="bezier_y-3">bezier_y/3</a></h3>
 <div class="spec">
 <p><tt>bezier_y(PID, Point1, Point3) -&gt; any()</tt></p>
-</div>
+</div><p>bezier_y/3  (PID, {X1,Y1},{X3,Y3}) <br><br>
+  This takes the current point as its start and then creates a cubic Bezier curve to Point3 using the Point1 and Point3 as the control points. Bezier paths should be stroked/closed/filled with a separate command.</p>
 
 <h3 class="function"><a name="break_text-1">break_text/1</a></h3>
 <div class="spec">
@@ -153,6 +159,11 @@
 <h3 class="function"><a name="circle-3">circle/3</a></h3>
 <div class="spec">
 <p><tt>circle(PID, X2, R) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="code_change-3">code_change/3</a></h3>
+<div class="spec">
+<p><tt>code_change(OldVsn, State, Extra) -&gt; any()</tt></p>
 </div>
 
 <h3 class="function"><a name="color-1">color/1</a></h3>
@@ -212,6 +223,21 @@
 <p><tt>grid(PID, XList, YList) -&gt; any()</tt></p>
 </div>
 
+<h3 class="function"><a name="handle_call-3">handle_call/3</a></h3>
+<div class="spec">
+<p><tt>handle_call(X1, From, X3) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="handle_cast-2">handle_cast/2</a></h3>
+<div class="spec">
+<p><tt>handle_cast(X1, X2) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="handle_info-2">handle_info/2</a></h3>
+<div class="spec">
+<p><tt>handle_info(Info, State) -&gt; any()</tt></p>
+</div>
+
 <h3 class="function"><a name="image-2">image/2</a></h3>
 <div class="spec">
 <p><tt>image(PID, FilePath) -&gt; any()</tt></p>
@@ -230,6 +256,11 @@
 <h3 class="function"><a name="inBuiltFonts-0">inBuiltFonts/0</a></h3>
 <div class="spec">
 <p><tt>inBuiltFonts() -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="init-1">init/1</a></h3>
+<div class="spec">
+<p><tt>init(Init) -&gt; any()</tt></p>
 </div>
 
 <h3 class="function"><a name="kernedtext-2">kernedtext/2</a></h3>
@@ -512,6 +543,11 @@
 <p><tt>skew(PID, XScewAngle, YScewAngle) -&gt; any()</tt></p>
 </div>
 
+<h3 class="function"><a name="terminate-2">terminate/2</a></h3>
+<div class="spec">
+<p><tt>terminate(Reason, State) -&gt; any()</tt></p>
+</div>
+
 <h3 class="function"><a name="text-2">text/2</a></h3>
 <div class="spec">
 <p><tt>text(PID, Text) -&gt; any()</tt></p>
@@ -549,6 +585,6 @@
 <hr>
 
 <div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
-<p><i>Generated by EDoc, Apr 25 2010, 12:43:05.</i></p>
+<p><i>Generated by EDoc, Apr 26 2010, 19:04:31.</i></p>
 </body>
 </html>
