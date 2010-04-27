@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
-
-<map template="template1:one">
+<data page="1">
+<template name="template1:one">
 
 <!-- all the tags here body, header, intro, etc. are defined in
      template_001.gal
@@ -26,8 +26,8 @@
 <p>This is a small footnote set in 8/10 Times Italic</p>"
 </footnote>
 
-</map>
-
+</template>
+</data>
 
 
 

@@ -34,9 +34,9 @@
 
 -include("../include/eg.hrl").
 
-test() -> format("../test/test1.map").
+test() -> format("../test/template testing/test1.map").
 
-bug() -> format("../test/test2.map").
+bug() -> format("../test/test/template testing/test2.map").
     
 
 batch([X]) ->
@@ -69,7 +69,7 @@ batch([X]) ->
 
 format(File) ->
     V = eg_xml_lite:parse_file(File),
-    io:format("read:~p~n",[V]),
+    %io:format("read:~p~n",[V]),
     Out = filename:rootname(File) ++ ".pdf",
     case V of
 	{error, W} ->
@@ -101,7 +101,9 @@ loop([{template,Args,Data}|T], Env) ->
     loop(T, Env3);
 loop([], Env) ->
     Env.
-
+    
+format_boxes([{comment,Args}|T], Env) ->  % ignore comment boxes
+    format_boxes(T, Env);
 format_boxes([{Box,Args,Data}|T], Env) ->
     Env1 = initialise_box(Box, Env),
     %% loop over the paragraphs in the Box
@@ -156,7 +158,7 @@ initialise_tagMap(Template, Box, E) ->
 
     
 default_tagmap() ->
-    [#tagMap{name=defult,font="Times-Roman",size=11},
+    [#tagMap{name=default,font="Times-Roman",size=11},
      #tagMap{name=em,font="Times-Italic", size=11},
      #tagMap{name=code,font="Courier",size=11,break=false}].
 
@@ -193,7 +195,11 @@ parse_flow([{"galley",F},{"name",Tag}]) ->
     end.
 
 get_template_name([{"name", N}]) ->
-    list_to_atom(N).
+    M = lists:map(fun(X) -> case X of
+      $: -> $_;
+      _ -> X end
+    end, N),
+    list_to_atom(M).
 
 
 

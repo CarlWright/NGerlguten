@@ -23,7 +23,7 @@
 
 -record(env,	{pdf,             % PDF process
 		 currentBox,      % name of currentBox
-		 template,        % current template (Mopdule Name)
+		 template,        % current template (Module Name)
 		 page,            % current page
 		 dict,            % dictionary with keys{free,Page,Box}
 				  %  {initialsed, Page, Template}
