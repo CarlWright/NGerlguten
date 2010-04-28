@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <templates>
-<template name="default">
+<template name="one">
     <box name = "header" x="100" y="760" measure="15" 
 	grid="false" bg="default"
        fontSize="32/32" lines="1" continue="none">
@@ -8,7 +8,7 @@
       <tag name="raw"  font="Times-Bold"  break="true"/>
     </obj>
   </box>
-  <box name = "flow_001" x="100" y="680" measure="30" 
+  <box name = "body" x="100" y="680" measure="30" 
 	grid="false" bg="default"
        fontSize="12/14" lines="43" continue="flow_001">
     <obj name="pstart" paraIndent="0,0">

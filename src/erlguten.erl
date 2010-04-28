@@ -36,7 +36,7 @@
 
 test() -> format("../test/template testing/test1.map").
 
-bug() -> format("../test/test/template testing/test2.map").
+bug() -> format("../test/template testing/test2.map").
     
 
 batch([X]) ->
@@ -142,7 +142,7 @@ initialise_tagMap(Template, Box, E) ->
 	    {'EXIT', Why} ->
 		 io:format("error in tagmap for ~p:~p~n",
 			   [Template,Box]),
-		 io:format("using defualt~n"),
+		 io:format("using default~n"),
 		 default_tagmap();
 	     L -> L
 	 end,
@@ -174,7 +174,8 @@ instanciate_template(Template, E) ->
 	     _ ->
 		 E
 	 end.
-    
+ 
+%% This isn't used anywhere in the source code.   
 get_tag_schema(Tag, [H|T]) ->
     case H of
 	Tag -> H;
@@ -182,7 +183,9 @@ get_tag_schema(Tag, [H|T]) ->
     end;
 get_tag_schema(Tag, []) ->
     exit({missing,tag,Tag}).
-
+    
+    
+%% This isn't used anywhere in the source code.
 parse_flow([{"galley",F},{"name",Tag}]) ->
     case eg_xml_lite:parse_file(F) of
 	{error, E} ->
