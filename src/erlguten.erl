@@ -115,7 +115,7 @@ format_boxes([], E) ->
 initialise_box(Box, E) ->
     #env{dict=Dict, page=Page, pdf=PDF, template=Template}=E,
     Dict1 = dict:store({free,Page,Box}, 1, Dict),
-    B = Template:box(Box),
+    B = Template:box(E, Template, Box),
     #box{x=XX,y=YY,leading=Lead, width=Width, lines=Lines} = B,
     eg_pdf_lib:draw_box(PDF, XX, YY,Width, Lead,Lines),
     Env1 = E#env{dict=Dict1, currentBox=Box},
@@ -169,8 +169,8 @@ instanciate_template(Template, E) ->
 		 io:format("calling first instantiation Page:~p "
 			   "Template: ~p ~n", [Page, Template]),
 		 Env2 = Template:on_instanciation(E),
-		 Dict1 = dict:store(Key, true, Dict),
-		 Env2#env{dict=Dict1};
+		 Dict2 = Env2#env.dict,
+		 Env2#env{dict= dict:store(Key, true, Dict2) };
 	     _ ->
 		 E
 	 end.

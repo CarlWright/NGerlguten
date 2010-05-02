@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <templates>
-<template name="one">
+<template name="template1">
     <box name = "header" x="100" y="760" width="15" 
 	grid="false" bg="default"
        fontSize="32" lines="1" continue="none">
