@@ -167,10 +167,10 @@ instanciate_template(Template, E) ->
     E1 = case dict:find(Key={initialised, Page, Template}, Dict) of
 	     error ->
 		 io:format("calling first instantiation Page:~p "
-			   "Template: ~p ~n", [E, Page, Template]),
-		 Template:on_instanciation(Page, PDF),
+			   "Template: ~p ~n", [Page, Template]),
+		 Env2 = Template:on_instanciation(E),
 		 Dict1 = dict:store(Key, true, Dict),
-		 E#env{dict=Dict1};
+		 Env2#env{dict=Dict1};
 	     _ ->
 		 E
 	 end.
