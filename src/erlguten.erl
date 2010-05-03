@@ -81,7 +81,7 @@ format(File) ->
 	    PDF  = eg_pdf:new(),
 	    Env = #env{page=Page, pdf=PDF, dict=dict:new()},
 	    loop(Templates, Env),
-	    Serialised = eg_pdf:export(PDF),
+	    {Serialised, _PageNo} = eg_pdf:export(PDF),
 	    file:write_file(Out,[Serialised]),
 	    io:format("Created a file called:~p~n",[Out]),
 	    eg_pdf:delete(PDF);
@@ -107,7 +107,9 @@ format_boxes([{comment,Args}|T], Env) ->  % ignore comment boxes
 format_boxes([{Box,Args,Data}|T], Env) ->
     Env1 = initialise_box(Box, Env),
     %% loop over the paragraphs in the Box
-    Env2 = format_paragraphs(Data, Box, Env1),
+    Dict = Env1#env.dict,
+    Template = Env1#env.template,
+    Env2 = format_paragraphs(Data, dict:fetch({Template,Box},Dict), Env1),
     format_boxes(T, Env2);
 format_boxes([], E) ->
     E.
@@ -138,7 +140,8 @@ format_paragraphs([], Box, E) ->
     E.
 
 initialise_tagMap(Template, Box, E) ->
-    Ts = case (catch Template:tagMap(Box)) of
+  Object = "get a value for this",
+    Ts = case (catch Template:tagMap(E, Template, Box, Object)) of
 	    {'EXIT', Why} ->
 		 io:format("error in tagmap for ~p:~p~n",
 			   [Template,Box]),

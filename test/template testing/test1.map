@@ -11,19 +11,19 @@
 <body data="content1:erlguten_introduction"/>
 
 <header>
-<p>ErlGuten</p>"
+<p>ErlGuten</p>
 </header>
 
 <intro>
-<p>Using Erlang in typography applications</p>"
+<p>Using Erlang in typography applications</p>
 </intro>
 
 <punch>
-<p>INTRODUCTION</p>"
+<p>INTRODUCTION</p>
 </punch>
 
 <footnote>
-<p>This is a small footnote set in 8/10 Times Italic</p>"
+<p>This is a small footnote set in 8/10 Times Italic</p>
 </footnote>
 
 </template>
