@@ -48,40 +48,40 @@ table_from_xml(PDF, XML, X, Width, Start, Bottom, FontSize, FontChoice) ->
   
   
         
-%% Creating tables
+%% @doc Creating tables
 %%
 %% 1. work out number of columns
 %% 2. split space evenly, leaving an extra 4 Pts for white space around each,
 %%    and an extra 1 Pt for each vertical Line
 %% 2 bis. OR Turn each cell into RTF as if it had the full width to use.
-
+%%
 %%           Then find a bunch of metrics about the table which will
 %%           help us find a good set of column widths.
-
+%%
 %%           Find the longest word in each column. This sets the
 %%           minimum column width. 
-
+%%
 %%           If the sum of the longest words is greater than the total
 %%           width avaialable then issue a warning, but carry on with
 %%           the table extending off the page to the right (really
 %%           trick would be to switch to landscape mode automatically
 %%           :)
-
+%%
 %%           Ideally we want to fit into the minimum vertical space,
 %%           so if there is a solution where every or most rows can
 %%           fit on one line this would be very nice.
-
+%%
 %%            Could do proportional split based on total volume of text
 %%            in each column
 %%
 %%           We could find the longest cell for each column
-
+%%
 %%   If all cells in a column will fit on a single line within what
 %%   would be an even split between the columns, allow that column to
 %%   take up the space it needs to fit everything one one line? OK,
 %%   but at the limit might really penalise another column with lots
 %%   of text.
-
+%%
 %% 3. Convert the text into RTF lines for each cell
 %% 4. For each row work out the number of lines required 
 %%    (largest number of lines).

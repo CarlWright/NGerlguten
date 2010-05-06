@@ -38,6 +38,7 @@
 %%  This produces an example Comcast bill.
 %%
 test()->
+  Start = now(),
     PDF = eg_pdf:new(),
     eg_pdf:set_pagesize(PDF,letter),
     eg_pdf:set_page(PDF,1),
@@ -295,6 +296,8 @@ test()->
     {Serialised, _PageNo} = eg_pdf:export(PDF),
     ok = file:write_file("../test/comcast_bill.pdf",[Serialised]),
     eg_pdf:delete(PDF),
+    Stop = now(),
+    io:format("Duration ~p  microseconds~n",[timer:now_diff( Stop, Start)]),
     bill_output.
 
 

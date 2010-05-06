@@ -1,9 +1,9 @@
 {application,'NGerlguten'}.
 {packages,[]}.
-{modules,[eg_afm,eg_convert,eg_embed,eg_font_server,eg_hyphen_rules_da_DK,
-          eg_hyphen_rules_en_GB,eg_hyphen_rules_fi_FI,eg_hyphen_rules_nb_NO,
-          eg_hyphen_rules_sv_SE,eg_hyphenate,eg_lib,eg_line_break,
-          eg_mk_hyphen,eg_pdf,eg_pdf_analyse,eg_pdf_annot,eg_pdf_image,
-          eg_pdf_lib,eg_pdf_obj,eg_pdf_op,eg_pdf_page,eg_richText,
-          eg_richText2pdf,eg_table,eg_xml2richText,eg_xml_lite,
+{modules,[eg_afm,eg_block,eg_convert,eg_embed,eg_font_server,
+          eg_hyphen_rules_da_DK,eg_hyphen_rules_en_GB,eg_hyphen_rules_fi_FI,
+          eg_hyphen_rules_nb_NO,eg_hyphen_rules_sv_SE,eg_hyphenate,eg_lib,
+          eg_line_break,eg_mk_hyphen,eg_pdf,eg_pdf_analyse,eg_pdf_annot,
+          eg_pdf_image,eg_pdf_lib,eg_pdf_obj,eg_pdf_op,eg_pdf_page,
+          eg_richText,eg_richText2pdf,eg_table,eg_xml2richText,eg_xml_lite,
           eg_xml_tokenise,erlguten]}.

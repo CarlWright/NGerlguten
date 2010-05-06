@@ -25,11 +25,11 @@
 -include("../include/eg.hrl").
 
 -export([append_stream/2,
-         arc/5,
          begin_text/1,
          bezier/5, bezier/9, bezier_c/4, bezier_v/3, bezier_y/3,
          break_text/1,
          circle/3,
+         cms/1,
          color/1,
          default_face/0,
          delete/1,
@@ -37,6 +37,7 @@
          end_text/1,
          ensure_font_gets_loaded/2,
          export/1,
+         inches/1,
          get_page_no/1,
          get_string_width/3, get_string_width/4,
          grid/3,
@@ -52,6 +53,8 @@
          page_script/2,
          pagesize/1, pagesize/2,
          path/2,
+         picas/1,
+         points/1,
          poly/2,
          rectangle/3, rectangle/4, rectangle/5, rectangle/6,
          restore_state/1,
@@ -246,6 +249,12 @@ get_string_width(Fontname, PointSize, Str)->
     trunc(lists:foldl(fun(A, Accu) -> eg_richText:width(A) + Accu end, 
 		      0, Inline) /1000).
 
+%% units of measure
+
+points(X) -> X.
+picas(X) -> X * 6.
+inches(X) -> round(X * 72.21).
+cms(X) -> round((X * 72.21) / 2.54).
 
 %% @spec color(Color::atom() | {R,G,B}) -> {R,G,B}
 %% @doc  R,G,B = 0-255

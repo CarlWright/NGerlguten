@@ -183,7 +183,7 @@ tag_map(Env, Template, Box, Object) ->
                end, [],Dict). 
           
 handler(Box, ParaTag, Args, Data, Env) ->
-    [{raw, InText}] = Data,
+    [{raw, InText}] = Data, 
     Text = eg_richText:str2richText(InText),
     writeBlock(Env#env.pdf,Text,0,Box#box.x, Box#box.y, 
                Box#box.fontSize, Box#box.leading, 0, Box#box.width),

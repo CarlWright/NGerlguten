@@ -55,8 +55,8 @@
 %% ----------------------------------------------------------------------------
 
 -export([test/1, 
-	 cloan_space/1,
-	 cloan_word/2,
+	 clone_space/1,
+	 clone_word/2,
 	 font/1,
 	 fontFromFace/1,
 	 classify_inline/1,
@@ -247,18 +247,18 @@ is_breakable(_) -> false.
 
 %% Make a new word based on the face of an old word
 
-cloan_word({word,_,Face,_}, Str) ->
+clone_word({word,_,Face,_}, Str) ->
     Font = Face#face.font,
     PointSize = Face#face.pointSize,
     W = width_of(Font, PointSize, Str),
     {word, W, Face, Str}.
 
-cloan_space({word,_,Face,_}) ->
-    cloan_space_from_face(Face);
-cloan_space({nl, Face}) ->
-    cloan_space_from_face(Face).
+clone_space({word,_,Face,_}) ->
+    clone_space_from_face(Face);
+clone_space({nl, Face}) ->
+    clone_space_from_face(Face).
 
-cloan_space_from_face(Face) ->
+clone_space_from_face(Face) ->
     Font = Face#face.font,
     PointSize = Face#face.pointSize,
     W = width_of(Font, PointSize, [$\s]),

@@ -129,7 +129,7 @@ text2para_widths(Txt, ParaShape, Widths, Rules) ->
 replace_nls_with_spaces(L) ->
     lists:map(fun(I) ->
 		      case eg_richText:is_nl(I) of
-			  true  -> eg_richText:cloan_space(I);
+			  true  -> eg_richText:clone_space(I);
 			  false -> I
 		      end
 	      end, L).
@@ -686,8 +686,8 @@ all_hyphenations(Word, Rules) ->
     lists:map(fun({A,B}) ->
 		      StrA = A ++ "-",
 		      StrB = B ++ Tail,
-		      Word1 = eg_richText:cloan_word(Word, StrA),
-		      Word2 = eg_richText:cloan_word(Word, StrB),
+		      Word1 = eg_richText:clone_word(Word, StrA),
+		      Word2 = eg_richText:clone_word(Word, StrB),
 		      {Word1, Word2}
 	      end, Ps).
 
