@@ -27,6 +27,7 @@
 -module(eg_test3).
 
 -export([test/0, norm/0]).
+-import(eg_pdf, [picas/1]).
     
 -include("../include/eg.hrl").
 
@@ -47,26 +48,26 @@ test() ->
     PtSize24 = 24,
     TagMap24 = eg_xml2richText:default_tagMap(PtSize24),
     box(PDF, moccasin, 50, 300, 225, 350), 
-    eg_block:block(PDF, gold, xml(title), 20, 830, 396, PtSize24, 24, 1, justified, TagMap24),
+    eg_block:block(PDF, gold, xml(title), 20, 830, picas(66), PtSize24, 24, 1, justified, TagMap24),
     
     PtSize14 = 14,
     TagMap14 = eg_xml2richText:default_tagMap(PtSize14),
-    eg_block:block(PDF, xml(simple), 60, 650, 210, PtSize14, 16, 5, justified, TagMap14),
-    eg_block:block(PDF, xml(simple), 60, 560, 180, PtSize14, 16, 5, justified, TagMap14),
-    eg_block:block(PDF, xml(romanAndCourier1), 60, 360, 210, PtSize14, 16, 7, justified, TagMap14),
+    eg_block:block(PDF, xml(simple), 60, 650, picas(35), PtSize14, 16, 5, justified, TagMap14),
+    eg_block:block(PDF, xml(simple), 60, 560, picas(30), PtSize14, 16, 5, justified, TagMap14),
+    eg_block:block(PDF, xml(romanAndCourier1), 60, 360, picas(35), PtSize14, 16, 7, justified, TagMap14),
     
     PtSize12 = 12,
     TagMap12 = eg_xml2richText:default_tagMap(PtSize12),
-    eg_block:block(PDF, palegreen, xml(complex), 400, 600, 156, PtSize12, 14, 22, justified, TagMap12),
-    eg_block:block(PDF, xml(5), 60, 450, 210, PtSize12, 14, 6, justified, TagMap12),
+    eg_block:block(PDF, palegreen, xml(complex), 400, 600, picas(26), PtSize12, 14, 22, justified, TagMap12),
+    eg_block:block(PDF, xml(5), 60, 450, picas(35), PtSize12, 14, 6, justified, TagMap12),
     
     PtSize18 = 18,
     TagMap18 = eg_xml2richText:default_tagMap(PtSize18),    
-    eg_block:block(PDF, whitesmoke, xml(two), 300, 760, 264, PtSize18, 20, 3, justified, TagMap18),
+    eg_block:block(PDF, whitesmoke, xml(two), 300, 760, picas(44), PtSize18, 20, 3, justified, TagMap18),
     
     PtSize8 = 8,
     TagMap8 = eg_xml2richText:default_tagMap(PtSize8),
-    eg_block:block(PDF, azure, xml(narrow), 280, 650, 96, PtSize8,10, 38, justified, TagMap8),
+    eg_block:block(PDF, azure, xml(narrow), 280, 650, picas(16), PtSize8,10, 38, justified, TagMap8),
     
     eg_pdf:image(PDF,'../test/joenew.jpg',{50, 650},{width,200}),
     {Serialised, _PageNo} = eg_pdf:export(PDF),
