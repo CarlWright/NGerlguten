@@ -37,31 +37,43 @@
 %%
 %%  parameters to control its output
 %%
-%% PDF  + the PID of pdf process for the document
+%% PDF  = the PID of pdf process for the document
+%%
 %% Color  = the color of the box that the block of text is in
+%%
 %%  Sample  = the content to format as a block of text 
+%%
 %%  X = the X coordinate of the top left corner of the block of text
+%%
 %%  Y = the Y coordinate of the top left corner of the block of text 
+%%
 %%  Measure = the width of the block holding the text in points
+%%
 %%  PtSize  = the size in points of the font
+%%
 %%  Leading = the distance in points from the bottom of one line to the bottom of the next 
+%%
 %%  NLines  = the number of lines allowed in the block of text
+%%
 %%  Justification = an atom expressing the text justification required ()
+%%
 %%  TagMap  = the tagmap describing how to handle differnet XML tags
 %%
 %% the tag map is formatted like the following:
 %%
+%% <pre>
 %% default_tagMap(Pts) -> 
 %%     {[p],
-%%      [{default,eg_richText:mk_face("Times-Roman", Pts, true, default, 0)},
-%%       {em,     eg_richText:mk_face("Times-Italic", Pts, true, default, 0)},
-%%       {red,    eg_richText:mk_face("ZapfChancery-MediumItalic", Pts, true,  {1,0,0},0)},
-%%       {blue,   eg_richText:mk_face("ZapfChancery-MediumItalic", Pts, true, {0,0,1},0)},
-%%       {code,   eg_richText:mk_face("Courier", Pts, false, default, 0)},
-%%       {b,      eg_richText:mk_face("Times-Bold", Pts, true, default, 0)},
-%%       {hb,     eg_richText:mk_face("Helvetica-Bold", Pts, true, default, 0)},
-%%       {helv,   eg_richText:mk_face("Helvetica", Pts, true, default, 0)}
+%%      [{default,eg_richText:mk_face("Times-Roman", Pts, true, default, 0)}, 
+%%       {em,     eg_richText:mk_face("Times-Italic", Pts, true, default, 0)}, 
+%%       {red,    eg_richText:mk_face("ZapfChancery-MediumItalic", Pts, true,  {1,0,0},0)},  
+%%       {blue,   eg_richText:mk_face("ZapfChancery-MediumItalic", Pts, true, {0,0,1},0)},  
+%%       {code,   eg_richText:mk_face("Courier", Pts, false, default, 0)},  
+%%       {b,      eg_richText:mk_face("Times-Bold", Pts, true, default, 0)}, 
+%%       {hb,     eg_richText:mk_face("Helvetica-Bold", Pts, true, default, 0)},  
+%%       {helv,   eg_richText:mk_face("Helvetica", Pts, true, default, 0)}  
 %%      ]}.
+%% </pre>
 
 
 
@@ -72,9 +84,7 @@ block(PDF, Color, Sample, X, Y, Measure, PtSize, Leading, NLines, Justification,
     block(PDF, Sample, X+10, Y+10, Measure, PtSize, Leading, NLines, Justification, TagMap).
     
 block(PDF, Sample, X, Y, Measure, PtSize, Leading, NLines, Justification, TagMap) ->
-    %% Measure in picas 
-    Len = Measure*6,
-    block1(PDF, eg_xml_lite:parse_all_forms(Sample),X, Y, Len, PtSize, Leading, NLines, Justification, TagMap).
+    block1(PDF, eg_xml_lite:parse_all_forms(Sample),X, Y, Measure, PtSize, Leading, NLines, Justification, TagMap).
 
 block1(PDF, [{xml, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification, TagMap) ->
    block2(PDF, [{xml, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification, TagMap),

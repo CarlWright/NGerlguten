@@ -51,8 +51,10 @@ table_from_xml(PDF, XML, X, Width, Start, Bottom, FontSize, FontChoice) ->
 %% @doc Creating tables
 %%
 %% 1. work out number of columns
+%%
 %% 2. split space evenly, leaving an extra 4 Pts for white space around each,
 %%    and an extra 1 Pt for each vertical Line
+%%
 %% 2 bis. OR Turn each cell into RTF as if it had the full width to use.
 %%
 %%           Then find a bunch of metrics about the table which will
@@ -83,13 +85,16 @@ table_from_xml(PDF, XML, X, Width, Start, Bottom, FontSize, FontChoice) ->
 %%   of text.
 %%
 %% 3. Convert the text into RTF lines for each cell
+%%
 %% 4. For each row work out the number of lines required 
 %%    (largest number of lines).
+%%
 %% 5. Output the table, drwing lines as we go
 %%
 %% TODO - Parameterise by:  Spacing around text, table width, row background
 %%        Clever algorithm to arrange column widths
 %%        Do page breaks in the middle of a table
+%%
 %% spec table(PDF, Rows, X, Y, SO) ->
 %%          Total_Y
 
