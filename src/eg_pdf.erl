@@ -18,7 +18,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
    terminate/2, code_change/3]).
 
--record(state, {}).
+
 
 %% Purpose: Generate PDF documents main api
 
@@ -39,6 +39,7 @@
          export/1,
          inches/1,
          get_page_no/1,
+         get_state/1,
          get_string_width/3, get_string_width/4,
          grid/3,
          image/2, image/3, image/4,
@@ -115,12 +116,12 @@ init_pdf_context()->
 
 %% --------------------- User functions --------------
 
-%% Spawn pdf building process
+%% @doc Spawn pdf building process
 new()->
     {ok, PDF} = start_link( [init_pdf_context(), <<>>] ),
     PDF.
 
-%% Export to PDF file format 
+%% @doc Export to PDF file format 
 %% return: {PDFDoc::binary(), PageNo::integer()} | exit(Reason)
 export(PID)->
   case gen_server:call(PID, {export}, infinity) of
@@ -130,13 +131,16 @@ export(PID)->
   	    exit(Reason)
   end.
 
-%% clear up - delete pdf building process
+%% @doc clear up - delete pdf building process
 delete(PID)->
     gen_server:cast(PID,{delete}).
 
+%% @doc return the state of the server
 
+get_state(PID) ->
+  gen_server:call(PID, {get_state}).
 
-%% Add current page context to PDF document and start on a new page 
+%% @doc Add current page context to PDF document and start on a new page 
 %% Note page 1 is already created  by default and  current page set 
 %% to it after creation of PDF context.
 new_page(PID)->
@@ -153,11 +157,11 @@ page_script(PID, Script) ->
     gen_server:cast(PID, {page_script, Script}).
 
 
-%% Go to a page already created.    
+%% @doc Go to a page already created.    
 set_page(PID, PageNo)->
     gen_server:cast(PID, {page,{set, PageNo}}).
 
-%% Useful for page numbering functions etc.
+%% @doc Useful for page numbering functions etc.
 get_page_no(PID)->
    case gen_server:call( PID, {get_page_no}, infinity) of
     	{page,PageNo}->
@@ -167,19 +171,28 @@ get_page_no(PID)->
     end.
     
 %% --- Info -----
+%% @doc set the Author atribute of the PDF
 
 set_author(PID,Author)->
       gen_server:cast(PID, {info, {author, Author}} ).
+      
+%% @doc set the Title atribute of the PDF
 
 set_title(PID,Title)->
     gen_server:cast(PID, {info, {title, Title}} ).
+      
+%% @doc set the Subject atribute of the PDF
 
 set_subject(PID,Subject)->
     gen_server:cast(PID, {info, {subject, Subject}} ).
-    
+      
+%% @doc set the Date atribute of the PDF 
+   
 set_date(PID,Year,Month,Day)->
     gen_server:cast(PID, {info, {date, {Year,Month,Day}}} ).
-    
+      
+%% @doc set the Keywords atribute of the PDF 
+   
 set_keywords(PID, Keywords)->
     gen_server:cast(PID, {info, {keywords, Keywords}} ).
 
@@ -187,7 +200,7 @@ set_keywords(PID, Keywords)->
 
 %% --- Page ---
 
-%% return: bouding box {Xleft, Ybottom, Xright, Ytop}
+%% @doc pagesize returns: bounding box {Xleft, Ybottom, Xright, Ytop}
 %%         full pages are always = {0, 0, Width, Height}
 pagesize(a0)             -> pagesize( 2380, 3368 );
 pagesize(a1)             -> pagesize( 1684, 2380 );
@@ -600,7 +613,10 @@ handle_call({export}, _From, [PDFC, Stream]) ->
       					    [Stream]),
       			  handle_export(PDFC#pdfContext{pages=Add})
       	    end,
-	    {reply, {export, PDF, PageNo}, [PDFC, Stream]}.
+	    {reply, {export, PDF, PageNo}, [PDFC, Stream]};
+	    
+handle_call({get_state}, _From, [PDFC, Stream]) ->	        
+	    {reply, [PDFC, Stream], [PDFC, Stream]}.
 
 
 %%--------------------------------------------------------------------
@@ -802,7 +818,7 @@ make_width(_, M, _, _) ->
 mkFontDescriptor(M, Embedded, I) ->
     {X1,X2,X3,X4} = M:fontBBox(),
     %% io:format("Flags FIXED to 6 ...~n"),
-    FontBBox = [X1,X2,X3,X3],
+    FontBBox = [X1,X2,X3,X4],
     D0 = [{"Type",{name,"FontDescriptor"}},
 	  {"Ascent", M:ascender()},
 	  {"CapHeight", M:capHeight()},
