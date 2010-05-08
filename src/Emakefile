@@ -1,0 +1,3 @@
+{'./*',[{i, "../include"}, {outdir, "../ebin"}, debug_info, strict_record_tests]}.
+{'../test/template testing/*',[{i, "../include"}, {outdir, "../ebin"}, debug_info, strict_record_tests]}.
+{'../test/*',[{i, "../include"}, {outdir, "../ebin"}, debug_info, strict_record_tests]}.

@@ -37,35 +37,11 @@
 test() -> format("../test/template testing/test1.map").
 
 bug() -> format("../test/template testing/test2.map").
-    
+  
 
 batch([X]) ->
     format(atom_to_list(X)).
 
-%% A map file has the following structure
-%% <data page="1">
-%% <template name="template1">
-%% <intro>
-%%   <p>...</p>
-%%   <q>...</q>
-%% </intro>
-%% <body>
-%%  ...
-%% </body>
-%% </template>
-%%
-%%  Logic:
-%%    in Env
-%%    set template=template1
-%%    set current page=1
-%%    enter intro
-%%      set currentBox = intro
-%%      set dict entry {initialised, Page, one}
-%%      set dict entry {free, Page, intro} = 1
-%%      set tagMap for template1:tagMap(one, intro)
-%%      call template1:handler(p, Args, Data, Env)  -> Env1
-%%      call template2:handler(q, Args, Data, Env1) -> Env2
-%%      etc.
 
 format(File) ->
     V = eg_xml_lite:parse_file(File),

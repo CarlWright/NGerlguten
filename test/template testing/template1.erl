@@ -182,19 +182,16 @@ tag_map(Env, Template, Box, Object) ->
                end
                end, [],Dict). 
           
-handler(Box, ParaTag, Args, Data, Env) ->
+handler(Box, TagMap, Args, Data, Env) ->
     [{raw, InText}] = Data, 
-    Text = eg_richText:str2richText(InText),
-    writeBlock(Env#env.pdf,Text,0,Box#box.x, Box#box.y, 
-               Box#box.fontSize, Box#box.leading, 0, Box#box.width),
+    case Box#box.bg of 
+      default ->      eg_block:block(Env#env.pdf,  InText, 
+                              Box#box.x, Box#box.y, Box#box.width, Box#box.fontSize, 
+                              Box#box.leading, Box#box.lines, Box#box.justify, TagMap);
+      _ ->            eg_block:block(Env#env.pdf, Box#box.bg, InText, 
+                              Box#box.x, Box#box.y, Box#box.width, Box#box.fontSize, 
+                              Box#box.leading, Box#box.lines, Box#box.justify, TagMap)
+                            end,
     Env.
     
 
-writeBlock(PDF, Text, Rot, X, Y, PointSize, Leading, Offset, Width) ->
-    Widths = [Width-Offset|lists:duplicate(30,Width)],
-    Off = [Offset|lists:duplicate(30,0)],
-    {Lines,_,_} = eg_line_break:break_richText(Text,{justified, Widths}),
-    Code = eg_richText2pdf:richText2pdf(PDF, X, Y, justified, Rot, Lines, 
-					Leading, Widths, Off),
-    io:format("Code=~p~n",[Code]),
-    eg_pdf:append_stream(PDF, Code).

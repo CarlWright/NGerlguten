@@ -21,7 +21,7 @@
 %% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
 %% Author: Joe Armstrong <joe@sics.se>
-%% Purpose: Test cases
+%% Purpose: Test cases 
 %%==========================================================================
 
 -module(eg_test3).

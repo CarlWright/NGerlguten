@@ -27,13 +27,13 @@
 
 -module (eg_block).
 
--export([block/11, block/10]).
+-export([block/11, block/10,  colored_inner_block/11, inner_block/10]).
     
 -include("../include/eg.hrl").
 
 
 %% 
-%% @doc block() processes one or more paragraphs correctly 
+%% @doc block() processes one or more paragraphs correctly into PDF content
 %%
 %%  parameters to control its output
 %%
@@ -41,7 +41,7 @@
 %%
 %% Color  = the color of the box that the block of text is in
 %%
-%%  Sample  = the content to format as a block of text 
+%%  Sample  = the content to format as a block of text i.e. "<p> a para with <em> big </em> thoughts </p>"
 %%
 %%  X = the X coordinate of the top left corner of the block of text
 %%
@@ -76,22 +76,35 @@
 %% </pre>
 
 
+%% @doc process an XML block of content into a block of PDf text with a color background
 
 block(PDF, Color, Sample, X, Y, Measure, PtSize, Leading, NLines, Justification, TagMap) ->
     Width = Measure + 20,
-    Ht = NLines * PtSize + 20,
+    Ht = (NLines * Leading) + 20,
     box(PDF, Color, X, Y-Ht+10, Width, Ht),
-    block(PDF, Sample, X+10, Y+10, Measure, PtSize, Leading, NLines, Justification, TagMap).
-    
-block(PDF, Sample, X, Y, Measure, PtSize, Leading, NLines, Justification, TagMap) ->
-    block1(PDF, eg_xml_lite:parse_all_forms(Sample),X, Y, Measure, PtSize, Leading, NLines, Justification, TagMap).
+    block(PDF, Sample, X+10, Y , Measure, PtSize, Leading, NLines, Justification, TagMap).
 
-block1(PDF, [{xml, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification, TagMap) ->
+%% @doc process a parsed XML block of content into a block of PDf text with a color background 
+   
+colored_inner_block(PDF, Color, Sample, X, Y, Measure, PtSize, Leading, NLines, Justification, TagMap) ->
+    Width = Measure + 20,
+    Ht = (NLines * Leading) + 20,
+    box(PDF, Color, X, Y-Ht+10, Width, Ht),
+    inner_block(PDF, Sample, X+10, Y-10, Measure, PtSize, Leading, NLines, Justification, TagMap).
+
+%% @doc process an XML block of content into a block of PDf text with a blank background
+       
+block(PDF, Sample, X, Y, Measure, PtSize, Leading, NLines, Justification, TagMap) ->
+    inner_block(PDF, eg_xml_lite:parse_all_forms(Sample),X, Y, Measure, PtSize, Leading, NLines, Justification, TagMap).
+
+%% @doc process a parsed XML block of content into a block of PDf text with a blank background
+
+inner_block(PDF, [{xml, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification, TagMap) ->
    block2(PDF, [{xml, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification, TagMap),
    ok;
-block1(PDF, [{xml, Xml} | T], X, Y, Len, PtSize, Leading, NLines, Justification, TagMap) ->
-  Height =block2(PDF, [{xml, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification, TagMap),
-   block1(PDF, T, X, Y - Height, Len, PtSize, Leading, NLines, Justification, TagMap).
+inner_block(PDF, [{xml, Xml} | T], X, Y, Len, PtSize, Leading, NLines, Justification, TagMap) ->
+  Height = block2(PDF, [{xml, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification, TagMap),
+   inner_block(PDF, T, X, Y - Height, Len, PtSize, Leading, NLines, Justification, TagMap).
 
     
 block2(PDF, [{xml, Xml}], X, Y, Len, _PtSize, Leading, NLines, Justification, TagMap) ->
@@ -105,7 +118,7 @@ block2(PDF, [{xml, Xml}], X, Y, Len, _PtSize, Leading, NLines, Justification, Ta
 	impossible ->
 	    io:format("Cannot break line are widths ok~n");
 	{Lines,_,_} ->
-	    Code = eg_richText2pdf:richText2pdf(PDF, X, Y, justified, 0, Lines, 
+	    Code = eg_richText2pdf:richText2pdf(PDF, X, Y, Justification, 0, Lines, 
 						Leading, Widths, Off),
 	    eg_pdf:begin_text(PDF),
 	    eg_pdf:append_stream(PDF, Code),

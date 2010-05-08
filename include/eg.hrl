@@ -26,7 +26,7 @@
 		 template,        % current template (Module Name)
 		 page,            % current page
 		 dict,            % dictionary with keys{free,Page,Box}
-				  %  {initialsed, Page, Template}
+				              %  {initialsed, Page, Template}
 		 tagMap           % current TagMap (function of the box)
 		 }).
 
@@ -45,7 +45,7 @@
 	       xHeight}).   % num
  
 -record(info, {creator,creationDate, producer, author, title, subject,
-	       keywords}).
+	       keywords}). % fields in the header of a PDF 
 
 -record(pdfContext, {
 	  info,
@@ -60,7 +60,9 @@
 	 }).
 
 
--record(image,{alias,width,height}).
+-record(image,{ alias,
+                width,
+                height}).
 
 -record(box,{name=default,  %name of the box
        x=10,                % X coordinate of top left hand corner of box
@@ -73,6 +75,7 @@
 	     grid=false,          % plot a grid
 	     continue=false,       
 	     fontSize=12,          % default font for box
+       justify=justified,         % text justification scheme (justified, centered, right_justified, left_justified)
 	     bg=default           % background color in box= default | {R,G,B}
 	    }).
 	    
@@ -91,10 +94,15 @@
 		}).   
 
 
--record(face, {font, pointSize, vOffset, color, breakable}).
+-record(face, {font, 
+               pointSize, 
+               vOffset, 
+               color, 
+               breakable}).
 
+% This is used to pass font choices for different tags into eg_table
 -record(table,
-    { def_font="Times-Bold",      % Default font choice
+    { def_font="Times-Roman",     % Default font choice
       em_font="Times-Bold",       % font for <em> tag 
       b_font="Times-Bold",        % font for <b> tag
       code_font="Courier-Bold"}). % font for <code> tag

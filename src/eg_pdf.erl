@@ -371,8 +371,12 @@ ellipse(PID, {X, Y}, {RX, RY})->
     append_stream(PID, eg_pdf_op:ellipse({X, Y}, {RX, RY})).
 
 
+%% @doc Stroke a rectangle area.
 %% If Stroke Type is not appended in arguments, explicit
 %% stroke command "path(StrokeType)" has to be executed.
+%%
+%% X, Y designate the lower left corner of the rectangle.
+
 
 rectangle(PID,{X,Y},{WX,WY}) ->
     rectangle(PID,X,Y,WX,WY).
