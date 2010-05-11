@@ -36,6 +36,9 @@
 
 %% ============================================================================
 
+%% @spec mk_images(Images, Count, [], []) -> {Free, XObjects, O0s}
+%% @doc mk_images takes a list of images and turns them into PDF XObjects
+%% to go into the PDF document. 
 
 mk_images([], I, Is, Os) -> 
     A = {{obj,I,0},{dict,lists:map(fun({Alias, ImageIndex}) ->
@@ -83,6 +86,17 @@ read_image(File) ->
       error 
   end.
 
+%% @spec get_head_info(Filepath) -> {jpeg_head,{Width, Height, Number_of_components, Precision}}
+%% Filepath = string()
+%% Width = integer()
+%% Height = integer()
+%% Number_of_components = integer()
+%% Precision = integer()
+%% @doc When called with a file path string, this returns a tuple of info
+%% on the jpeg at the file path location. The tuple is like the following <br/>
+%% <center>{ jpeg_head, { Width(pixels), Height(pixels), 
+%% Number_of_color_components(1, 3, 4), Data_precision(bits size)}} </center>
+
 get_head_info(File) ->
     process_header(read_image(File)).
 
@@ -108,7 +122,20 @@ get_head_info(File) ->
 %% -define(COM,   16#FE).  %% Comment 
 
 
-%% JPEG file
+
+%% @spec process_header(Jpeg) -> {jpeg_head,{Width, Height, Number_of_components, Precision}}
+%% Jpeg = binary()
+%% Width = integer()
+%% Height = integer()
+%% Number_of_components = integer()
+%% Precision = integer()
+%% @doc Same as get_head_info except it is called with a binary that holds the 
+%% content of a JPG file. This returns a tuple of info
+%% on the jpeg. The tuple is like the following <br/>
+%% <center>{ jpeg_head, { Width(pixels), Height(pixels), 
+%% Number_of_color_components(1, 3, 4), Data_precision(bits size)}} </center>
+
+
 process_header( << 16#FF:8, ?SOI:8, Rest/binary >> )->
     process_jpeg( Rest );
 process_header(Any) ->

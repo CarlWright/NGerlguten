@@ -76,7 +76,7 @@
 %% </pre>
 
 
-%% @doc process an XML block of content into a block of PDf text with a color background
+%% process an XML block of content into a block of PDf text with a color background
 
 block(PDF, Color, Sample, X, Y, Measure, PtSize, Leading, NLines, Justification, TagMap) ->
     Width = Measure + 20,
@@ -99,6 +99,9 @@ block(PDF, Sample, X, Y, Measure, PtSize, Leading, NLines, Justification, TagMap
 
 %% @doc process a parsed XML block of content into a block of PDf text with a blank background
 
+inner_block(PDF, [{raw, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification, TagMap) ->
+   block2(PDF, [{xml, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification, TagMap),
+   ok;
 inner_block(PDF, [{xml, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification, TagMap) ->
    block2(PDF, [{xml, Xml}], X, Y, Len, PtSize, Leading, NLines, Justification, TagMap),
    ok;

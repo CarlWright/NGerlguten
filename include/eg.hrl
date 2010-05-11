@@ -62,7 +62,9 @@
 
 -record(image,{ alias,
                 width,
-                height}).
+                height,
+                mask        % image color key masking color values
+                }).
 
 -record(box,{name=default,  %name of the box
        x=10,                % X coordinate of top left hand corner of box

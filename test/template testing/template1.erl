@@ -183,12 +183,11 @@ tag_map(Env, Template, Box, Object) ->
                end, [],Dict). 
           
 handler(Box, TagMap, Args, Data, Env) ->
-    [{raw, InText}] = Data, 
     case Box#box.bg of 
-      default ->      eg_block:block(Env#env.pdf,  InText, 
+      default ->      eg_block:inner_block(Env#env.pdf,  Data, 
                               Box#box.x, Box#box.y, Box#box.width, Box#box.fontSize, 
                               Box#box.leading, Box#box.lines, Box#box.justify, TagMap);
-      _ ->            eg_block:block(Env#env.pdf, Box#box.bg, InText, 
+      _ ->            eg_block:colored_inner_block(Env#env.pdf, Box#box.bg, Data, 
                               Box#box.x, Box#box.y, Box#box.width, Box#box.fontSize, 
                               Box#box.leading, Box#box.lines, Box#box.justify, TagMap)
                             end,

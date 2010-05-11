@@ -29,9 +29,10 @@
 -export([test/0]).
 
 %% Assemble a pdf document directly by building it from pdf "objects"
-%% rather than going through the pdf.erl API (and its pdf process).
+%% rather than going through the eg_pdf.erl API (and its pdf process).
 %%
-%% This test mostly producess the same output as eg_test1.erl.
+%% This test mostly producess the same output as eg_test1.erl, but doesn't 
+%% have any images.
 %%
 test()->
     %% create needed pdf "objects"
