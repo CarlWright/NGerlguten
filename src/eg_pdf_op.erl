@@ -572,7 +572,7 @@ set_stroke_gray(Gray)->
     [n2s(Gray)," G\n"].
 
 
-%% Image
+%% @doc create the PDF operator to draw an image
 set_image(Width, Height, IMGName)->
     [ n2s([Width, 0, 0, Height, 0, 0]), " cm\n", %% scale
 		  " /", IMGName, " Do\n" ].      %% Draw image

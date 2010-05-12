@@ -1046,6 +1046,9 @@ handle_export(PDFC)->
 %% handle_setfont(FontList, FontName) ->
 %%   {FontList1, Alias}
 %% Alias = "F" ++ Index
+%% alias is a name used in the PDF file to refer to the font.
+%%
+
 handle_setfont(FontList, FontName)->
     case eg_font_map:handler(FontName) of
 	undefined ->
@@ -1066,14 +1069,23 @@ ensure_font(Handler, FontList) ->
 		false ->
 		    [Handler|FontList]
 	    end.
-  
+	    
+%% @doc  This updates the image dictionary from the pdfContext.images with this new image if
+%% it's not already present. It also scales the image information to to fit the maximum
+%% sizes received in the Size parameter. This may be {undefined,Height}, {Width, undefined} or {max, width, height}.
+%% Filepath is the key into the dictionary. If a dictionary entry already exists for the FIlepath
+%% it doesn't put it into the dictionary again, but it does calculate the bounding box for the image.
+%% When the number of color components is less than or equal to 2, the Procset has a tuple value
+%% of {A,B} where A can be undefined or imageb and B can be undefined or imagec. These cause the 
+%% listing of these procedure set in the PDf so that the related procedure set can be loaded in 
+%% the Postscript printing device. This is suppoed to be obsolete as of v. 1.4 PDFs. 
+
 handle_image(ImageDict, FilePath, Size, ProcSet)->
     case dict:find(FilePath, ImageDict) of
 	{ok, #image{alias=Alias, width=W, height=H}} ->
 	    {ImageDict, Alias, set_size(Size,{W,H}), ProcSet };
 	error ->
-	    Alias = "Im" ++ 
-		eg_pdf_op:i2s(dict:size(ImageDict) + 1),
+	    Alias = "Im" ++ eg_pdf_op:i2s(dict:size(ImageDict) + 1),
 	    case eg_pdf_image:get_head_info(FilePath) of
 		{jpeg_head,{W1, H1, Ncomponents, Data_precision}} ->
 		    NewDict =dict:store(FilePath,
@@ -1104,7 +1116,7 @@ set_size({W1,undefined},{W2,H2}) -> {W1,trunc(W1*H2/W2)};
 set_size({undefined,H1},{W2,H2}) -> {trunc(H1*W2/H2),H1};
 set_size(Size1,_) -> Size1.
 
-%% Set the images for ProcSet
+%% @doc Set the image types for ProcSet. If we have black/white image we set imageb; color then imagec. Both can be set.
 imageBC(Ncomp,{B,C}) when Ncomp =< 2 -> {imageb,C};
 imageBC(Ncomp,{B,C}) when Ncomp > 2 -> {B,imagec}.
 

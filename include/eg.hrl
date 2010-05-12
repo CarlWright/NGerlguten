@@ -51,7 +51,7 @@
 	  info,
 	  fonts,
 	  font_handler,
-	  images=[], 
+	  images=[],    %% a dictionary of images
 	  currentpage,
 	  pages=[],
 	  scripts=[],

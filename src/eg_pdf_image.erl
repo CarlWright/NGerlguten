@@ -57,6 +57,10 @@ mk_image(I, File, #image{alias=Alias, width=W, height=H}) ->
 	    Extras = [{"Filter", {name,"DCTDecode"}},
 		      {"ColorSpace",{name, colorspace(Ncomponents)}},
 		      {"BitsPerComponent", Data_precision}];
+	{png_head,{Width, Height, Ncomponents, Data_precision}} ->
+	    Extras = [{"Filter", {name,"FlateDecode"}},
+		      {"ColorSpace",{name, pngspace(Ncomponents)}},
+		      {"BitsPerComponent", Data_precision}];
 	_ ->
 	    {Width, Height} = {W,H},
 	    Extras = []
@@ -76,6 +80,12 @@ colorspace(1)-> "DeviceGray";
 colorspace(2)-> "DeviceGray";
 colorspace(3)-> "DeviceRGB";
 colorspace(4)-> "DeviceCMYK".
+
+pngspace(0)-> "DeviceGray";
+pngspace(2)-> "DeviceRGD";
+pngspace(3)->  unknown;
+pngspace(4)-> "DeviceGray".
+pngspace(6)-> "DeviceRGB";
 
 read_image(File) ->
   case file:read_file(File) of
@@ -138,11 +148,15 @@ get_head_info(File) ->
 
 process_header( << 16#FF:8, ?SOI:8, Rest/binary >> )->
     process_jpeg( Rest );
+process_header( << 137:8, 80:8, 78:8, 71:8, 13:8, 10:8, 26:8, 10:8, Rest/binary >> )->
+    process_png( Rest );
 process_header(Any) ->
     image_format_not_yet_implemented_or_unknown.
 
 
-%% JPEG file header processing
+%% @doc JPEG file header processing
+%% it skips over charaters until it gets the a character that marks 
+%% the beginning of the bytes that define the shape of the image data
 
 %% Skip any leading 16#FF
 process_jpeg( << 16#FF:8,Rest/binary >> ) -> process_jpeg(Rest);
@@ -179,3 +193,6 @@ skip_marker(Image)->
     AdjLen = Length-2,
     << Skip:AdjLen/binary, Rest2/binary >> = Rest,
     Rest2.
+
+process_png( <<_:32, $I:8, $H:8, $D:8, $R:8, Width:32, Height:32, Data_precision:8, Color_type:8, Rest/binary >>) ->
+        {png_head,{Width, Height, Color_type, Data_precision}}. 
