@@ -1095,6 +1095,14 @@ handle_image(ImageDict, FilePath, Size, ProcSet)->
 					ImageDict),
 		    {NewDict, Alias, set_size(Size, {W1,H1}),
 		     imageBC(Ncomponents, ProcSet) };
+		{png_head,{W1, H1, Ncomponents, Data_precision}} ->
+		    NewDict =dict:store(FilePath,
+					#image{alias  = Alias,
+                                               width  = W1,
+                                               height = H1},
+					ImageDict),
+		    {NewDict, Alias, set_size(Size, {W1,H1}),
+		     imageBC(Ncomponents, ProcSet) };
 		
 		A -> 
 		    {error_not_yet_implemented_image_format,A}
