@@ -225,7 +225,7 @@ process_png( <<_Length:32, $I:8, $H:8, $D:8, $R:8,
               Interface_method:8/integer, _CRC:32, Rest/binary >>, 
               _Params, _MoreParams, Palette, Image, Alpha_channel) ->
         process_png( Rest,{png_head,{Width, Height, Color_type, Data_precision}},
-                {params, Compression, Filter_method, Interface_method}, Palette, Image, Alpha_channel);
+                {params, Compression, Filter_method, Interface_method, undefined}, Palette, Image, Alpha_channel);
         
 process_png( <<Length:32, $P:8, $L:8, $T:8, $E:8,  Data:Length/binary-unit:8, _CRC:32, Rest/binary >>, 
               Params, MoreParams, Palette, Image, Alpha_channel) ->
@@ -235,7 +235,25 @@ process_png( <<Length:32, $P:8, $L:8, $T:8, $E:8,  Data:Length/binary-unit:8, _C
 process_png( <<Length:32, $I:8, $D:8, $A:8, $T:8,  Data:Length/binary-unit:8, _CRC:32, Rest/binary >>, 
               Params, MoreParams, Palette, Image, Alpha_channel) ->
         process_png( Rest, Params, MoreParams, Palette, Image ++ binary_to_list(Data) , Alpha_channel);
-        
+
+process_png( <<Length:32, $t:8, $R:8, $N:8, $S:8,  Data:Length/binary-unit:8, _CRC:32, Rest/binary >>, Params, 
+              {params, Compression, Filter_method, Interface_method, 
+                Transparency, Indexed_alpha, Grayval, Red, Green, Blue},
+              Palette, Image, Alpha_channel) ->
+        {png_head,{_Width, _Height, Color_type, _Data_precision}} = Params,
+        case Color_type of
+          3 ->  Transparency = indexed,
+                Indexed_alpha = binary_to_list(Data);
+          0 ->  << Grayval:16>> = Data,
+                Transparency = grayscale;
+          2 -> << Red:16, Green:16, Blue:16 >> = Data,
+                Transparency = rgb
+        end,
+        process_png( Rest, Params, {params, Compression, Filter_method, Interface_method, 
+                    Transparency, Indexed_alpha, Grayval, Red, Green, Blue}, 
+                    Palette, Image , Alpha_channel);
+                    
+               
 process_png( <<_Length:32, $I:8, $E:8, $N:8, $D:8,  _Rest/binary >>, 
               Params, MoreParams, Palette, Image, Alpha_channel) ->
         [Params, MoreParams, list_to_binary(Palette), list_to_binary(Image) , list_to_binary(Alpha_channel)];
