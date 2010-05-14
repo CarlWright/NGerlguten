@@ -21,6 +21,7 @@
 %% USE OR OTHER DEALINGS IN THE SOFTWARE.
 %%
 %% Author:   Mikael Karlsson <mikael.karlsson@creado.com>
+%%           Carl Wright <wright@servicelevel.net>
 %% Purpose: Import images to PDF
 %%==========================================================================
 
@@ -30,7 +31,7 @@
 %%          Pack into XObjects
 %% 
 
--export([mk_images/4, get_head_info/1, process_header/1]).
+-export([mk_images/4, get_head_info/1, process_header/1, get_png_content/1]).
 
 -include("../include/eg.hrl").
 
@@ -56,13 +57,16 @@ mk_image(I, File, #image{alias=_Alias, width=W, height=H}) ->
 	{jpeg_head,{Width, Height, Ncomponents, Data_precision}} ->
 	    Extras = [{"Filter", {name,"DCTDecode"}},
 		      {"ColorSpace",{name, colorspace(Ncomponents)}},
-		      {"BitsPerComponent", Data_precision}];
+		      {"BitsPerComponent", Data_precision}],
+		      Image2 = Image;
 	{png_head,{Width, Height, Ncomponents, Data_precision}} ->
 	    Extras = [{"Filter", {name,"FlateDecode"}},
 		      {"ColorSpace",{name, pngspace(Ncomponents)}},
-		      {"BitsPerComponent", Data_precision}];
+		      {"BitsPerComponent", Data_precision}],
+		      [_Params, _MoreParams, _Palette, Image2 , _Alpha_channel] = get_png_content(File);
 	_ ->
 	    {Width, Height} = {W,H},
+	    Image2 = Image,
 	    Extras = []
     end,
     {{obj,I,0}, 
@@ -71,7 +75,7 @@ mk_image(I, File, #image{alias=_Alias, width=W, height=H}) ->
 	     {"Subtype",{name,"Image"}},
 	     {"Width",Width},
 	     {"Height", Height}| Extras ]},
-      Image}
+      Image2}
     }.
 
 
@@ -146,10 +150,12 @@ get_head_info(File) ->
 %% Number_of_color_components(1, 3, 4), Data_precision(bits size)}} </center>
 
 
+
 process_header( << 16#FF:8, ?SOI:8, Rest/binary >> )->
     process_jpeg( Rest );
 process_header( << 137:8, 80:8, 78:8, 71:8, 13:8, 10:8, 26:8, 10:8, Rest/binary >> )->
-    process_png( Rest );
+    [Params, _MoreParams, _Palette, _Image , _Alpha_channel] = png_head( Rest,[],[], [], [], [] ),
+    Params;
 process_header(_Any) ->
     image_format_not_yet_implemented_or_unknown.
 
@@ -192,5 +198,48 @@ skip_marker(Image)->
     << _Skip:AdjLen/binary, Rest2/binary >> = Rest,
     Rest2.
 
-process_png( <<_Length:32, $I:8, $H:8, $D:8, $R:8, Width:32, Height:32, Data_precision:8, Color_type:8, _Rest/binary >>) ->
-        {png_head,{Width, Height, Color_type, Data_precision}}. 
+png_head( <<_Length:32, $I:8, $H:8, $D:8, $R:8, 
+              Width:32/integer, Height:32/integer, Data_precision:8/integer, 
+              Color_type:8/integer, Compression:8/integer, Filter_method:8/integer,
+              Interface_method:8/integer, _CRC:32, _Rest/binary >>, 
+              _Params, _MoreParams, Palette, Image, Alpha_channel) ->
+                    [{png_head,{Width, Height, Color_type, Data_precision}},
+                    {params, Compression, Filter_method, Interface_method}, 
+                    Palette, Image, Alpha_channel].
+                  
+get_png_content(File) ->
+  case file:read_file(File) of
+    {ok, Image} ->
+      process_png_header( Image );
+    {error, Reason} ->
+      io:format("Can not read file ~s; reason is ~s~n",[File,Reason]),
+      error 
+  end.                     
+
+process_png_header( << 137:8, 80:8, 78:8, 71:8, 13:8, 10:8, 26:8, 10:8, Rest/binary >> )->
+        process_png(Rest, [], [], [], [], []).
+                        
+process_png( <<_Length:32, $I:8, $H:8, $D:8, $R:8, 
+              Width:32/integer, Height:32/integer, Data_precision:8/integer, 
+              Color_type:8/integer, Compression:8/integer, Filter_method:8/integer,
+              Interface_method:8/integer, _CRC:32, Rest/binary >>, 
+              _Params, _MoreParams, Palette, Image, Alpha_channel) ->
+        process_png( Rest,{png_head,{Width, Height, Color_type, Data_precision}},
+                {params, Compression, Filter_method, Interface_method}, Palette, Image, Alpha_channel);
+        
+process_png( <<Length:32, $P:8, $L:8, $T:8, $E:8,  Data:Length/binary-unit:8, _CRC:32, Rest/binary >>, 
+              Params, MoreParams, Palette, Image, Alpha_channel) ->
+                io:format("Palette length = ~w~n",[Length]),
+        process_png( Rest, Params, MoreParams, Palette ++ binary_to_list(Data), Image, Alpha_channel);
+        
+process_png( <<Length:32, $I:8, $D:8, $A:8, $T:8,  Data:Length/binary-unit:8, _CRC:32, Rest/binary >>, 
+              Params, MoreParams, Palette, Image, Alpha_channel) ->
+        process_png( Rest, Params, MoreParams, Palette, Image ++ binary_to_list(Data) , Alpha_channel);
+        
+process_png( <<_Length:32, $I:8, $E:8, $N:8, $D:8,  _Rest/binary >>, 
+              Params, MoreParams, Palette, Image, Alpha_channel) ->
+        [Params, MoreParams, list_to_binary(Palette), list_to_binary(Image) , list_to_binary(Alpha_channel)];
+        
+process_png( <<Length:32/integer, _ID:32, _:Length/binary-unit:8, _CRC:32, Rest/binary >>, 
+              Params, MoreParams, Palette, Image, Alpha_channel) ->
+        process_png( Rest, Params, MoreParams, Palette, Image , Alpha_channel).        
