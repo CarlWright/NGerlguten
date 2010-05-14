@@ -76,7 +76,7 @@
 %% </pre>
 
 
-%% process an XML block of content into a block of PDf text with a color background
+%% process an XML block of content into a block of PDF text with a color background
 
 block(PDF, Color, Sample, X, Y, Measure, PtSize, Leading, NLines, Justification, TagMap) ->
     Width = Measure + 20,

@@ -61,9 +61,13 @@ mk_image(I, File, #image{alias=_Alias, width=W, height=H}) ->
 		      Image2 = Image;
 	{png_head,{Width, Height, Ncomponents, Data_precision}} ->
 	    Extras = [{"Filter", {name,"FlateDecode"}},
+	        {"DecodeParms", {dict,[{"Predictor", 15}, 
+	                              {"Colors", 3},
+	                              {"BitsPerComponent", Data_precision},
+	                              {"Columns", Width}] } },
 		      {"ColorSpace",{name, pngspace(Ncomponents)}},
 		      {"BitsPerComponent", Data_precision}],
-		      [_Params, _MoreParams, _Palette, Image2 , _Alpha_channel] = get_png_content(File);
+		  [_Params, _MoreParams, _Palette, Image2 , _Alpha_channel] = get_png_content(File);
 	_ ->
 	    {Width, Height} = {W,H},
 	    Image2 = Image,

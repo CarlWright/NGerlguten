@@ -198,6 +198,47 @@ serialise2bin(A) ->
 %% @spec serialise(Object::pdfobject()) -> deeplist()
 %% deeplist() = deeplist() | string()
 %% @doc Returns a serialised object as a deep list of strings
+%%
+%% For example,
+%% <pre>
+
+%% {obj,1, 0, 
+%%  {stream,
+%%    {dict,
+%%      {"Type",{name,"XObject"}},
+%%      {"Subtype",{name,"Image"}},
+%%      {"Width", 997},
+%%      {"Height", 744},
+%%      {"Filter",{name,"FlateDecode"},
+%%      {"DecodeParms", {dict,[{"Predictor", 15},
+%%                      {"Colors", 3},
+%%                      {"BitsPerComponent", 8},
+%%                      {"Columns", 997}]}},
+%%      {"ColorSpace",{name,"DeviceRGB}},
+%%                      {"BitsPerComponent", 8},
+%%                      {"Columns", 997}}
+%% }}}
+%% becomes
+%%
+%% 1 0 obj
+%%<<
+%%/Type  /XObject 
+%%/Subtype  /Image 
+%%/Width  997 
+%%/Height  744 
+%%/Filter  /FlateDecode 
+%%/DecodeParms <<
+%%/Predictor  15 
+%%/Colors  3 
+%%/BitsPerComponent  8 
+%/Columns  997 
+%%>> 
+%% /ColorSpace  /DeviceRGB 
+%% /BitsPerComponent  8 
+%% /Length  1412674 
+%% >>
+%% </pre>
+
 serialise({{obj,I,J},K}) ->
     [eg_pdf_op:i2s(I)," ",eg_pdf_op:i2s(J)," obj\n", serialise(K),"endobj\n"];
 serialise({stream, S}) -> 
