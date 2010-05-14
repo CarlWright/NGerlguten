@@ -200,8 +200,8 @@ serialise2bin(A) ->
 %% @doc Returns a serialised object as a deep list of strings
 %%
 %% For example,
-%% <pre>
-
+%% <pre><code>
+%%
 %% {obj,1, 0, 
 %%  {stream,
 %%    {dict,
@@ -217,27 +217,29 @@ serialise2bin(A) ->
 %%      {"ColorSpace",{name,"DeviceRGB}},
 %%                      {"BitsPerComponent", 8},
 %%                      {"Columns", 997}}
-%% }}}
-%% becomes
+%% }}}</code></pre>
 %%
+%% <em>becomes</em>
+%%
+%% <pre><code>
 %% 1 0 obj
-%%<<
-%%/Type  /XObject 
-%%/Subtype  /Image 
-%%/Width  997 
-%%/Height  744 
-%%/Filter  /FlateDecode 
-%%/DecodeParms <<
-%%/Predictor  15 
-%%/Colors  3 
-%%/BitsPerComponent  8 
-%/Columns  997 
-%%>> 
+%% &lt;&lt;
+%% /Type  /XObject 
+%% /Subtype  /Image 
+%% /Width  997 
+%% /Height  744 
+%% /Filter  /FlateDecode 
+%% /DecodeParms &lt;&lt;
+%% /Predictor  15 
+%% /Colors  3 
+%% /BitsPerComponent  8 
+%% /Columns  997 
+%% &gt;&gt; 
 %% /ColorSpace  /DeviceRGB 
 %% /BitsPerComponent  8 
 %% /Length  1412674 
-%% >>
-%% </pre>
+%% &gt;&gt;
+%% </code></pre>
 
 serialise({{obj,I,J},K}) ->
     [eg_pdf_op:i2s(I)," ",eg_pdf_op:i2s(J)," obj\n", serialise(K),"endobj\n"];
