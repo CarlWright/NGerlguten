@@ -31,7 +31,12 @@
 %%          Pack into XObjects
 %% 
 
--export([mk_images/4, get_head_info/1, process_header/1, get_png_content/1]).
+-export([mk_images/4, 
+        get_head_info/1, 
+        process_header/1, 
+        get_png_content/1,
+        deflate_stream/1,
+        inflate_stream/1]).
 
 -include("../include/eg.hrl").
 
@@ -48,9 +53,14 @@ mk_images([], I, Is, Os) ->
 				   lists:reverse(Is))}},
     {I+1, {ptr,I,0}, lists:reverse([A|Os])};
 mk_images([{ImageURI, #image{alias=Alias}=Im}|T], I, Fs, E) ->
-    O = mk_image(I, ImageURI, Im),
-    mk_images(T, I+1, [{Alias,I}|Fs], [O|E]).
-
+  List = case mk_image(I, ImageURI, Im) of
+    {J, [A,[]]} ->
+      [A|E] ;
+    {J, [A,B]} ->
+      [A,B|E]  
+  end,
+  mk_images(T, J+1, [{Alias,I}|Fs], List).
+ 
 mk_image(I, File, #image{alias=_Alias, width=W, height=H}) ->
     Image = read_image(File),
     case process_header(Image) of
@@ -58,29 +68,97 @@ mk_image(I, File, #image{alias=_Alias, width=W, height=H}) ->
 	    Extras = [{"Filter", {name,"DCTDecode"}},
 		      {"ColorSpace",{name, colorspace(Ncomponents)}},
 		      {"BitsPerComponent", Data_precision}],
-		      Image2 = Image;
+		      Image2 = Image,
+		      J = I,
+		      ExtraObj = [];
 	{png_head,{Width, Height, Ncomponents, Data_precision}} ->
+	  [_Params, MoreParams, Palette, Image2 , Alpha_channel] = get_png_content(File),
+	  case Ncomponents of 
+	    0 ->
 	    Extras = [{"Filter", {name,"FlateDecode"}},
 	        {"DecodeParms", {dict,[{"Predictor", 15}, 
-	                              {"Colors", 3},
+	                              {"Colors", pngbits(Ncomponents)},
 	                              {"BitsPerComponent", Data_precision},
 	                              {"Columns", Width}] } },
-		      {"ColorSpace",{name, pngspace(Ncomponents)}},
+		      {"ColorSpace",{name, pngcolor(Ncomponents)}},
 		      {"BitsPerComponent", Data_precision}],
-		  [_Params, _MoreParams, _Palette, Image2 , _Alpha_channel] = get_png_content(File);
+		      J = I,
+		      ExtraObj = [];
+	    2 ->
+	    Extras = [{"Filter", {name,"FlateDecode"}},
+	        {"BitsPerComponent", Data_precision},
+	        {"DecodeParms", {dict,[{"Predictor", 15}, 
+	                              {"Colors", pngbits(Ncomponents)},
+	                              {"BitsPerComponent", Data_precision},
+	                              {"Columns", Width}] } },
+		      {"ColorSpace",{name, pngcolor(Ncomponents)}}],
+		      J = I,
+		      ExtraObj = [];
+	    3 ->
+	    		J = I + 1,
+	    		Extras = [{"Filter", {name,"FlateDecode"}},
+	    		{"BitsPerComponent", Data_precision},
+	        {"DecodeParms", {dict,[{"Predictor", 15}, 
+	                              {"Colors", pngbits(Ncomponents)},
+	                              {"BitsPerComponent", Data_precision},
+	                              {"Columns", Width}] } },
+		      {"ColorSpace",{array,[{name,"Indexed"},{name,"DeviceRGB"}, 
+		                    round(((length(binary_to_list(Palette))/3)-1)), {ptr, J, 0}] }}],
+
+		      ExtraObj = {{obj,J, 0}, {stream, Palette}};
+
+	    4 ->
+		      J = I + 1,
+	        Extras = [{"Filter", {name,"FlateDecode"}},
+	        {"BitsPerComponent", Data_precision},
+		      {"ColorSpace",{name, pngcolor(Ncomponents)}},
+		      {"Smask", {ptr, J, 0}}],
+		     
+
+		      ExtraObj = {{obj,J, 0}, {stream, 
+		            {dict,[{"Type",{name,"XObject"}},
+            	     {"Subtype",{name,"Image"}},
+            	     {"Width",Width},
+            	     {"Height", Height},
+            	     {"BitsPerComponent", Data_precision},
+            	     {"Filter", {name,"FlateDecode"}},
+            	     {"ColorSpace",{name, pngcolor(Ncomponents)}},
+            	     {"Decode",{array,[0,1]}}]},
+          	     Alpha_channel}};
+	    6 ->
+		      J = I + 1,
+	        Extras = [{"Filter", {name,"FlateDecode"}},
+	        {"BitsPerComponent", Data_precision},
+		      {"ColorSpace",{name, pngcolor(Ncomponents)}},
+		      {"Smask", {ptr, J, 0}}],
+		     
+
+		      ExtraObj = {{obj,J, 0}, {stream, 
+		            {dict,[{"Type",{name,"XObject"}},
+            	     {"Subtype",{name,"Image"}},
+            	     {"Width",Width},
+            	     {"Height", Height},
+            	     {"BitsPerComponent", Data_precision},
+            	     {"Filter", {name,"FlateDecode"}},
+            	     {"ColorSpace",{name, "DeviceGray"}},
+            	     {"Decode",{array,[0,1]}}]},
+          	     Alpha_channel}}
+      end;
 	_ ->
 	    {Width, Height} = {W,H},
 	    Image2 = Image,
-	    Extras = []
+	    Extras = [],
+	    J = I,
+	    ExtraObj = []
     end,
-    {{obj,I,0}, 
+   {J, [{{obj,I,0}, 
      {stream,	  
       {dict,[{"Type",{name,"XObject"}},
 	     {"Subtype",{name,"Image"}},
 	     {"Width",Width},
 	     {"Height", Height}| Extras ]},
       Image2}
-    }.
+    },ExtraObj]}.
 
 
 colorspace(0)-> "DeviceGray";
@@ -89,11 +167,17 @@ colorspace(2)-> "DeviceGray";
 colorspace(3)-> "DeviceRGB";
 colorspace(4)-> "DeviceCMYK".
 
-pngspace(0)-> "DeviceGray";
-pngspace(2)-> "DeviceRGB";
-pngspace(3)->  unknown;
-pngspace(4)-> "DeviceGray";
-pngspace(6)-> "DeviceRGB".
+pngcolor(X) ->
+  {A,_} = pngspace(X),
+  A.
+pngbits(X) ->
+  {_, B} = pngspace(X),
+  B.
+pngspace(0)-> {"DeviceGray", 1};
+pngspace(2)-> {"DeviceRGB", 3};
+pngspace(3)-> {"DeviceGray", 1};
+pngspace(4)-> {"DeviceGray", 1};
+pngspace(6)-> {"DeviceRGB", 3}.
 
 read_image(File) ->
   case file:read_file(File) of
@@ -260,8 +344,48 @@ process_png( <<Length:32, $t:8, $R:8, $N:8, $S:8,  Data:Length/binary-unit:8, _C
                
 process_png( <<_Length:32, $I:8, $E:8, $N:8, $D:8,  _Rest/binary >>, 
               Params, MoreParams, Palette, Image, Alpha_channel) ->
-        [Params, MoreParams, list_to_binary(Palette), list_to_binary(Image) , list_to_binary(Alpha_channel)];
+        {png_head,{Width, Height, Color_type, Data_precision}} = Params,
+        case Color_type of
+          0 ->
+              [Params, MoreParams, list_to_binary(Palette), list_to_binary(Image) , list_to_binary(Alpha_channel)];
+          2 ->
+              [Params, MoreParams, list_to_binary(Palette), list_to_binary(Image) , list_to_binary(Alpha_channel)];
+          3 ->
+              [Params, MoreParams, list_to_binary(Palette), list_to_binary(Image) , list_to_binary(Alpha_channel)];
+          4 ->
+              {ImageScan, AlphaCodes} = extractAlphaAndData(list_to_binary(Image)),
+              [Params, MoreParams, list_to_binary(Palette), ImageScan , AlphaCodes];
+          6 ->        
+              {ImageScan, AlphaCodes} = extractAlphaAndData(list_to_binary(Image)),
+              [Params, MoreParams, list_to_binary(Palette), ImageScan , AlphaCodes]
+          end;
         
 process_png( <<Length:32/integer, _ID:32, _:Length/binary-unit:8, _CRC:32, Rest/binary >>, 
               Params, MoreParams, Palette, Image, Alpha_channel) ->
-        process_png( Rest, Params, MoreParams, Palette, Image , Alpha_channel).        
+        process_png( Rest, Params, MoreParams, Palette, Image , Alpha_channel).   
+        
+extractAlphaAndData(Image) ->
+  {ok,Decompressed} = deflate_stream(Image),
+  {Decompressed,<< >>}.     
+        
+%% @doc Decompress a bit stream using the zlib/deflate algorithm
+%%        
+inflate_stream(Data) ->
+  Z = zlib:open(),
+  ok = zlib:inflateInit(Z),
+  Decompressed = zlib:inflate(Z, Data),
+  ok = zlib:inflateEnd(Z),
+  zlib:close(Z),
+  {ok,Decompressed}.
+  
+%% @doc Compress a bit stream using the zlib/deflate algorithm
+%% 
+deflate_stream(Data) ->
+  Z = zlib:open(),
+  zlib:deflateInit(Z),
+  B1 = zlib:deflate(Z,Data),
+  B2 = zlib:deflate(Z,<< >>,finish),
+  zlib:deflateEnd(Z),
+  Compressed = list_to_binary([B1,B2]),
+  zlib:close(Z),
+  {ok,Compressed}.
