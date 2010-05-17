@@ -367,6 +367,36 @@ process_png( <<Length:32/integer, _ID:32, _:Length/binary-unit:8, _CRC:32, Rest/
 extractAlphaAndData(Image) ->
   {ok,Decompressed} = deflate_stream(Image),
   {Decompressed,<< >>}.     
+ 
+breakout({PixelSize, AlphaSize}, Stream, Pixels, Alpha_channel) ->
+  <<Pixel:PixelSize, Alpha:AlphaSize, Rest/binary>> = Stream,
+  breakout({PixelSize, AlphaSize},  Rest, Pixels ++ binary_to_list(Pixel), Alpha_channel ++ binary_to_list(Alpha));
+breakout(Sizes, << >>,Pixels, Alpha_channel) ->
+  {list_to_binary(Pixels), list_to_binary(Alpha_channel)}.
+  
+%% Apply the PDF filter to the bytes of the image 
+filter(X,A,B,C,D, Method) ->
+  NewX = case Method of
+    0 -> X;
+    1 -> X - A div 256;
+    2 -> X - B div 256;
+    3 -> (X - floor( (A + B)/2) ) div 256;
+    4 -> (X - paethPredictor(A,B,C)) div 256
+  end,
+  NewX.
+
+%% calculate the specialized filter invented by Mr. Paeth
+  
+paethPredictor(A,B,C) ->
+  P = A + B - C,
+  Pa = abs(P - A),
+  Pb = abs( P - B),
+  Pc = abs( P - C),
+  Pr = if (Pa =< Pb) and (Pa =< Pc) -> A;
+    (Pb =< Pc) -> B;
+    true -> C
+  end,
+  Pr.
         
 %% @doc Decompress a bit stream using the zlib/deflate algorithm
 %%        
@@ -389,3 +419,12 @@ deflate_stream(Data) ->
   Compressed = list_to_binary([B1,B2]),
   zlib:close(Z),
   {ok,Compressed}.
+  
+  
+floor(X) ->
+    T = erlang:trunc(X),
+    case (X - T) of
+        Neg when Neg < 0 -> T - 1;
+        Pos when Pos > 0 -> T;
+        _ -> T
+    end.
