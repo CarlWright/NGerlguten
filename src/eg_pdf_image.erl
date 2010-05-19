@@ -37,7 +37,7 @@
         get_png_content/1,
         deflate_stream/1,
         inflate_stream/1]).
-
+-compile(export_all).
 -include("../include/eg.hrl").
 
 %% ============================================================================
@@ -304,6 +304,8 @@ get_png_content(File) ->
       error 
   end.                     
 
+%% @doc recognize the header on a PNG image
+
 process_png_header( << 137:8, 80:8, 78:8, 71:8, 13:8, 10:8, 26:8, 10:8, Rest/binary >> )->
         process_png(Rest, [], [], [], [], []).
                         
@@ -353,37 +355,101 @@ process_png( <<_Length:32, $I:8, $E:8, $N:8, $D:8,  _Rest/binary >>,
           3 ->
               [Params, MoreParams, list_to_binary(Palette), list_to_binary(Image) , list_to_binary(Alpha_channel)];
           4 ->
-              {ImageScan, AlphaCodes} = extractAlphaAndData(list_to_binary(Image)),
+              {ImageScan, AlphaCodes} = extractAlphaAndData(Params, list_to_binary(Image)),
               [Params, MoreParams, list_to_binary(Palette), ImageScan , AlphaCodes];
           6 ->        
-              {ImageScan, AlphaCodes} = extractAlphaAndData(list_to_binary(Image)),
+              {ImageScan, AlphaCodes} = extractAlphaAndData(Params, list_to_binary(Image)),
               [Params, MoreParams, list_to_binary(Palette), ImageScan , AlphaCodes]
           end;
         
 process_png( <<Length:32/integer, _ID:32, _:Length/binary-unit:8, _CRC:32, Rest/binary >>, 
               Params, MoreParams, Palette, Image, Alpha_channel) ->
-        process_png( Rest, Params, MoreParams, Palette, Image , Alpha_channel).   
+        process_png( Rest, Params, MoreParams, Palette, Image , Alpha_channel).  
         
-extractAlphaAndData(Image) ->
-  {ok,Decompressed} = deflate_stream(Image),
-  {Decompressed,<< >>}.     
- 
-breakout({PixelSize, AlphaSize}, Stream, Pixels, Alpha_channel) ->
-  <<Pixel:PixelSize, Alpha:AlphaSize, Rest/binary>> = Stream,
-  breakout({PixelSize, AlphaSize},  Rest, Pixels ++ binary_to_list(Pixel), Alpha_channel ++ binary_to_list(Alpha));
-breakout(Sizes, << >>,Pixels, Alpha_channel) ->
-  {list_to_binary(Pixels), list_to_binary(Alpha_channel)}.
+         
+%% @doc Take the compressed image data and return the image and alpha channel data sompressed in seperate streams.
+       
+extractAlphaAndData({png_head,{Width, Height, Color_type, Data_precision}},Image) ->
+  {ok,Decompressed} = inflate_stream(Image),
+  ByteWidth = 1 + ceiling((Width * (pngbits(Color_type) + 1) * Data_precision) /8),
+  AllScanLines = extractScanLines(ByteWidth,Decompressed),
+  NoFilterImage = filterStream(AllScanLines),
+  {Image,AlphaChannel} = breakoutLines({pngbits(Color_type)* Data_precision, Data_precision}, NoFilterImage),
+  {inflate_stream(Image), inflate_stream(AlphaChannel)}.   
+
+%% @doc this extracts the scan lines and returns them in reverse order
   
-%% Apply the PDF filter to the bytes of the image 
-filter(X,A,B,C,D, Method) ->
+extractScanLines(Width,Decompressed) ->
+    extractLine([],Width,Decompressed).
+    
+extractLine(ScanLines,Width,<< >>) ->
+  AlmostDone = lists:reverse(ScanLines),
+  [{0, string:chars(0,Width)} | AlmostDone];
+extractLine(ScanLines,Width,Image) ->
+  LineSize = Width - 1,
+  << Method:8, Line:LineSize/binary-unit:8, Rest/binary>> = Image,
+  extractLine([{Method, [0 | binary_to_list(Line)] } | ScanLines ], Width, Rest).  
+  
+%% @doc Remove the filter on all the bytes in the scan lines.
+
+filterStream(AllScanLines) ->
+  processLine(AllScanLines,[]).
+
+%% @doc a scan line and its buddy line to remove the filter on the bytes.
+
+processLine([{_Method, Line1}], Results)->
+  lists:reverse(Results);
+processLine([{_, Line1},{Method, Line2} | Remainder], Results) ->
+  {ok, Unfiltered} = liner(Method, Line1, Line2),
+  processLine([{Method, Line2} | Remainder],[Unfiltered | Results] ).
+  
+%% @doc  Take two scan lines and turn them into X,A,B and C tuples
+%% needed for the filter calculations for each byte.
+  
+liner(Method, Line1, Line2) ->
+  F= fun(X,Y) -> {X,Y} end,
+  E1 = lists:zipwith(F, Line1, Line2),
+  FourTuples = pairUp(E1,[]),
+  {ok, Unfiltered} = defilter(FourTuples, Method, []).
+
+pairUp([A],Pairs)->
+  lists:reverse(Pairs);
+pairUp([A|Rest],Pairs)->
+  [B |Remainder] = Rest,
+  pairUp(Rest, [{A,B}|Pairs]).
+
+%% @doc take a list of tuples and filter each tuple
+  
+defilter([],Method,Results) ->
+  {ok,lists:reverse(Results)};
+defilter([{{C,A},{B,X}}|T],Method,Results) ->
+  NewValue = filter(X,A,B,C, Method),
+  defilter(T,Method,[NewValue|Results]).
+  
+%% @doc Break out the scan lines from the image to remove the filtering  
+  
+breakoutLines(Sizes,ScanLines) ->
+  breakout(Sizes, ScanLines, << >>, << >>). 
+
+%% @doc filters gone, now we separate the image and alpha data
+
+breakout(Sizes, << >>,Pixels, Alpha_channel) ->
+  {Pixels, Alpha_channel};
+breakout({PixelSize, AlphaSize}, Stream, Pixels, Alpha_channel) ->
+  <<Pixel:PixelSize, Alpha:AlphaSize, Rest/bitstring>> = Stream,
+  breakout({PixelSize, AlphaSize},  Rest, <<Pixels/bitstring, Pixel:PixelSize/bitstring>>, 
+        <<Alpha_channel/bitstring, Alpha:AlphaSize/bitstring>>).
+
+  
+%% Apply the PDF filter to a byte of the image 
+filter(X,A,B,C, Method) ->
   NewX = case Method of
     0 -> X;
     1 -> X - A div 256;
     2 -> X - B div 256;
-    3 -> (X - floor( (A + B)/2) ) div 256;
-    4 -> (X - paethPredictor(A,B,C)) div 256
-  end,
-  NewX.
+    3 -> (X - floor( (A + B)/2) ) rem 256;
+    4 -> (X - paethPredictor(A,B,C)) rem 256
+  end.
 
 %% calculate the specialized filter invented by Mr. Paeth
   
@@ -406,7 +472,9 @@ inflate_stream(Data) ->
   Decompressed = zlib:inflate(Z, Data),
   ok = zlib:inflateEnd(Z),
   zlib:close(Z),
-  {ok,Decompressed}.
+  F = fun(A, B) -> <<A/binary, B/binary>> end,
+  MergedBinaries = lists:foldr(F, <<>>, Decompressed),
+  {ok,MergedBinaries}.
   
 %% @doc Compress a bit stream using the zlib/deflate algorithm
 %% 
@@ -426,5 +494,13 @@ floor(X) ->
     case (X - T) of
         Neg when Neg < 0 -> T - 1;
         Pos when Pos > 0 -> T;
+        _ -> T
+    end.
+    
+ceiling(X) ->
+    T = erlang:trunc(X),
+    case (X - T) of
+        Neg when Neg < 0 -> T;
+        Pos when Pos > 0 -> T + 1;
         _ -> T
     end.
