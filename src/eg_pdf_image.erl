@@ -1,5 +1,6 @@
 %%==========================================================================
 %% Copyright (C) 2003 Mikael Karlsson
+%%               2010 Carl Wright
 %%
 %% Permission is hereby granted, free of charge, to any person obtaining a
 %% copy of this software and associated documentation files (the
@@ -374,8 +375,15 @@ extractAlphaAndData({png_head,{Width, Height, Color_type, Data_precision}},Image
   ByteWidth = 1 + ceiling((Width * (pngbits(Color_type) + 1) * Data_precision) /8),
   AllScanLines = extractScanLines(ByteWidth,Decompressed),
   NoFilterImage = filterStream(AllScanLines),
-  {Image,AlphaChannel} = breakoutLines({pngbits(Color_type)* Data_precision, Data_precision}, NoFilterImage),
-  {inflate_stream(Image), inflate_stream(AlphaChannel)}.   
+  {NewImage,AlphaChannel} = breakoutLines({pngbits(Color_type)* Data_precision, Data_precision}, NoFilterImage),
+  io:format("channel separated~n"),
+  {ok,A} = deflate_stream(NewImage), 
+  {ok,B} = deflate_stream(AlphaChannel),
+  <<C:64/binary,_/binary>> = AlphaChannel,
+  io:format("Alpha bytes = ~w~n",[C]),
+  <<D:64/binary,_/binary>> = NewImage,
+  io:format("Image bytes = ~w~n",[D]),
+  {A,B}.   
 
 %% @doc this extracts the scan lines and returns them in reverse order
   
@@ -398,7 +406,8 @@ filterStream(AllScanLines) ->
 %% @doc a scan line and its buddy line to remove the filter on the bytes.
 
 processLine([{_Method, Line1}], Results)->
-  lists:reverse(Results);
+   A =lists:flatten( lists:reverse(Results) ),
+   list_to_binary( A );
 processLine([{_, Line1},{Method, Line2} | Remainder], Results) ->
   {ok, Unfiltered} = liner(Method, Line1, Line2),
   processLine([{Method, Line2} | Remainder],[Unfiltered | Results] ).
@@ -434,21 +443,22 @@ breakoutLines(Sizes,ScanLines) ->
 %% @doc filters gone, now we separate the image and alpha data
 
 breakout(Sizes, << >>,Pixels, Alpha_channel) ->
+  io:format("Stream size = ~w and ~w~n",[bit_size(Pixels), bit_size(Alpha_channel)]),
   {Pixels, Alpha_channel};
 breakout({PixelSize, AlphaSize}, Stream, Pixels, Alpha_channel) ->
-  <<Pixel:PixelSize, Alpha:AlphaSize, Rest/bitstring>> = Stream,
-  breakout({PixelSize, AlphaSize},  Rest, <<Pixels/bitstring, Pixel:PixelSize/bitstring>>, 
-        <<Alpha_channel/bitstring, Alpha:AlphaSize/bitstring>>).
+  <<Pixel:PixelSize/bits, Alpha:AlphaSize/bits, Rest/bitstring>> = Stream,
+  breakout({PixelSize, AlphaSize},  Rest, <<Pixels/bits, Pixel:PixelSize/bits>>, 
+        <<Alpha_channel/bits, Alpha:AlphaSize/bits>>).
 
   
 %% Apply the PDF filter to a byte of the image 
 filter(X,A,B,C, Method) ->
   NewX = case Method of
     0 -> X;
-    1 -> X - A div 256;
-    2 -> X - B div 256;
-    3 -> (X - floor( (A + B)/2) ) rem 256;
-    4 -> (X - paethPredictor(A,B,C)) rem 256
+    1 -> X + A div 256;
+    2 -> X + B div 256;
+    3 -> (X + floor( (A + B)/2) ) rem 256;
+    4 -> (X + paethPredictor(A,B,C)) rem 256
   end.
 
 %% calculate the specialized filter invented by Mr. Paeth
