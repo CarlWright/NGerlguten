@@ -24,7 +24,7 @@
 %% Purpose: PNG image testing
 %%==========================================================================
 
--module(eg_test10).
+-module(eg_test11).
 
 -export([test/0]).
 
@@ -35,23 +35,14 @@ test()->
     eg_pdf:set_pagesize(PDF,a4),
     eg_pdf:set_page(PDF,1),
     
-    eg_pdf:set_font(PDF, "Victorias-Secret", 14),
-    eg_pdf_lib:moveAndShow(PDF, 100, 685, "Type 0"),
-    eg_pdf:image(PDF,"../test/images/web-links.png", {100,700},{height,21}),
-    
-    eg_pdf_lib:moveAndShow(PDF, 150, 685, "Type 2"),
-    eg_pdf:image(PDF,"../test/images/ruport.png", {150,700},{width,258}),
-    
-    eg_pdf_lib:moveAndShow(PDF, 100, 485, "Type 3"),
-    eg_pdf:image(PDF,"../test/images/rails.png", {100,500},{height,50}),
+
+
     
     eg_pdf_lib:moveAndShow(PDF, 350, 185, "Type 4"),
     eg_pdf:image(PDF,"../test/images/page_white_text.png", {350,500},{height,16}),
-    
-    eg_pdf_lib:moveAndShow(PDF, 50, 20, "Type 6"),
-    eg_pdf:image(PDF,"../test/images/dice.png",{50,35}, {height,320}),
+
     
     {Serialised, _PageNo} = eg_pdf:export(PDF),
-    file:write_file("../test/eg_test10.pdf",[Serialised]),
+    file:write_file("../test/eg_test11.pdf",[Serialised]),
     eg_pdf:delete(PDF).
 

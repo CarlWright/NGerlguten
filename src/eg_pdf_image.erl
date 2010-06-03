@@ -104,7 +104,7 @@ mk_image(I, File, #image{alias=_Alias, width=W, height=H}) ->
 	                              {"BitsPerComponent", Data_precision},
 	                              {"Columns", Width}] } },
 		      {"ColorSpace",{array,[{name,"Indexed"},{name,"DeviceRGB"}, 
-		                    round(((length(binary_to_list(Palette))/3)-1)), {ptr, J, 0}] }}],
+		                    round(((byte_size(Palette)/3)-1)), {ptr, J, 0}] }}],
 
 		      ExtraObj = {{obj,J, 0}, {stream, Palette}};
 
@@ -308,7 +308,7 @@ get_png_content(File) ->
 %% @doc recognize the header on a PNG image
 
 process_png_header( << 137:8, 80:8, 78:8, 71:8, 13:8, 10:8, 26:8, 10:8, Rest/binary >> )->
-        process_png(Rest, [], [], [], [], []).
+        process_png(Rest, [], << >>, << >>, << >>, << >>).
                         
 process_png( <<_Length:32, $I:8, $H:8, $D:8, $R:8, 
               Width:32/integer, Height:32/integer, Data_precision:8/integer, 
@@ -321,11 +321,11 @@ process_png( <<_Length:32, $I:8, $H:8, $D:8, $R:8,
 process_png( <<Length:32, $P:8, $L:8, $T:8, $E:8,  Data:Length/binary-unit:8, _CRC:32, Rest/binary >>, 
               Params, MoreParams, Palette, Image, Alpha_channel) ->
                 io:format("Palette length = ~w~n",[Length]),
-        process_png( Rest, Params, MoreParams, Palette ++ binary_to_list(Data), Image, Alpha_channel);
+        process_png( Rest, Params, MoreParams, << Palette/bits, Data/bits>>, Image, Alpha_channel);
         
 process_png( <<Length:32, $I:8, $D:8, $A:8, $T:8,  Data:Length/binary-unit:8, _CRC:32, Rest/binary >>, 
               Params, MoreParams, Palette, Image, Alpha_channel) ->
-        process_png( Rest, Params, MoreParams, Palette, Image ++ binary_to_list(Data) , Alpha_channel);
+        process_png( Rest, Params, MoreParams, Palette, << Image/bits , Data/bits>> , Alpha_channel);
 
 process_png( <<Length:32, $t:8, $R:8, $N:8, $S:8,  Data:Length/binary-unit:8, _CRC:32, Rest/binary >>, Params, 
               {params, Compression, Filter_method, Interface_method, 
@@ -334,8 +334,8 @@ process_png( <<Length:32, $t:8, $R:8, $N:8, $S:8,  Data:Length/binary-unit:8, _C
         {png_head,{_Width, _Height, Color_type, _Data_precision}} = Params,
         case Color_type of
           3 ->  Transparency = indexed,
-                Indexed_alpha = binary_to_list(Data);
-          0 ->  << Grayval:16>> = Data,
+                Indexed_alpha = Data;
+          0 ->  << Grayval:16 >> = Data,
                 Transparency = grayscale;
           2 -> << Red:16, Green:16, Blue:16 >> = Data,
                 Transparency = rgb
@@ -346,44 +346,75 @@ process_png( <<Length:32, $t:8, $R:8, $N:8, $S:8,  Data:Length/binary-unit:8, _C
                     
                
 process_png( <<_Length:32, $I:8, $E:8, $N:8, $D:8,  _Rest/binary >>, 
-              Params, MoreParams, Palette, Image, Alpha_channel) ->
+              Params, 
+              MoreParams, 
+              Palette, 
+              Image, 
+              Alpha_channel) ->
         {png_head,{Width, Height, Color_type, Data_precision}} = Params,
         case Color_type of
           0 ->
-              [Params, MoreParams, list_to_binary(Palette), list_to_binary(Image) , list_to_binary(Alpha_channel)];
+              [Params, MoreParams, Palette, Image , Alpha_channel];
           2 ->
-              [Params, MoreParams, list_to_binary(Palette), list_to_binary(Image) , list_to_binary(Alpha_channel)];
+              [Params, MoreParams, Palette, Image , Alpha_channel];
           3 ->
-              [Params, MoreParams, list_to_binary(Palette), list_to_binary(Image) , list_to_binary(Alpha_channel)];
+              [Params, MoreParams, Palette, Image , Alpha_channel];
           4 ->
-              {ImageScan, AlphaCodes} = extractAlphaAndData(Params, list_to_binary(Image)),
-              [Params, MoreParams, list_to_binary(Palette), ImageScan , AlphaCodes];
+              {ImageScan, AlphaCodes} = extractAlphaAndData(Params, Image),
+              [Params, MoreParams, Palette, ImageScan , AlphaCodes];
           6 ->        
-              {ImageScan, AlphaCodes} = extractAlphaAndData(Params, list_to_binary(Image)),
-              [Params, MoreParams, list_to_binary(Palette), ImageScan , AlphaCodes]
+              {ImageScan, AlphaCodes} = extractAlphaAndData(Params, Image),
+              [Params, MoreParams, Palette, ImageScan , AlphaCodes]
           end;
         
 process_png( <<Length:32/integer, _ID:32, _:Length/binary-unit:8, _CRC:32, Rest/binary >>, 
-              Params, MoreParams, Palette, Image, Alpha_channel) ->
+              Params, 
+              MoreParams, 
+              Palette, 
+              Image, 
+              Alpha_channel) ->
         process_png( Rest, Params, MoreParams, Palette, Image , Alpha_channel).  
+ 
         
+               
          
 %% @doc Take the compressed image data and return the image and alpha channel data sompressed in seperate streams.
        
 extractAlphaAndData({png_head,{Width, Height, Color_type, Data_precision}},Image) ->
+
+%% decompress the ZLIB compressed bit stream
   {ok,Decompressed} = inflate_stream(Image),
+    ok = file:write_file("original.bin",[Decompressed]),
+    
+%% calc the length of a scan line
+  Offset = ceiling( ((pngbits(Color_type) + 1) * Data_precision) /8),
   ByteWidth = 1 + ceiling((Width * (pngbits(Color_type) + 1) * Data_precision) /8),
+
+%% extract the scan lines into tuples of filter number and byte stream
   AllScanLines = extractScanLines(ByteWidth,Decompressed),
-  NoFilterImage = filterStream(AllScanLines),
+
+%% undo the filters applied to the scan lines
+  NoFilterImage = filterStream(AllScanLines, Offset),
+    ok = file:write_file("filtered.bin",[NoFilterImage]),
+    
+%% separate the image and alpha channel data streams
   {NewImage,AlphaChannel} = breakoutLines({pngbits(Color_type)* Data_precision, Data_precision}, NoFilterImage),
   io:format("channel separated~n"),
-  {ok,A} = deflate_stream(NewImage), 
+  ok = file:write_file("image.bin",[NewImage]),
+    ok = file:write_file("alpha.bin",[AlphaChannel]),
+    
+%% compress the two streams and return them
+      {ok,A} = deflate_stream(NewImage), 
   {ok,B} = deflate_stream(AlphaChannel),
+
   <<C:64/binary,_/binary>> = AlphaChannel,
   io:format("Alpha bytes = ~w~n",[C]),
   <<D:64/binary,_/binary>> = NewImage,
   io:format("Image bytes = ~w~n",[D]),
   {A,B}.   
+
+
+
 
 %% @doc this extracts the scan lines and returns them in reverse order
   
@@ -392,48 +423,41 @@ extractScanLines(Width,Decompressed) ->
     
 extractLine(ScanLines,Width,<< >>) ->
   AlmostDone = lists:reverse(ScanLines),
-  [{0, string:chars(0,Width)} | AlmostDone];
+  [ {0, string:chars(0,Width-1)} | AlmostDone];
 extractLine(ScanLines,Width,Image) ->
   LineSize = Width - 1,
   << Method:8, Line:LineSize/binary-unit:8, Rest/binary>> = Image,
-  extractLine([{Method, [0 | binary_to_list(Line)] } | ScanLines ], Width, Rest).  
+  extractLine([{Method,  binary_to_list(Line) } | ScanLines ], Width, Rest).  
   
 %% @doc Remove the filter on all the bytes in the scan lines.
 
-filterStream(AllScanLines) ->
-  processLine(AllScanLines,[]).
+filterStream(AllScanLines, Offset) ->
+  processLine(AllScanLines, 1, Offset, []).
 
 %% @doc a scan line and its buddy line to remove the filter on the bytes.
 
-processLine([{_Method, Line1}], Results)->
+processLine([{_Method, Line1}], _Iter, Offset, Results)->
    A =lists:flatten( lists:reverse(Results) ),
    list_to_binary( A );
-processLine([{_, Line1},{Method, Line2} | Remainder], Results) ->
-  {ok, Unfiltered} = liner(Method, Line1, Line2),
-  processLine([{Method, Line2} | Remainder],[Unfiltered | Results] ).
-  
-%% @doc  Take two scan lines and turn them into X,A,B and C tuples
-%% needed for the filter calculations for each byte.
-  
-liner(Method, Line1, Line2) ->
-  F= fun(X,Y) -> {X,Y} end,
-  E1 = lists:zipwith(F, Line1, Line2),
-  FourTuples = pairUp(E1,[]),
-  {ok, Unfiltered} = defilter(FourTuples, Method, []).
+processLine([{_, Line1},{Method, Line2} | Remainder], Iter, Offset, Results) ->
+  {ok, Unfiltered} = x(Method, Line1, Line2,Offset,length(Line1),Iter),
+  processLine([{Method, Unfiltered } | Remainder], Iter, Offset, [Unfiltered | Results] ).
 
-pairUp([A],Pairs)->
-  lists:reverse(Pairs);
-pairUp([A|Rest],Pairs)->
-  [B |Remainder] = Rest,
-  pairUp(Rest, [{A,B}|Pairs]).
-
-%% @doc take a list of tuples and filter each tuple
+%% @doc Taking two lines of stream defilter the 2nd with the previously defiltered 1st line.
   
-defilter([],Method,Results) ->
-  {ok,lists:reverse(Results)};
-defilter([{{C,A},{B,X}}|T],Method,Results) ->
-  NewValue = filter(X,A,B,C, Method),
-  defilter(T,Method,[NewValue|Results]).
+x(Method, Line1, Line2, Offset, Width, Iter) when Iter =< Width ->
+  NewVal = case Iter =< Offset of
+    true ->  filter(lists:nth(Iter,Line2), 0, lists:nth(Iter,Line1), 0, Method);
+    false ->  filter(lists:nth(Iter,Line2), lists:nth(Iter-Offset,Line2), lists:nth(Iter,Line1), lists:nth(Iter-Offset,Line1), Method)
+    end,
+    L2 = case Iter == Width of
+      true -> lists:flatten([lists:sublist(Line2,Iter - 1),NewVal]);
+      false -> lists:flatten([lists:sublist(Line2,Iter - 1),NewVal,lists:nthtail(Iter, Line2)])
+    end,
+    x(Method, Line1, L2 ,Offset, Width, Iter+1);
+x(_Method, _Line1, Line2, _Offset, _Width, _Iter) ->
+  {ok, Line2}.
+
   
 %% @doc Break out the scan lines from the image to remove the filtering  
   
@@ -455,8 +479,8 @@ breakout({PixelSize, AlphaSize}, Stream, Pixels, Alpha_channel) ->
 filter(X,A,B,C, Method) ->
   NewX = case Method of
     0 -> X;
-    1 -> X + A div 256;
-    2 -> X + B div 256;
+    1 -> (X + A) rem 256;
+    2 -> (X + B) rem 256;
     3 -> (X + floor( (A + B)/2) ) rem 256;
     4 -> (X + paethPredictor(A,B,C)) rem 256
   end.
