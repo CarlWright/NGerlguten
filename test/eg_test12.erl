@@ -24,7 +24,7 @@
 %% Purpose: PNG image testing
 %%==========================================================================
 
--module(eg_test11).
+-module(eg_test12).
 
 -export([test/0]).
 
@@ -34,21 +34,18 @@ test()->
     PDF = eg_pdf:new(),
     eg_pdf:set_pagesize(PDF,a4),
     eg_pdf:set_page(PDF,1),
-    eg_pdf:set_font(PDF, "Victorias-Secret", 14),    
-    eg_pdf_lib:moveAndShow(PDF, 350, 185, "Type 4"),
+    
+    eg_pdf:set_font(PDF, "Victorias-Secret", 14),  
+    eg_pdf_lib:moveAndShow(PDF, 50, 20, "Type 6"),
+
     
     eg_pdf:save_state(PDF),
-    eg_pdf:set_fill_color(PDF,red),
-    eg_pdf:rectangle(PDF, 350,200,16,16, fill),
-    eg_pdf:restore_state(PDF),
-        
-    eg_pdf:save_state(PDF),
-    eg_pdf:set_fill_color(PDF,red),
-    eg_pdf:rectangle(PDF, 340,480,56,56, fill),
-    eg_pdf:image(PDF,"../test/images/page_white_text.png", {350,500},{height,16}),
+    eg_pdf:set_fill_color(PDF,gainsboro),
+    eg_pdf:rectangle(PDF, 50,35,240,320, fill),
+    eg_pdf:image(PDF,"../test/images/dice.png",{50,35}, {240,320}),
     eg_pdf:restore_state(PDF),
     
     {Serialised, _PageNo} = eg_pdf:export(PDF),
-    file:write_file("../test/eg_test11.pdf",[Serialised]),
+    file:write_file("../test/eg_test12.pdf",[Serialised]),
     eg_pdf:delete(PDF).
 

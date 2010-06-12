@@ -113,7 +113,7 @@ mk_image(I, File, #image{alias=_Alias, width=W, height=H}) ->
 	        Extras = [{"Filter", {name,"FlateDecode"}},
 	        {"BitsPerComponent", Data_precision},
 		      {"ColorSpace",{name, pngcolor(Ncomponents)}},
-		      {"Smask", {ptr, J, 0}}],
+		      {"SMask", {ptr, J, 0}}],
 		     
 
 		      ExtraObj = {{obj,J, 0}, {stream, 
@@ -129,9 +129,10 @@ mk_image(I, File, #image{alias=_Alias, width=W, height=H}) ->
 	    6 ->
 		      J = I + 1,
 	        Extras = [{"Filter", {name,"FlateDecode"}},
-	        {"BitsPerComponent", Data_precision},
 		      {"ColorSpace",{name, pngcolor(Ncomponents)}},
-		      {"Smask", {ptr, J, 0}}],
+		      {"SMask", {ptr, J, 0}},
+		      {"BitsPerComponent", Data_precision}
+            ],
 		     
 
 		      ExtraObj = {{obj,J, 0}, {stream, 
@@ -139,9 +140,9 @@ mk_image(I, File, #image{alias=_Alias, width=W, height=H}) ->
             	     {"Subtype",{name,"Image"}},
             	     {"Width",Width},
             	     {"Height", Height},
-            	     {"BitsPerComponent", Data_precision},
-            	     {"Filter", {name,"FlateDecode"}},
             	     {"ColorSpace",{name, "DeviceGray"}},
+            	     {"Filter", {name,"FlateDecode"}},
+            	     {"BitsPerComponent", Data_precision},
             	     {"Decode",{array,[0,1]}}]},
           	     Alpha_channel}}
       end;
@@ -320,7 +321,6 @@ process_png( <<_Length:32, $I:8, $H:8, $D:8, $R:8,
         
 process_png( <<Length:32, $P:8, $L:8, $T:8, $E:8,  Data:Length/binary-unit:8, _CRC:32, Rest/binary >>, 
               Params, MoreParams, Palette, Image, Alpha_channel) ->
-                io:format("Palette length = ~w~n",[Length]),
         process_png( Rest, Params, MoreParams, << Palette/bits, Data/bits>>, Image, Alpha_channel);
         
 process_png( <<Length:32, $I:8, $D:8, $A:8, $T:8,  Data:Length/binary-unit:8, _CRC:32, Rest/binary >>, 
@@ -399,18 +399,11 @@ extractAlphaAndData({png_head,{Width, Height, Color_type, Data_precision}},Image
     
 %% separate the image and alpha channel data streams
   {NewImage,AlphaChannel} = breakoutLines({pngbits(Color_type)* Data_precision, Data_precision}, NoFilterImage),
-  io:format("channel separated~n"),
-  ok = file:write_file("image.bin",[NewImage]),
-    ok = file:write_file("alpha.bin",[AlphaChannel]),
+
     
 %% compress the two streams and return them
-      {ok,A} = deflate_stream(NewImage), 
+  {ok,A} = deflate_stream(NewImage), 
   {ok,B} = deflate_stream(AlphaChannel),
-
-  <<C:64/binary,_/binary>> = AlphaChannel,
-  io:format("Alpha bytes = ~w~n",[C]),
-  <<D:64/binary,_/binary>> = NewImage,
-  io:format("Image bytes = ~w~n",[D]),
   {A,B}.   
 
 
@@ -467,7 +460,6 @@ breakoutLines(Sizes,ScanLines) ->
 %% @doc filters gone, now we separate the image and alpha data
 
 breakout(Sizes, << >>,Pixels, Alpha_channel) ->
-  io:format("Stream size = ~w and ~w~n",[bit_size(Pixels), bit_size(Alpha_channel)]),
   {Pixels, Alpha_channel};
 breakout({PixelSize, AlphaSize}, Stream, Pixels, Alpha_channel) ->
   <<Pixel:PixelSize/bits, Alpha:AlphaSize/bits, Rest/bitstring>> = Stream,
