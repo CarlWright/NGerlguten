@@ -16,7 +16,7 @@ has not been updated for any changes I've made. Carl Wright
 
 The edoc data can be produced by running "erl" in the <em>base directory</em> and using the following command:
 
-    edoc:application('NGerlguten',".",[{def,{version,"2.5"}},{dir,"./doc/edoc"},{stylesheet_file, ".//doc/eg_stylesheet.css"}]). 
+    edoc:application('NGerlguten',".",[{def,{version,"2.6"}},{dir,"./doc/edoc"},{stylesheet_file, ".//doc/eg_stylesheet.css"}]). 
     
     Change the version number string to the correct value. The dir entry in the command
     will put the documentation in /doc/edoc.
