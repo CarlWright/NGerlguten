@@ -38,7 +38,28 @@
          max_y = 735  % Top margin - bottom edge of page to top of text area
         }).
            
-  
+%% @doc Take an XML string and generate a table from it in the PDF
+%% <br/><br/><table>
+%%  <tr><td>PDF</td><td>PID of PDF being produced </td></tr>
+%%  <tr><td>XML</td><td>string of XML defining the table and its contents </td> </tr>
+%%  <tr><td>X</td><td>X coordinate of the top left corner of the table box </td></tr>
+%%  <tr><td>Width</td> <td>maximum width of the table </td></tr>
+%%  <tr><td>Start</td> <td>Y coordinate of top left corner of the box</td> </tr>
+%%  <tr><td>Bottom</td><td>Y coordinate of maximum bottom of the box</td> </tr>
+%%  <tr><td>FontSize</td><td>size of the letters in points</td> </tr>
+%%  <tr><td>FontChoice</td><td>font name</td> </tr>
+%% </table>
+%%
+%% with an XML string like the following:
+%% <code><pre>  &lt;row&gt;&lt;cell&gt;Escape Sequence&lt;/cell&gt;&lt;cell&gt;Value&lt;/cell&gt;&lt;/row&gt;
+%%  &lt;row&gt;&lt;cell&gt;\\b&lt;/cell&gt;&lt;cell&gt;Backspace&lt;/cell&gt;&lt;/row&gt;
+%%  &lt;row&gt;&lt;cell&gt;\\d&lt;/cell&gt;&lt;cell&gt;Delete&lt;/cell&gt;&lt;/row&gt;
+%%  &lt;row&gt;&lt;cell&gt;\\e&lt;/cell&gt;&lt;cell&gt;Escape&lt;/cell&gt;&lt;/row&gt;
+%% </pre></code>
+%%
+%% You get the following PDF results
+%%
+%% <center><img src="../table_example.bmp" width="247" height="115"></img><br/></center> 
         
 table_from_xml(PDF, XML, X, Width, Start, Bottom, FontSize, FontChoice) ->
   Parsed = eg_xml_lite:parse_all_forms(XML),
@@ -89,7 +110,7 @@ table_from_xml(PDF, XML, X, Width, Start, Bottom, FontSize, FontChoice) ->
 %% 4. For each row work out the number of lines required 
 %%    (largest number of lines).
 %%
-%% 5. Output the table, drwing lines as we go
+%% 5. Output the table, drawing lines as we go
 %%
 %% TODO - Parameterise by:  Spacing around text, table width, row background
 %%        Clever algorithm to arrange column widths

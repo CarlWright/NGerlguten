@@ -227,13 +227,20 @@ get_head_info(File) ->
 
 
 
-%% @spec process_header(Jpeg) -> {jpeg_head,{Width, Height, Number_of_components, Precision}}
+%% @spec process_header(Jpeg) -> {jpeg_head,{Width, Height, Number_of_components, Precision}} 
 %% Jpeg = binary()
 %% Width = integer()
 %% Height = integer()
 %% Number_of_components = integer()
 %% Precision = integer()
-%% @doc Same as get_head_info except it is called with a binary that holds the 
+%%
+%%  @doc It can also follow the following pattern:
+%%
+%%  process_header(image content) ->{png_head,{Width, Height, Color_type, Data_precision}},
+%%                    {params, Compression, Filter_method, Interface_method}, 
+%%                    Palette, Image, Alpha_channel].
+%%
+%% Same as get_head_info except it is called with a binary that holds the 
 %% content of a JPG file. This returns a tuple of info
 %% on the jpeg. The tuple is like the following <br/>
 %% <center>{ jpeg_head, { Width(pixels), Height(pixels), 
@@ -296,7 +303,15 @@ png_head( <<_Length:32, $I:8, $H:8, $D:8, $R:8,
                     [{png_head,{Width, Height, Color_type, Data_precision}},
                     {params, Compression, Filter_method, Interface_method}, 
                     Palette, Image, Alpha_channel].
-                  
+                    
+                    
+%% @doc opens the PNG file indicated by the calling parameter and returns a
+%% tuple like [Params, MoreParams, Palette, Image2 , Alpha_channel]. This has the
+%% Parameters that descibe the image and the content of the image as appropriate
+%% for the type of PNG. Palette has the color palatte for indexed color images.
+%% Image2 has the image pixels. Alpha_channel has the transparaency overlay to control
+%% the display of the Image2 pixels.
+%%                
 get_png_content(File) ->
   case file:read_file(File) of
     {ok, Image} ->
@@ -433,12 +448,12 @@ processLine([{_Method, Line1}], _Iter, Offset, Results)->
    A =lists:flatten( lists:reverse(Results) ),
    list_to_binary( A );
 processLine([{_, Line1},{Method, Line2} | Remainder], Iter, Offset, Results) ->
-  {ok, Unfiltered} = x(Method, Line1, Line2,Offset,length(Line1),Iter),
+  {ok, Unfiltered} = defilter(Method, Line1, Line2,Offset,length(Line1),Iter),
   processLine([{Method, Unfiltered } | Remainder], Iter, Offset, [Unfiltered | Results] ).
 
 %% @doc Taking two lines of stream defilter the 2nd with the previously defiltered 1st line.
   
-x(Method, Line1, Line2, Offset, Width, Iter) when Iter =< Width ->
+defilter(Method, Line1, Line2, Offset, Width, Iter) when Iter =< Width ->
   NewVal = case Iter =< Offset of
     true ->  filter(lists:nth(Iter,Line2), 0, lists:nth(Iter,Line1), 0, Method);
     false ->  filter(lists:nth(Iter,Line2), lists:nth(Iter-Offset,Line2), lists:nth(Iter,Line1), lists:nth(Iter-Offset,Line1), Method)
@@ -447,8 +462,8 @@ x(Method, Line1, Line2, Offset, Width, Iter) when Iter =< Width ->
       true -> lists:flatten([lists:sublist(Line2,Iter - 1),NewVal]);
       false -> lists:flatten([lists:sublist(Line2,Iter - 1),NewVal,lists:nthtail(Iter, Line2)])
     end,
-    x(Method, Line1, L2 ,Offset, Width, Iter+1);
-x(_Method, _Line1, Line2, _Offset, _Width, _Iter) ->
+    defilter(Method, Line1, L2 ,Offset, Width, Iter+1);
+defilter(_Method, _Line1, Line2, _Offset, _Width, _Iter) ->
   {ok, Line2}.
 
   
@@ -477,7 +492,7 @@ filter(X,A,B,C, Method) ->
     4 -> (X + paethPredictor(A,B,C)) rem 256
   end.
 
-%% calculate the specialized filter invented by Mr. Paeth
+%% @doc calculate the specialized filter invented by Mr. Paeth
   
 paethPredictor(A,B,C) ->
   P = A + B - C,
