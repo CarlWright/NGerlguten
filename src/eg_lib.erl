@@ -53,7 +53,7 @@ find_files([File|T], Dir, Reg, Recursive, Fun, Acc0) ->
     case file_type(FullName) of
 	regular ->
 	    case re:run(FullName, Reg) of
-		{match,[{ _, _}] }  -> 
+		{match,_}  ->
 		    Acc = Fun(FullName, Acc0),
 		    find_files(T, Dir, Reg, Recursive, Fun, Acc);
 		_ ->
