@@ -141,7 +141,7 @@ page_tree(KidRefs, FontsPtr, XObjectsPtr, MediaBox = {rect,{A,B,C,D}},
 
 
 append_page(PageContents, Objects) ->
-    [PageTreeObj] = eg_pdf_lib:get_objects_of_type("Page", Objects),
+    PageTreeObj = get_tree_obj(Objects),
     PTRef = eg_pdf_lib:get_ref(PageTreeObj),
     {ContentRef,Objects1} = eg_pdf_lib:add_object({stream, PageContents}, 
 						  Objects),
@@ -160,7 +160,7 @@ append_page2tree(Ref, PageTreeItem) ->
     eg_pdf_lib:store_in_dict({Key, {array, NewKids}}, PageTreeItem).
 
 get_page(PageNo, Objects) ->
-    [PageTreeObj] = eg_pdf_lib:get_objects_of_type("Page", Objects),
+    PageTreeObj = get_tree_obj(Objects),
     PageTree = eg_pdf_lib:pdf_item(PageTreeObj), 
     {array, Kids} = eg_pdf_lib:find_in_dict("Kids", PageTree),
     PagePtr = lists:nth(PageNo, Kids),
@@ -170,6 +170,14 @@ get_page(PageNo, Objects) ->
 	false ->
 	    no_page_available
     end.
+
+get_tree_obj(Objects) ->
+    Pages = eg_pdf_lib:get_objects_of_type("Page", Objects),
+    DropWhile = fun (P) -> eg_pdf_lib:pdf_object_dict_item("Parent", P) =/=
+			   undefined
+		end,
+    [PageTreeObj|_] = lists:dropwhile(DropWhile, Pages),
+    PageTreeObj.
 
 get_page_contents(PageObj, Objects) ->
     PageDict = eg_pdf_lib:pdf_item(PageObj),
