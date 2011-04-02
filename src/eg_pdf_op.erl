@@ -207,23 +207,23 @@ grid(XList, YList)->
 
 %% Bezier paths should be stroked/closed/filled with separate
 %% command.
-bezier(X1,Y1,X2,Y2,X3,Y3,X4,Y4)->
-    bezier({X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4}).
+bezier(X1, Y1, X2, Y2, X3, Y3, X4, Y4)->
+    bezier({X1, Y1}, {X2, Y2}, {X3, Y3}, {X4, Y4}).
 
 bezier(Point1, Point2, Point3, Point4)->
     [move_to(Point1), bezier_c( Point2, Point3, Point4 ) ].
 
-bezier_c({X1,Y1},{X2,Y2},{X3,Y3})->
-    [n2s([X1,Y1,X2,Y2,X3,Y3]), " c\n"].
+bezier_c({X1, Y1}, {X2, Y2}, {X3, Y3})->
+    [n2s([X1, Y1, X2, Y2, X3, Y3]), " c\n"].
 
-bezier_v({X2,Y2}, {X3,Y3})-> 
-    [n2s([X2,Y2,X3,Y3]), " v\n"].
+bezier_v({X2, Y2}, {X3, Y3})-> 
+    [n2s([X2, Y2, X3, Y3]), " v\n"].
 
-bezier_y({X1,Y1}, {X3,Y3})->
-    [n2s([X1,Y1,X3,Y3]), " y\n"].
+bezier_y({X1, Y1}, {X3, Y3})->
+    [n2s([X1, Y1, X3, Y3]), " y\n"].
     
 
-arc(X1,Y1,X2,Y2)->
+arc(_X1, _Y1, _X2, _Y2)->
     tobedone.
 
 circle({X,Y}, R)->
@@ -610,20 +610,26 @@ image1(FilePath, {height, H}) ->
     image1(FilePath, {size,{undefined,H}});
 image1(FilePath, {W, H}) when is_integer(W), is_integer(H)->
     image1(FilePath, {size,{W,H}});
-image1(FilePath, {size,Size})->
+image1(_FilePath, {size, _Size})->
 %%    PID ! {image, FilePath, Size}.
     to_be_done.
 
 %% ----------------------------------------------------------------------------
 %% Internals
 
-escapePdfText([]) -> [];
-escapePdfText([$(|Rest]) -> [$\\,$( | escapePdfText(Rest)];
-escapePdfText([$)|Rest]) -> [$\\,$) | escapePdfText(Rest)];
-escapePdfText([$\\|Rest]) -> [$\\,$\\ | escapePdfText(Rest)];
-escapePdfText([C|Rest]) when is_list(C)-> [ escapePdfText(C) |
-					    escapePdfText(Rest)];
-escapePdfText([C|Rest]) -> [ C | escapePdfText(Rest)].
+escapePdfText([]) -> 
+    [];
+escapePdfText([$(|Rest]) -> 
+    [$\\,$( | escapePdfText(Rest)];
+escapePdfText([$)|Rest]) -> 
+    [$\\,$) | escapePdfText(Rest)];
+escapePdfText([$\\ | Rest]) -> 
+    [$\\,$\\ | escapePdfText(Rest)];
+escapePdfText([C | Rest]) when is_list(C)-> 
+    [ escapePdfText(C) |
+      escapePdfText(Rest)];
+escapePdfText([C | Rest]) ->  
+    [ C | escapePdfText(Rest)].
 
 i2s(I) ->
     integer_to_list(I).

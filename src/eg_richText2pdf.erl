@@ -65,28 +65,28 @@ richText2pdf(PID, X, Y0, Type, Rot, Lines, Leading, Widths, Offsets) ->
     P = start(),
     P2 = case Type of
 	     justified ->
-		 {Cos, Sin, P1} = init_rotation_matrix(X, Y0, Rot, P),
+		 {_Cos, _Sin, P1} = init_rotation_matrix(X, Y0, Rot, P),
 		 make_justified(PID, X,Y,Leading,Lines,Offsets,Widths,P1);
 	     Style when Style == left_justified;
 			Style == right_justified;
 			Style == centered ->
-		 {Cos, Sin, P1} = init_rotation_matrix(X, Y0, Rot, P),
+		 {_Cos, _Sin, P1} = init_rotation_matrix(X, Y0, Rot, P),
 		 make_para(PID, X, Y, Leading, Lines,Offsets,Widths,Style,P1)
     end,
     finalise(P2).
 
-make_justified(PID, X, Y, Leading, [], _, _, P) -> P;
-make_justified(PID, X, Y, Leading, [H], [O|_], [W|_], P) -> 
+make_justified(_PID, _X, _Y, _Leading, [], _, _, P) -> P;
+make_justified(PID, X, Y, _Leading, [H], [O|_], [W|_], P) -> 
     line2pdf(PID, X+O,Y,H,W,last_line_justified, P);
-make_justified(PID, X, Y, Leading, [H|T], [O|O1] = O0, [W|W1] = W0, P) -> 
+make_justified(PID, X, Y, Leading, [H | T], [O | _O1] = O0, [W | _W1] = W0, P) -> 
     {O2, W2} = last_offset_width(O0, W0),
-    P1 = line2pdf(PID, X+O,Y,H,W,justified,P),
+    P1 = line2pdf(PID, X + O, Y, H, W, justified, P),
     make_justified(PID, X, Y-Leading, Leading, T, O2, W2, P1).
 
-make_para(PID, X, Y, Leading, [], _, _, _, P) -> P;
-make_para(PID, X, Y, Leading, [H], [O|_], [W|_], Style, P) -> 
+make_para(_PID, _X, _Y, _Leading, [], _, _, _, P) -> P;
+make_para(PID, X, Y, _Leading, [H], [O | _], [W | _], Style, P) -> 
     line2pdf(PID, X+O,Y,H,W,Style, P);
-make_para(PID, X, Y, Leading, [H|T], [O|O1] = O0, [W|W1] = W0, Style, P) -> 
+make_para(PID, X, Y, Leading, [H|T], [O | _O1] = O0, [W | _W1] = W0, Style, P) -> 
     {O2, W2} = last_offset_width(O0, W0),
     P1 = line2pdf(PID, X+O,Y,H,W,Style,P),
     make_para(PID, X, Y-Leading, Leading, T, O2, W2, Style, P1).
@@ -171,7 +171,7 @@ make_line(PID,[H|T], Tw, P) ->
 	    dbg_io("Don't know how to make a line with a: ~p~n",[H]),
 	    make_line(PID, T, Tw, P)
     end;
-make_line(PID, [], _, P) ->
+make_line(_PID, [], _, P) ->
     P.
 
 get_font_info(X) ->
@@ -284,7 +284,7 @@ add_code(Str, P) ->
     P#pdf{code=lists:reverse(Str, C1)}.
 
 
-str2pdf(Font, "")  -> "";
+str2pdf(_Font, "")  -> "";
 str2pdf(Font, Str) ->
     K = str2TJ(Font, Str),
     K1 = lists:map(fun({Str1,Kern}) -> {quote_strings(Str1), Kern} end, K),
@@ -317,9 +317,9 @@ str2TJ(Font, [H1,H2|T], Tmp,  L) ->
     end;
 str2TJ(Font, [H|T], Tmp, L) ->
     str2TJ(Font, T, [H|Tmp], L);
-str2TJ(Font, [], [], L) ->
+str2TJ( _Font, [], [], L) ->
     lists:reverse(L);
-str2TJ(Font, [], Tmp, L) ->
+str2TJ( _Font, [], Tmp, L) ->
     lists:reverse([{lists:reverse(Tmp), 0}|L]).
 
 %% To set the font use /Fn Pt Tf

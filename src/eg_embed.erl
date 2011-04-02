@@ -49,26 +49,26 @@ embed(F) ->
     O = lists:map(fun({_,_,B}) -> B end, P),
     file:write_file(F ++ ".synth", O).
 
-%% Parse_pfb -> [{Type,Len,Bin}]
+%% Parse_pfb -> [{Type, Len, Bin}]
 %%  The lengths are the required lengths in the
 %%  object descriptor ...
 
 parse_pfb(F) ->
     {ok, Bin} = file:read_file(F),
-    L = parse(Bin).
+    parse(Bin).
 
 parse(<<128,3>>) ->
     [];
 parse(B) ->
-    {B1,B2} = split_binary(B, 6),
-    [128,Type,N1,N2,N3,N4] = binary_to_list(B1),
+    {B1, B2} = split_binary(B, 6),
+    [128, Type, N1, N2, N3, N4] = binary_to_list(B1),
     Len = N1 + N2*256 + N3*256*256 + N4*256*256*256,
     %% io:format("Chunk: ~p length=~p~n",[Type, Len]),
     case Len of
 	0 -> [];
 	_ ->
-	    {B3,B4} = split_binary(B2, Len),
-	    [{Type,Len,B3}|parse(B4)]
+	    {B3, B4} = split_binary(B2, Len),
+	    [{Type, Len, B3}|parse(B4)]
     end.
 
 

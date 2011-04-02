@@ -123,7 +123,7 @@ destination(PageRef, {"FitBV", Left}) ->
 fonts(Fonts, Objects) ->
     Free0 = eg_pdf_lib:get_next_ref(Objects),
     Fonts1 = lists:map(fun(I) -> eg_font_map:handler(I) end, Fonts),
-    {Free,FontsPtr,O1s}  = mk_fonts(Fonts1, Free0, [], []),
+    {_Free, FontsPtr, O1s}  = mk_fonts(Fonts1, Free0, [], []),
     {FontsPtr, eg_pdf_lib:store_object(O1s, Objects)}.
 
 mk_fonts([], I, Fs, Os) -> 
@@ -205,9 +205,9 @@ make_width(_, M, _, _) ->
     M:widths().
 
 mkFontDescriptor(M, Embedded, I) ->
-    {X1,X2,X3,X4} = M:fontBBox(),
+    {X1, X2, X3, X4} = M:fontBBox(),
     %% io:format("Flags FIXED to 6 ...~n"),
-    FontBBox = [X1,X2,X3,X3],
+    FontBBox = [X1, X2, X3, X4],
     D0 = [{"Type",{name,"FontDescriptor"}},
 	  {"Ascent", M:ascender()},
 	  {"CapHeight", M:capHeight()},
@@ -262,8 +262,8 @@ get_font_program(Handler) ->
     %% io:format("reading Font from:~s~n",[File]),
     P = eg_embed:parse_pfb(File),
     case P of
-	[{_,L1,B1},{_,L2,B2},{_,L3,B3}|_] ->
-	    {L1+L2+L3,L1,L2,L3,concat_binary([B1,B2,B3])};
+	[{_, L1, B1}, {_, L2, B2}, {_, L3, B3} | _] ->
+	    {L1 + L2 + L3, L1, L2, L3, erlang:list_to__binary([B1, B2, B3])};
 	_ ->
 	    error
     end.

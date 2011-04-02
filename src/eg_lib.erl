@@ -44,8 +44,10 @@ find_files(Dir, Re, Flag) ->
 
 find_files(Dir, Reg, Recursive, Fun, Acc) ->
     case file:list_dir(Dir) of
-	{ok, Files} -> find_files(Files, Dir, Reg, Recursive, Fun, Acc);
-	{error, _}  -> Acc
+	{ok, Files} -> 
+	    find_files(Files, Dir, Reg, Recursive, Fun, Acc);
+	{error, _}  -> 
+	    Acc
     end.
 
 find_files([File|T], Dir, Reg, Recursive, Fun, Acc0) ->
@@ -77,9 +79,12 @@ file_type(File) ->
     case file:read_file_info(File) of
 	{ok, Facts} ->
 	    case Facts#file_info.type of
-		regular   -> regular;
-		directory -> directory;
-		_         -> error
+		regular -> 
+		    regular;
+		directory -> 
+		    directory;
+		_ -> 
+		    error
 	    end;
 	_ ->
 	    error

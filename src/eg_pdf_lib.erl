@@ -100,7 +100,7 @@ delete_object(Key, Objects) ->
 %% Object = pdfobject()
 %% @doc Returns a copy of Objects1 with Objects added or, if the object's 
 %% reference already is present, replacing the old object.
-store_object({Key, PDFItem} = Object, Objects) ->
+store_object({Key, _PDFItem} = Object, Objects) ->
    case lists:keymember(Key, 1, Objects) of
 	true ->
 	    lists:keyreplace(Key, 1, Objects, Object);
@@ -134,7 +134,7 @@ pdf_item(Key, Objects) ->
 
 %% @spec pdf_item(Object::pdfobject()) -> pdftype()
 %% @doc Returns the PDFItem for the Object.
-pdf_item({ Key, Value}) ->
+pdf_item({ _Key, Value}) ->
     Value.
 
 
@@ -154,7 +154,7 @@ find_in_dict(Key, {dict,Dict})->
 %% Value = pdftype()
 %% @doc Stores a new item in a PDF dictionary, replacing the old
 %% one if it exists.
-store_in_dict({Key, Value} = A, {dict, D}) ->
+store_in_dict({Key, _Value} = A, {dict, D}) ->
     case lists:keymember(Key, 1, D) of 
 	true ->
 	    {dict, lists:keyreplace(Key,1,D,A) }; 
@@ -459,7 +459,7 @@ showGrid(PDF, Paper) ->
     vlines(PDF, Left, Right, Top, Bottom),
     hlines(PDF, Left, Right, Top, Bottom).
 
-hlines(PDF, Left, Right, Top, Bottom) ->
+hlines(PDF, Left, Right, Top, _Bottom) ->
     eg_pdf:save_state(PDF),
 	  eg_pdf:set_font(PDF,"Helvetica", 6),
     diter(Top,25,10,
@@ -475,7 +475,7 @@ hlines(PDF, Left, Right, Top, Bottom) ->
 	  end),
 	  eg_pdf:restore_state(PDF).
 
-vlines(PDF, Left, Right, Top, Bottom) ->
+vlines(PDF, _Left, Right, Top, Bottom) ->
     eg_pdf:save_state(PDF),
 	  eg_pdf:set_font(PDF,"Helvetica", 6),
     diter(Right,25,10,
@@ -521,7 +521,7 @@ moveAndShowRight(_,_,_,_,_)  ->
 
 %% downwards iterator
 
-diter(X, Inc, Stop, F) when X < Stop ->
+diter(X, _Inc, Stop, _F) when X < Stop ->
     true;
 diter(X, Inc, Stop, F) ->
     F(X), diter(X-Inc,Inc,Stop,F).
@@ -545,7 +545,7 @@ draw_box1(X1,Y1,Measure,Leading,MaxRows) ->
 	 end),
      " Q "].
 
-for(I, Max, F) when I > Max -> [];
+for(I, Max, _F) when I > Max -> [];
 for(I, Max, F)              -> [F(I)|for(I+1,Max,F)].
 
 line(X1,Y1,X2,Y2) -> [eg_pdf_op:i2s(X1)," ",eg_pdf_op:i2s(Y1)," m ",
@@ -595,5 +595,5 @@ code128_conv(b, [C|R], Acc) ->
 
 code128_start([A,B,C,D|_]) when ?DIGIT(A),?DIGIT(B),?DIGIT(C),?DIGIT(D) ->
     {?START_C,c};
-code128_start(String0) ->
+code128_start(_String0) ->
     {?START_B,b}.

@@ -60,7 +60,7 @@ mk_images([{ImageURI, #image{alias=Alias}=Im}|T], I, Fs, E) ->
     {J, [A,B]} ->
       [A,B|E]  
   end,
-  mk_images(T, J+1, [{Alias,I}|Fs], List).
+  mk_images(T, J+1, [{Alias, I} | Fs], List).
  
 mk_image(I, File, #image{alias=_Alias, width=W, height=H}) ->
     Image = read_image(File),
@@ -73,7 +73,7 @@ mk_image(I, File, #image{alias=_Alias, width=W, height=H}) ->
 		      J = I,
 		      ExtraObj = [];
 	{png_head,{Width, Height, Ncomponents, Data_precision}} ->
-	  [_Params, MoreParams, Palette, Image2 , Alpha_channel] = get_png_content(File),
+	  [_Params, _MoreParams, Palette, Image2 , Alpha_channel] = get_png_content(File),
 	  case Ncomponents of 
 	    0 ->
 	    Extras = [{"Filter", {name,"FlateDecode"}},
@@ -157,10 +157,10 @@ mk_image(I, File, #image{alias=_Alias, width=W, height=H}) ->
      {stream,	  
       {dict,[{"Type",{name,"XObject"}},
 	     {"Subtype",{name,"Image"}},
-	     {"Width",Width},
-	     {"Height", Height}| Extras ]},
+	     {"Width", Width},
+	     {"Height", Height} | Extras ]},
       Image2}
-    },ExtraObj]}.
+    }, ExtraObj]}.
 
 
 colorspace(0)-> "DeviceGray";
@@ -366,7 +366,7 @@ process_png( <<_Length:32, $I:8, $E:8, $N:8, $D:8,  _Rest/binary >>,
               Palette, 
               Image, 
               Alpha_channel) ->
-        {png_head,{Width, Height, Color_type, Data_precision}} = Params,
+        {png_head,{_Width, _Height, Color_type, _Data_precision}} = Params,
         case Color_type of
           0 ->
               [Params, MoreParams, Palette, Image , Alpha_channel];
@@ -395,7 +395,7 @@ process_png( <<Length:32/integer, _ID:32, _:Length/binary-unit:8, _CRC:32, Rest/
          
 %% @doc Take the compressed image data and return the image and alpha channel data sompressed in seperate streams.
        
-extractAlphaAndData({png_head,{Width, Height, Color_type, Data_precision}},Image) ->
+extractAlphaAndData({png_head,{Width, _Height, Color_type, Data_precision}},Image) ->
 
 %% decompress the ZLIB compressed bit stream
   {ok,Decompressed} = inflate_stream(Image),
@@ -444,7 +444,7 @@ filterStream(AllScanLines, Offset) ->
 
 %% @doc a scan line and its buddy line to remove the filter on the bytes.
 
-processLine([{_Method, Line1}], _Iter, Offset, Results)->
+processLine([{_Method, _Line1}], _Iter, _Offset, Results)->
    A =lists:flatten( lists:reverse(Results) ),
    list_to_binary( A );
 processLine([{_, Line1},{Method, Line2} | Remainder], Iter, Offset, Results) ->
@@ -474,7 +474,7 @@ breakoutLines(Sizes,ScanLines) ->
 
 %% @doc filters gone, now we separate the image and alpha data
 
-breakout(Sizes, << >>,Pixels, Alpha_channel) ->
+breakout(_Sizes, << >>,Pixels, Alpha_channel) ->
   {Pixels, Alpha_channel};
 breakout({PixelSize, AlphaSize}, Stream, Pixels, Alpha_channel) ->
   <<Pixel:PixelSize/bits, Alpha:AlphaSize/bits, Rest/bitstring>> = Stream,
@@ -484,7 +484,7 @@ breakout({PixelSize, AlphaSize}, Stream, Pixels, Alpha_channel) ->
   
 %% Apply the PDF filter to a byte of the image 
 filter(X,A,B,C, Method) ->
-  NewX = case Method of
+  case Method of
     0 -> X;
     1 -> (X + A) rem 256;
     2 -> (X + B) rem 256;

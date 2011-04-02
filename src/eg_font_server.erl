@@ -27,7 +27,12 @@
 
 -include("../include/eg.hrl").
 
--export([start/0, stop/0, char_width/2, data/1, info/1, kern/2]).
+-export([start/0, 
+	 stop/0, 
+	 char_width/2, 
+	 data/1, 
+	 info/1, 
+	 kern/2]).
 
 %% ============================================================================
 
@@ -36,7 +41,7 @@ start() ->
 	true ->
 	    true;
 	false ->
-	    fonts = ets:new(fonts, [named_table,set,public]),
+	    fonts = ets:new(fonts, [named_table, set, public]),
 	    true
     end.
 
@@ -75,7 +80,7 @@ info(Index) ->
 	[{_,I}] ->
 	    I;
 	[] ->
-	    exit({font_server_info,Index})
+	    exit({font_server_info, Index})
     end.
 
 data(Fontname) ->
@@ -87,18 +92,18 @@ data(Fontname) ->
     end.
 
 char_width(N, Char) ->
-    case ets:lookup(fonts, {width,N,Char}) of
-	[{_,W}] ->
+    case ets:lookup(fonts, {width, N, Char}) of
+	[{_, W}] ->
 	    W;
 	[] ->
-	    io:format("Cannot figure out width of:~p ~p~n",[N, Char]),
+	    io:format("Cannot figure out width of:~p ~p~n", [N, Char]),
 	    io:format("Possible \n in code etc~n"),
 	    1000
     end.
 
 kern(N, KP) ->
-    case ets:lookup(fonts, {kern,N,KP}) of
-	[{_,W}] ->
+    case ets:lookup(fonts, {kern, N, KP}) of
+	[{_, W}] ->
 	    W;
 	[] ->
 	    0

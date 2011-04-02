@@ -351,7 +351,7 @@ distribute_reduction([], [], _Sum, _Lost) ->
 
 expand(Init, Max_cell_widths, W) ->
     %% io:format("Init = ~p~n",[{Init, Max_cell_widths, W}]),
-    {I1, Gained} = ensure_maximums(Init, Max_cell_widths, 0, []),
+    {I1, _Gained} = ensure_maximums(Init, Max_cell_widths, 0, []),
     %% io:format("I1 Gained = ~p~n",[{Gained, I1}]),
     Sum = lists:foldl(fun({fixed, Col}, Sum) ->
                               Sum + Col;
@@ -512,7 +512,7 @@ row(PDF, [{Lines, Width, Off}|Cells], X, [Col_width|T], Height, Cols, S, FontSiz
     lines2pdf(PDF, X+3,S#st.y,Lines, FontSize, Width, Off, justified),
     eg_pdf:end_text(PDF),
     row(PDF, Cells, X+Col_width, T, Height, Cols-1, S, FontSize, FontChoice);
-row(PDF, [], X, [], Height, 0, S, FontSize, FontChoice) ->
+row(PDF, [], X, [], Height, 0, S, FontSize, _FontChoice) ->
     eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*FontSize)-5, fill),
     S;
 row(PDF, [], X, [Col_width|T], Height, Cols, S, FontSize, FontChoice) ->
