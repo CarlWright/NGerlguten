@@ -1,0 +1,53 @@
+<?xml version="1.0" ?>
+<templates>
+<template name="template1">
+    <box name = "header" x="100" y="760" width="150" 
+	grid="false" bg="default"
+       fontSize="32" lines="1" continue="none">
+    <obj name="p" paraIndent="0">
+      <tag name="raw"  font="Times-Bold"  break="true"/>
+    </obj>
+  </box>
+  <box name = "body" x="100" y="680" width="300" 
+	grid="false" bg="default"
+       fontSize="12" lines="43" continue="flow_001">
+    <obj name="pstart" paraIndent="0">
+      <tag name="raw"  font="Times-Roman"  break="true"/>
+      <tag name="em"   font="Times-Italic" break="true"/>
+      <tag name="code" font="Courier"      break="false"/>
+    </obj>
+    <obj name="p" paraIndent="1">
+      <tag name="raw"  font="Times-Roman"  break="true"/>
+      <tag name="em"   font="Times-Italic" break="true"/>
+      <tag name="code" font="Courier"      break="false"/>
+    </obj>
+  </box>
+  <box name = "intro" x="100" y="710" width="300" 
+	grid="false" bg="default"
+       fontSize="10" lines="1" continue="none">
+    <obj name="p" paraIndent="0">
+      <tag name="raw"  font="Times-Italic"  break="false"/>
+    </obj>
+  </box>
+  <box name = "punch" x="106" y="796" width="300" 
+	grid="false" bg="default"
+       fontSize="10" lines="1" continue="none">
+    <obj name="p" paraIndent="0">
+      <tag name="raw"  font="Helvetica"  break="false"/>
+    </obj>
+  </box>
+  <box name = "footnote" x="100" y="60" width="300" 
+	grid="true" bg="default"
+       fontSize="8" lines="1" continue="none">
+    <obj name="p" paraIndent="0">
+      <tag name="raw"  font="Times-Italic"  break="true"/>
+    </obj>
+  </box>
+</template>
+</templates>
+
+
+
+
+
+

@@ -1,0 +1,23 @@
+#!/usr/bin/env escript
+%% -*- erlang -*-
+main(_)->
+    io:format("~p~n",[ "Building font_map code"]),
+
+    %% This code uses the font data to create modules that support the use of the 
+    %% fonts in erlguten.
+
+    %% if it has never been built before by sinan, you need to run sinan twice to get
+    %% the modules built.
+
+    %% This code assumes that erlguten is being built in the user's home directory.
+    Homedir = os:getenv("HOME"),
+    io:format("~p~n",[Homedir]),
+    case
+ 	code:add_path(Homedir ++ "/NGerlguten/_build/ngerlguten/lib/ngerlguten-0.1.0/ebin") of
+	true ->
+	    {ok, eg_afm} = compile:file(Homedir ++ "/NGerlguten/lib/ngerlguten/src/eg_afm",
+					[debug_info,{outdir,Homedir ++ "/NGerlguten/_build/ngerlguten/lib/ngerlguten-0.1.0/ebin"}]),
+	    eg_afm:make(Homedir ++ "/NGerlguten/lib/ngerlguten","/priv/font_locations");
+	{error, _What} ->
+	    io:format("_build directory not yet present, will create eg_font_map.erl during next build~n",[])
+    end.
