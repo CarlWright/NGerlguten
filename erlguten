@@ -1,3 +1,0 @@
-#!/bin/sh
-erl -pa ./ebin -s erlguten batch $1 -s init stop
-
