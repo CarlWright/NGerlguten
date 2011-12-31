@@ -755,11 +755,13 @@ page_numbers(PDF, N, Tot) ->
 %% TODO - Parameterise by: Font size, Spacing around text, table width
 %%        Clever algorithm to arrange column widths
 %%        Do page breaks in the middle of a table
-%% @spec table(PDF, Rows, X, Y) ->
-%%          Total_Y
-% table(PDF, Rows, S) ->
-%     table(PDF, Rows, 45, S#st.y
-%         ).
+%%
+%%  table(PDF :: term() , Rows :: list(), X :: integer(), Y :: integer()) -> atom()
+%%         
+%% 
+%%  table(PDF, Rows, S) ->
+%%     table(PDF, Rows, 45, S#st.y ).
+%%         
 
 table(PDF, Rows, X, W0, S0) ->
     S = space_before(10, S0),

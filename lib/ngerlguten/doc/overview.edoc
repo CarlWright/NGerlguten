@@ -3,6 +3,7 @@
 
 	NGerlGuten overview page
 
+
 @title Next Generation ErlGuten - a typesetting system for producing PDF from XML
 
 @author Joe Armstrong
@@ -15,7 +16,8 @@
 Sean Hinde, Håkan Stenholm, Carl Wright
 @version {@version}
 
-@doc <img src="../NextGenErlguten_logo.png" width="537" height="88"></img><br/> NGerlGuten is a typesetting system for producing PDF from XML.
+@doc <link rel="stylesheet" type="text/css" href="../doc/eg_stylesheet.css" title="EDoc"></link>
+<img src="../doc/NextGenErlguten_logo.png" width="537" height="88"></img><br/> NGerlGuten is a typesetting system for producing PDF from XML.
 
 NGerlGuten is free software published under the MIT license.
 
@@ -31,7 +33,7 @@ typesetting programs.
 
 == Gallery ==
 
-<center><img src="../NGerlguten diagram 6may10.jpg" width="257" height="130"></img><br/></center>
+<center><img src="../doc/NGerlguten diagram 6may10.jpg" width="257" height="130"></img><br/></center>
 
 Here you can see the inputs to NGerlGuten and the corresponding output.
 
@@ -41,17 +43,17 @@ Here you can see the inputs to NGerlGuten and the corresponding output.
 <td><b>Inputs</b></td><td>Output</td>
 </tr>
 <tr>
-<td><a href="../test/test1.xml">test1.xml</a> <br/>
-<a href="../test/galley_001.gal">galley_001.gal</a></td>
-<td valign="top"><a href="../test/test1.pdf">test1.pdf</a></td>
+<td><a href="../../ng_examples-0.1.0/testing/template%20testing/test1.xml">test1.xml</a> <br/>
+<a href="../../ng_examples-0.1.0/testing/template%20testing/galley_001.gal">galley_001.gal</a></td>
+<td valign="top"><a href="../../ng_examples-0.1.0/testing/test1.pdf">test1.pdf</a></td>
 </tr>
 <tr>
-<td><a href="../test/eg_test1.erl">eg_test1.erl</a></td>
-<td><a href="../test/eg_test1.pdf">eg_test1.pdf</a></td>
+<td><a href="../../ng_examples-0.1.0/testing/eg_test1.erl">eg_test1.erl</a></td>
+<td><a href="../../ng_examples-0.1.0/testing/eg_test1.pdf">eg_test1.pdf</a></td>
 </tr>
 <tr>
-<td><a href="../test/eg_test4.erl">eg_test4.erl</a></td>
-<td><a href="../test/eg_test4.pdf">eg_test4.pdf</a></td>
+<td><a href="../../ng_examples-0.1.0/testing/eg_test4.erl">eg_test4.erl</a></td>
+<td><a href="../../ng_examples-0.1.0/testing/eg_test4.pdf">eg_test4.pdf</a></td>
 </tr>
 
 </table>
