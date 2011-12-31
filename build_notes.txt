@@ -1,4 +1,4 @@
-1) The NGerlguten project is built with sinan, an Erlang OTP  oriented build system. If you can sinan installed, you can just "sinan build" to make NGerlguten.
+1) The NGerlguten project is built with sinan, an Erlang OTP-oriented build system. If you can sinan installed, you can just "sinan build" to make NGerlguten.
 
 2) Run "sinan build" twice. The second time is runs eg_afm and eg_mk_hyphen to make additional modules that include the fonts and the hyphenation dictionaries.
 
