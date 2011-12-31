@@ -163,4 +163,4 @@ When you run tmo_doc:file(), you get an output file that at first glance looks t
 
 ### kd_test1
 
-When you run kd_test1:test(), it produces a 1 page PDF. It is a commercial bill in Swedish for a some recording, I think. It does a good job of including a graphics to show the vendor's logo. It looks interesting.
+When you run kd_test1:test(), it produces a 1 page PDF. It is a commercial bill in Swedish for a recording, I think. It does a good job of including a graphic to show the vendor's logo. It looks interesting.
