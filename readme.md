@@ -93,7 +93,7 @@ with calls to the pdf module.
 
 ###    pdf_lib:moveAndShow(PDF, 50, 700, "Hello Joe from Gutenburg"),
 
-       To move to position (50,700) and place the "Hello Joe from Gutenberg content"
+       To move to position (50,700) and place the "Hello Joe from Gutenberg" content
 
 ###    Serialised = pdf:export(PDF),
 
