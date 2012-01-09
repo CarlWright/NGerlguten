@@ -12,12 +12,11 @@
 @author Sean Hinde
 @author Håkan Stenholm
 @author Carl Wright
-@copyright 2003-2010 Joe Armstrong, Mikael Karlsson, Johan Bevemyr,
+@copyright 2003-2012 Joe Armstrong, Mikael Karlsson, Johan Bevemyr,
 Sean Hinde, Håkan Stenholm, Carl Wright
 @version {@version}
 
-@doc <link rel="stylesheet" type="text/css" href="../doc/eg_stylesheet.css" title="EDoc"></link>
-<img src="../doc/NextGenErlguten_logo.png" width="537" height="88"></img><br/> NGerlGuten is a typesetting system for producing PDF from XML.
+@doc <img src="../doc/NextGenErlguten_logo.png" width="537" height="88"></img><br/> NGerlGuten is a typesetting system for producing PDF from XML.
 
 NGerlGuten is free software published under the MIT license.
 
