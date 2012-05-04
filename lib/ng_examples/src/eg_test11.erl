@@ -36,6 +36,10 @@ test()->
     eg_pdf:set_page(PDF,1),
     eg_pdf:set_font(PDF, "Victorias-Secret", 14),    
     eg_pdf_lib:moveAndShow(PDF, 350, 185, "Type 4"),
+
+    eg_pdf:set_font(PDF, "Times-Italic", 14),
+    eg_pdf_lib:moveAndShow(PDF, 150, 400, "This shows a red box with a 'page' icon graphic."),
+
     
     eg_pdf:save_state(PDF),
     eg_pdf:set_fill_color(PDF,red),
