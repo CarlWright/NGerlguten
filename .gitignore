@@ -1,6 +1,6 @@
 *.beam
 .eunit
 deps/*
-apps/ngerlguten/ebin
+apps/erlguten/ebin
 dev/*
-rel/ngerlguten
+rel/erlguten

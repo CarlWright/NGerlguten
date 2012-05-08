@@ -1,2 +1,2 @@
-app=ngerlguten
+app=erlguten
 prefix=/opt/monaco

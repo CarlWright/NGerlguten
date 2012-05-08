@@ -1,9 +1,8 @@
--init_debug
 ## Name of the node
--name ngerlguten@127.0.0.1
+-name erlguten@127.0.0.1
 
 ## Cookie for distributed erlang
--setcookie ngerlguten
+-setcookie erlguten
 
 ## Heartbeat management; auto-restarts VM if it dies or becomes unresponsive
 ## (Disabled by default..use with caution!)
