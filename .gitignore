@@ -1,0 +1,6 @@
+*.beam
+.eunit
+deps/*
+apps/ngerlguten/ebin
+dev/*
+rel/ngerlguten
