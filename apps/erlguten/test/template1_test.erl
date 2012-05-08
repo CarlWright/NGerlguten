@@ -1,8 +1,10 @@
--module (template1).
+-module (template1_test).
+-include("eg.hrl").
+-include_lib("eunit/include/eunit.hrl").
 
--include("../../include/eg.hrl").
-
--export ([on_instanciation/1, box/3, tag_map/4, handler/5]).
+run_test() ->
+  ?debugMsg("Begin Test"),
+  ok.
 
 on_instanciation(Env ) ->
   FilePart = atom_to_list(?MODULE),
@@ -69,15 +71,15 @@ end.
 %% get the box name out of the box list
 
 getBoxName(BoxItem) ->
-  [{"name", BoxName}] = lists:filter(fun(X) -> case catch({"name", Name} = X ) of
-            {'EXIT',Why} -> false; 
+  [{"name", BoxName}] = lists:filter(fun(X) -> case catch({"name", _Name} = X ) of
+            {'EXIT',_Why} -> false; 
             _ -> true end 
           end, BoxItem),
           BoxName.
            
 %% load boxes into the dict of the env ... key = {template_atom, box_name}
 
-loadBoxRecords(Env,Template,BoxRecords) ->
+loadBoxRecords(Env,_Template,BoxRecords) ->
   Dict = Env#env.dict,
   DictNew = loadBoxRecords(Dict, Env, Env#env.template, BoxRecords),
   Env#env{dict = DictNew}.
@@ -91,7 +93,7 @@ loadBoxRecords(Dict, Env, Tmplt,[Rec|MoreRecs]) ->
 
 %% Parse out the descriptions of the boxes with their tags 
   
-objectParse(Env, [], BoxName) ->
+objectParse(Env, [], _BoxName) ->
   Env;
 objectParse(Env, [ObjDef|MoreObjs], BoxName) ->
   Record = #object{},
@@ -129,7 +131,7 @@ putObjectRecord(Env, Record, BoxName, ObjName) ->
 
 %% Parse out the descriptions of the boxes with their tags 
   
-tagParse(Env, [], BoxName, ObjectName) ->
+tagParse(Env, [], _BoxName, _ObjectName) ->
   Env;
 tagParse(Env, [TagDef|MoreTags], BoxName, ObjectName) ->
   Record = #tagMap{},
@@ -175,14 +177,14 @@ box(Env, Template, Box) ->
      
 tag_map(Env, Template, Box, Object) ->
    Dict = Env#env.dict,
-   AccOut = dict:fold(fun(Key, Value, Acc) ->
-             case catch( {Template, Box, Object, Tag} = Key) of
-               {'EXIT', Why} -> Acc;
+   _AccOut = dict:fold(fun(Key, Value, Acc) ->
+             case catch( {Template, Box, Object, _Tag} = Key) of
+               {'EXIT', _Why} -> Acc;
                _ -> Acc ++ Value
                end
                end, [],Dict). 
           
-handler(Box, TagMap, Args, Data, Env) ->
+handler(Box, TagMap, _Args, Data, Env) ->
     case Box#box.bg of 
       default ->      eg_block:inner_block(Env#env.pdf,  Data, 
                               Box#box.x, Box#box.y, Box#box.width, Box#box.fontSize, 

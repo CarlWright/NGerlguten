@@ -25,10 +25,8 @@
 %%==========================================================================
 
 -module(tmo_doc_test).
-
--export([file/0, file/1, file/2, test/0]).
-
--define(font_size, 10).
+-include_lib("eunit/include/eunit.hrl").
+-define(FONT_SIZE, 10).
 
 -record(doc_info, {system    = " ",
                    type      = " ",
@@ -51,6 +49,7 @@
         }).
              
 run_test() ->
+  ?debugMsg("Begin Test"),
   file().
   
 file() ->
@@ -404,17 +403,17 @@ title(PDF, Title, Level, S0) ->
         end,
     [{Num, Lvl, Str}|T] = S#st.toc,
     eg_pdf:begin_text(PDF),
-    eg_pdf:set_font(PDF, "Helvetica-Bold", ?font_size + 2),
+    eg_pdf:set_font(PDF, "Helvetica-Bold", ?FONT_SIZE + 2),
     eg_pdf:set_text_pos(PDF, 50, S#st.y-20),
     eg_pdf:text(PDF, Num),
     TagMap = {[p], 
-              [{default, eg_richText:mk_face("Helvetica-Bold",?font_size + 2,
+              [{default, eg_richText:mk_face("Helvetica-Bold",?FONT_SIZE + 2,
                                              true,default,0)},
-               {em,      eg_richText:mk_face("Helvetica-Bold",?font_size + 2,
+               {em,      eg_richText:mk_face("Helvetica-Bold",?FONT_SIZE + 2,
                                              true,default,0)},
-               {code,    eg_richText:mk_face("Courier-Bold",?font_size + 2,
+               {code,    eg_richText:mk_face("Courier-Bold",?FONT_SIZE + 2,
                                              true,default,0)},
-               {b,       eg_richText:mk_face("Helvetica-Bold",?font_size + 2,
+               {b,       eg_richText:mk_face("Helvetica-Bold",?FONT_SIZE + 2,
                                              true,default,0)}]},
     {p, _, RichText} = 
         eg_xml2richText:normalise_xml({p, [], Title}, TagMap),
@@ -432,13 +431,13 @@ title(PDF, Title, Level, S0) ->
 
 para(PDF, Indent, Width, Para0, S) ->
     Para = skip_white(Para0),                   % Remove leading ws
-    TagMap = {[para], [{default, eg_richText:mk_face("Times-Roman",?font_size,
+    TagMap = {[para], [{default, eg_richText:mk_face("Times-Roman",?FONT_SIZE,
                                                      true,default,0)},
-                       {em,      eg_richText:mk_face("Times-Italic",?font_size,
+                       {em,      eg_richText:mk_face("Times-Italic",?FONT_SIZE,
                                                      true,default,0)},
-                       {code,    eg_richText:mk_face("Courier",?font_size,
+                       {code,    eg_richText:mk_face("Courier",?FONT_SIZE,
                                                      true,default,0)},
-                       {b,       eg_richText:mk_face("Times-Bold",?font_size,
+                       {b,       eg_richText:mk_face("Times-Bold",?FONT_SIZE,
                                                      true,default,0)}]},
     %%io:format("Para = ~p~n",[Para]),
     Norm = eg_xml2richText:normalise_xml({para, [], Para}, TagMap),
@@ -483,8 +482,8 @@ item(PDF, Indent, Width, [{para, _, _Para} | _T] = P, Type, S0) ->
         end,
     eg_pdf:begin_text(PDF),
     Type1 = if is_integer(Type) ->
-                    eg_pdf:set_text_pos(PDF, 80, S#st.y-?font_size-2),
-                    eg_pdf:set_font(PDF, "Times-Roman", ?font_size),
+                    eg_pdf:set_text_pos(PDF, 80, S#st.y-?FONT_SIZE-2),
+                    eg_pdf:set_font(PDF, "Times-Roman", ?FONT_SIZE),
                     eg_pdf:text(PDF, eg_pdf_op:n2s(Type) ++ "."),
                     Type + 1;
                Type == bulleted ->
@@ -508,8 +507,8 @@ item(PDF, Indent, Width, Item0, Type, S0) ->
     eg_pdf:begin_text(PDF),
     eg_pdf:set_font(PDF, "Times-Roman", 16),
     Type1 = if is_integer(Type) ->
-                    eg_pdf:set_text_pos(PDF, 80, S#st.y-?font_size-2),
-                    eg_pdf:set_font(PDF, "Times-Roman", ?font_size),
+                    eg_pdf:set_text_pos(PDF, 80, S#st.y-?FONT_SIZE-2),
+                    eg_pdf:set_font(PDF, "Times-Roman", ?FONT_SIZE),
                     eg_pdf:text(PDF, eg_pdf_op:n2s(Type) ++ "."),
                     Type + 1;
                Type == bulleted ->
@@ -520,13 +519,13 @@ item(PDF, Indent, Width, Item0, Type, S0) ->
             end,
     eg_pdf:end_text(PDF),
     Item = skip_white(Item0),                   % Remove leading ws
-    TagMap = {[item], [{default, eg_richText:mk_face("Times-Roman",?font_size,
+    TagMap = {[item], [{default, eg_richText:mk_face("Times-Roman",?FONT_SIZE,
                                                      true,default,0)},
-                       {em,      eg_richText:mk_face("Times-Italic",?font_size,
+                       {em,      eg_richText:mk_face("Times-Italic",?FONT_SIZE,
                                                      true,default,0)},
-                       {code,    eg_richText:mk_face("Courier",?font_size,
+                       {code,    eg_richText:mk_face("Courier",?FONT_SIZE,
                                                      true,default,0)},
-                       {b,       eg_richText:mk_face("Times-Bold",?font_size,
+                       {b,       eg_richText:mk_face("Times-Bold",?FONT_SIZE,
                                                      true,default,0)}]},
     %% io:format("code = ~p~n", [Para]),
     Norm = eg_xml2richText:normalise_xml({item, [], Item}, TagMap),
@@ -550,7 +549,7 @@ item_paras(_, _, _, [], S) ->
 
 code(PDF, Indent, Width, Para, S) ->
     TagMap = {[code], 
-              [{default,eg_richText:mk_face("Courier",?font_size,false,
+              [{default,eg_richText:mk_face("Courier",?FONT_SIZE,false,
 					    default,0)}]},
     %% io:format("code = ~p~n", [Para]),
     Norm = eg_xml2richText:normalise_xml({code, [], Para}, TagMap),
@@ -568,11 +567,11 @@ code(PDF, Indent, Width, Para, S) ->
 output_lines(PDF, Lines, Widths, Off, Indent, Width, Just, S) ->
     Y = S#st.y,
     Min_y = S#st.min_y,
-    Y_req = length(Lines) * (?font_size + 2),
+    Y_req = length(Lines) * (?FONT_SIZE + 2),
     %% io:format("Input1 = ~p~n",[{Off, Y, Y_req, Lines, Min_y}]),
     if Y_req =< (Y - Min_y)  ->
             Code = eg_richText2pdf:richText2pdf(PDF, Indent, Y, Just, 0, Lines, 
-                                                (?font_size+2), Widths, Off),
+                                                (?FONT_SIZE+2), Widths, Off),
             %% io:format("Code = ~p~n",[Code]),
             eg_pdf:begin_text(PDF),
             eg_pdf:append_stream(PDF, Code),
@@ -581,11 +580,11 @@ output_lines(PDF, Lines, Widths, Off, Indent, Width, Just, S) ->
        true ->
             Left =  (Y - Min_y),
             This_page_lines = if Left =< 14 -> 0;
-                                 true -> Left div (?font_size+2)
+                                 true -> Left div (?FONT_SIZE+2)
                               end,
             {TPL, NPL} = lists:split(This_page_lines, Lines),
             Code = eg_richText2pdf:richText2pdf(PDF, Indent, Y, Just, 0, TPL, 
-                                                (?font_size+2), Widths, Off),
+                                                (?FONT_SIZE+2), Widths, Off),
             %% io:format("Code = ~p~n",[Code]),
             eg_pdf:begin_text(PDF),
             eg_pdf:append_stream(PDF, Code),
@@ -705,9 +704,9 @@ page_numbers(PDF, N, Tot) ->
     _R = eg_pdf:set_page(PDF, N),
 %%    io:format("R = ~p~n",[R]),
     eg_pdf:begin_text(PDF),
-    eg_pdf:set_font(PDF,"Helvetica", ?font_size),
+    eg_pdf:set_font(PDF,"Helvetica", ?FONT_SIZE),
     Str = "Page " ++ eg_pdf_op:n2s(N) ++ " of " ++ Tot,
-    Width = eg_pdf:get_string_width(PDF,"Helvetica", ?font_size, Str),
+    Width = eg_pdf:get_string_width(PDF,"Helvetica", ?FONT_SIZE, Str),
     eg_pdf:set_text_pos(PDF, 555 - Width, 30),
     eg_pdf:text(PDF, Str),
     eg_pdf:end_text(PDF),
@@ -873,8 +872,8 @@ rows(PDF, [H|T],[Row|Rows],X,Col_widths, Cols, Mid_row, S) ->
             eg_pdf:rectangle(PDF, X,S#st.y,lists:sum(Col_widths) + 1,1, fill);
        true -> ok
     end,
-    if S#st.y - (H*?font_size) =< S#st.min_y ->
-            This_page_lines = (S#st.y - S#st.min_y) div ?font_size,
+    if S#st.y - (H*?FONT_SIZE) =< S#st.min_y ->
+            This_page_lines = (S#st.y - S#st.min_y) div ?FONT_SIZE,
             {TPR, NPR} = split_row(This_page_lines, Row),
             S1 = row(PDF, TPR, X, Col_widths, This_page_lines, Cols, S),
             %% io:format("NPR = ~p~n", [NPR]),
@@ -894,7 +893,7 @@ rows(PDF, [H|T],[Row|Rows],X,Col_widths, Cols, Mid_row, S) ->
             Y = S#st.y,
             S1 = row(PDF, Row, X,Col_widths,H, Cols, S),
             rows(PDF, T, Rows, X, Col_widths, Cols, false,
-                 S1#st{y = Y - (H*?font_size)-5})
+                 S1#st{y = Y - (H*?FONT_SIZE)-5})
     end;
 rows(PDF, [], [], X, Col_widths, _Cols, _Mid_row, S) ->
     %% Draw final line under table
@@ -902,37 +901,37 @@ rows(PDF, [], [], X, Col_widths, _Cols, _Mid_row, S) ->
     S.
 
 row(PDF, [{Lines, Width, Off}|Cells], X, [Col_width|T], Height, Cols, S) ->
-    eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*?font_size)-5, fill),
+    eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*?FONT_SIZE)-5, fill),
     eg_pdf:begin_text(PDF),
-    lines2pdf(PDF, X+3,S#st.y,Lines, ?font_size, Width, Off, justified),
+    lines2pdf(PDF, X+3,S#st.y,Lines, ?FONT_SIZE, Width, Off, justified),
     eg_pdf:end_text(PDF),
     row(PDF, Cells, X+Col_width, T, Height, Cols-1, S);
 row(PDF, [], X, [], Height, 0, S) ->
-    eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*?font_size)-5, fill),
+    eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*?FONT_SIZE)-5, fill),
     S;
 row(PDF, [], X, [Col_width|T], Height, Cols, S) ->
-    eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*?font_size)-5, fill),
+    eg_pdf:rectangle(PDF, X,S#st.y,1,-(Height*?FONT_SIZE)-5, fill),
     row(PDF, [], X+Col_width, T, Height, Cols-1, S).
 
 
 row2rtf({row, _, Row}, Col_widths) ->
-    TagMap = {[cell], [{default, eg_richText:mk_face("Times-Roman",?font_size,
+    TagMap = {[cell], [{default, eg_richText:mk_face("Times-Roman",?FONT_SIZE,
                                                      true,default,0)},
-                       {em,      eg_richText:mk_face("Times-Italic",?font_size,
+                       {em,      eg_richText:mk_face("Times-Italic",?FONT_SIZE,
                                                      true,default,0)},
-                       {code,    eg_richText:mk_face("Courier",?font_size,
+                       {code,    eg_richText:mk_face("Courier",?FONT_SIZE,
                                                      true,default,0)},
-                       {b,       eg_richText:mk_face("Times-Bold",?font_size,
+                       {b,       eg_richText:mk_face("Times-Bold",?FONT_SIZE,
                                                      true,default,0)}]},
     row2rtf1(Row, Col_widths, TagMap);
 row2rtf({header, _, Row}, Col_widths) ->
-    TagMap = {[cell], [{default, eg_richText:mk_face("Times-Bold",?font_size,
+    TagMap = {[cell], [{default, eg_richText:mk_face("Times-Bold",?FONT_SIZE,
                                                      true,default,0)},
-                       {em,      eg_richText:mk_face("Times-Bold",?font_size,
+                       {em,      eg_richText:mk_face("Times-Bold",?FONT_SIZE,
                                                      true,default,0)},
-                       {code,    eg_richText:mk_face("Courier-Bold",?font_size,
+                       {code,    eg_richText:mk_face("Courier-Bold",?FONT_SIZE,
                                                      true,default,0)},
-                       {b,       eg_richText:mk_face("Times-Bold",?font_size,
+                       {b,       eg_richText:mk_face("Times-Bold",?FONT_SIZE,
                                                      true,default,0)}]},
     row2rtf1(Row, Col_widths, TagMap).
 
@@ -1194,13 +1193,13 @@ xml2lines(Para, Len, PtSize, NLines, Justification) ->
 
 lines(Xml, Len, _PtSize, NLines, Justification) ->
     TagMap = {[p], 
-              [{default, eg_richText:mk_face("Times-Roman",?font_size,
+              [{default, eg_richText:mk_face("Times-Roman",?FONT_SIZE,
                                              true,default,0)},
-               {em,      eg_richText:mk_face("Times-Italic",?font_size,
+               {em,      eg_richText:mk_face("Times-Italic",?FONT_SIZE,
                                              true,default,0)},
-               {code,    eg_richText:mk_face("Courier",?font_size,
+               {code,    eg_richText:mk_face("Courier",?FONT_SIZE,
                                              true,default,0)},
-               {b,       eg_richText:mk_face("Times-Bold",?font_size,
+               {b,       eg_richText:mk_face("Times-Bold",?FONT_SIZE,
                                              true,default,0)}]},
     %%io:format("TagMap: ~p~n",[TagMap]),
    % ensure_fonts_are_loaded(PDF, TagMap),

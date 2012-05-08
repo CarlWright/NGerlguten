@@ -27,7 +27,8 @@
 -module(eg1_test).
 -include_lib("eunit/include/eunit.hrl").
 
-run_test_()->
+run_test()->
+    ?debugMsg("Begin Test"),
     PDF = eg_pdf:new(),
     eg_pdf:set_pagesize(PDF,a4),
     eg_pdf:set_author(PDF,"Mikael Karlsson"),

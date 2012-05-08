@@ -28,21 +28,16 @@
 %% =====================================================================
 
 -module(comcast_bill_test).
--import(eg_pdf_op, [n2s/1]).
--import(eg_pdf_lib, [showGrid/2, moveAndShow/4, moveAndShowRot/5]).
-
-
-
+-include_lib("eunit/include/eunit.hrl").
 %%
 %%  This produces an example Comcast bill.
 %%
-run_test_()->
+run_test()->
+  ?debugMsg(""),
   Start = now(),
     PDF = eg_pdf:new(),
     eg_pdf:set_pagesize(PDF,letter),
     eg_pdf:set_page(PDF,1),
-   %% pdf_lib:showGrid(PDF, letter),
-
     eg_pdf:set_dash(PDF, [1]),
     eg_pdf:set_stroke_gray(PDF, 0.5), %% black
     eg_pdf:set_line_width(PDF,1),
@@ -51,27 +46,27 @@ run_test_()->
     eg_pdf:set_font(PDF,"Helvetica", 10),
     Base = 760,
     Increment = 12,
-    moveAndShow(PDF, 370,Base,                    "Account Number"),
-    moveAndShow(PDF, 370,Base - Increment,        "Billing Date"),
-    moveAndShow(PDF, 370,Base - (2 * Increment),  "Total Amount Due"),
-    moveAndShow(PDF, 370,Base - (3 * Increment),  "Payment Due by"),
-    moveAndShow(PDF, 470,Base,                    "09588 355496-01-5"),
-    moveAndShow(PDF, 470,Base - Increment,        "02/28/10"),
-    moveAndShow(PDF, 470,Base - (2 * Increment),  "$99.95"),
-    moveAndShow(PDF, 470,Base - (3 * Increment),  "Page 1 of 2"),  
+    eg_pdf_lib:moveAndShow(PDF, 370,Base,                    "Account Number"),
+    eg_pdf_lib:moveAndShow(PDF, 370,Base - Increment,        "Billing Date"),
+    eg_pdf_lib:moveAndShow(PDF, 370,Base - (2 * Increment),  "Total Amount Due"),
+    eg_pdf_lib:moveAndShow(PDF, 370,Base - (3 * Increment),  "Payment Due by"),
+    eg_pdf_lib:moveAndShow(PDF, 470,Base,                    "09588 355496-01-5"),
+    eg_pdf_lib:moveAndShow(PDF, 470,Base - Increment,        "02/28/10"),
+    eg_pdf_lib:moveAndShow(PDF, 470,Base - (2 * Increment),  "$99.95"),
+    eg_pdf_lib:moveAndShow(PDF, 470,Base - (3 * Increment),  "Page 1 of 2"),  
     
     eg_pdf:set_dash(PDF, solid),
     eg_pdf:set_stroke_color(PDF,dodgerblue),
     eg_pdf:set_line_width(PDF,2),
     eg_pdf:line(PDF, 25,700,570,700), 
-    
+    ?debugMsg("Before Image"),
     eg_pdf:image(PDF, "../testing/comcast_logo.jpg",{25,760},{height,20}),
-
+    ?debugMsg("After Image"),
     eg_pdf:set_fill_gray(PDF, 0.0),
     eg_pdf:set_font(PDF,"Helvetica", 10),
-    moveAndShow(PDF, 30, 705,  "Contact us:"),  
-    moveAndShow(PDF, 110,705,  "www.comcast.com"),  
-    moveAndShow(PDF, 220,705,  "1-800-391-3000"),  
+    eg_pdf_lib:moveAndShow(PDF, 30, 705,  "Contact us:"),  
+    eg_pdf_lib:moveAndShow(PDF, 110,705,  "www.comcast.com"),  
+    eg_pdf_lib:moveAndShow(PDF, 220,705,  "1-800-391-3000"),  
     
     eg_pdf:save_state(PDF),
     eg_pdf:set_fill_color(PDF,orange),
@@ -115,19 +110,19 @@ run_test_()->
     
     eg_pdf:set_fill_gray(PDF, 1.0),
     eg_pdf:set_font(PDF,"Helvetica", 14),
-    moveAndShow(PDF, 325,680,                    "Monthly Statement Summary"),
-    moveAndShow(PDF, 325,565,                    "New Charges Summary"),
+    eg_pdf_lib:moveAndShow(PDF, 325,680,                    "Monthly Statement Summary"),
+    eg_pdf_lib:moveAndShow(PDF, 325,565,                    "New Charges Summary"),
     eg_pdf:set_fill_gray(PDF, 0.0),
     eg_pdf:set_font(PDF,"Helvetica", 12),
-    moveAndShow(PDF, 25,675,                      "SERVICE LEVEL CORP"),
+    eg_pdf_lib:moveAndShow(PDF, 25,675,                      "SERVICE LEVEL CORP"),
 
     eg_pdf:set_font(PDF,"Helvetica", 10),
-    moveAndShow(PDF, 25,650,"For service at:"),
-    moveAndShow(PDF, 25,640,"7006 SUNCREST DR"),
-    moveAndShow(PDF, 25,630,"SALINE MI 48176-9102"),
+    eg_pdf_lib:moveAndShow(PDF, 25,650,"For service at:"),
+    eg_pdf_lib:moveAndShow(PDF, 25,640,"7006 SUNCREST DR"),
+    eg_pdf_lib:moveAndShow(PDF, 25,630,"SALINE MI 48176-9102"),
     
     eg_pdf:set_font(PDF,"Helvetica", 16),
-    moveAndShow(PDF, 25,595,"News from Comcast"),  
+    eg_pdf_lib:moveAndShow(PDF, 25,595,"News from Comcast"),  
 
     %% zap(PDF, Sample, X, Y, Measure, PtSize, Leading, NLines, Justification)
     PtSize10 = 10,
@@ -138,33 +133,34 @@ run_test_()->
     %% eg_test3:zap(PDF, xml(news), 25, 585, 40, 10, 12, 20, ragged),
 
     eg_pdf:set_font(PDF,"Helvetica-Bold", 10),
-    moveAndShow(PDF, 325,610,"Total Amount Due"),
-    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "$99.95"),610,"$99.95"),   
+    eg_pdf_lib:moveAndShow(PDF, 325,610,"Total Amount Due"),
+    eg_pdf_lib:moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "$99.95"),610,"$99.95"),   
 
     eg_pdf:set_font(PDF,"Helvetica", 11),
-    moveAndShow(PDF, 325,660,"Previous Balance"),   
-    moveAndShow(PDF, 325,642,"Payment - 02/16/10 - thank you"),  
-    moveAndShow(PDF, 325,627,"New Charges - see below"),  
-    moveAndShow(PDF, 325,595,"Payment Due By"),  
-    moveAndShow(PDF, 340,545,"Comcast High-Speed Internet"),  
-    moveAndShow(PDF, 325,525,"Total New Charges"),  
+    eg_pdf_lib:moveAndShow(PDF, 325,660,"Previous Balance"),   
+    eg_pdf_lib:moveAndShow(PDF, 325,642,"Payment - 02/16/10 - thank you"),  
+    eg_pdf_lib:moveAndShow(PDF, 325,627,"New Charges - see below"),  
+    eg_pdf_lib:moveAndShow(PDF, 325,595,"Payment Due By"),  
+    eg_pdf_lib:moveAndShow(PDF, 340,545,"Comcast High-Speed Internet"),  
+    eg_pdf_lib:moveAndShow(PDF, 325,525,"Total New Charges"),  
                             
-    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "99.95"),660, "99.95"),
-    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "-99.95"),642,"-99.95"),     
-    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "99.95"),627,"99.95"),     
-    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "03/22/10"),595,"03/22/10"),     
-    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "99.95"),545,"99.95"),
-    moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "$99.95"),525,"$99.95"),  
+    eg_pdf_lib:moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "99.95"),660, "99.95"),
+    eg_pdf_lib:moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "-99.95"),642,"-99.95"),     
+    eg_pdf_lib:moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "99.95"),627,"99.95"),     
+    eg_pdf_lib:moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "03/22/10"),595,"03/22/10"),     
+    eg_pdf_lib:moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "99.95"),545,"99.95"),
+    eg_pdf_lib:moveAndShow(PDF, 565 - eg_pdf:get_string_width(PDF, "Helvetica", 12, "$99.95"),525,"$99.95"),  
     
     eg_pdf:set_fill_gray(PDF, 1.0),
     eg_pdf:set_font(PDF,"Helvetica", 14),
-    moveAndShow(PDF, 445 - round(eg_pdf:get_string_width(PDF, "Helvetica", 14, "Thank you for being a")/2),495,"Thank you for being a"), 
-    moveAndShow(PDF, 445 - round(eg_pdf:get_string_width(PDF, "Helvetica", 14, "valued Comcast customer!")/2),480,"valued Comcast customer!"),           
+    eg_pdf_lib:moveAndShow(PDF, 445 - round(eg_pdf:get_string_width(PDF, "Helvetica", 14, "Thank you for being a")/2),495,"Thank you for being a"), 
+    eg_pdf_lib:moveAndShow(PDF, 445 - round(eg_pdf:get_string_width(PDF, "Helvetica", 14, "valued Comcast customer!")/2),480,"valued Comcast customer!"),           
  
     eg_pdf:set_fill_gray(PDF, 0.0),
     eg_pdf:set_font(PDF,"Helvetica", 8),
-    moveAndShowRot(PDF, 585, 500, "016604 1/1", 90),
-    
+    ?debugMsg("Before moveAndShowRot"),
+    eg_pdf_lib:moveAndShowRot(PDF, 585, 500, "016604 1/1", 90),
+    ?debugMsg("After moveAndShowRot"),
     
     eg_pdf:set_dash(PDF, dot),
     eg_pdf:set_stroke_color(PDF,black),
@@ -172,28 +168,28 @@ run_test_()->
     eg_pdf:line(PDF, 25,255,570,255),   
     
     CouponLine = "Detach and enclose this coupon with your payment. Please write your account number on your check or money order. Do not send cash.",
-    moveAndShow(PDF, 277 - round(eg_pdf:get_string_width(PDF, "Helvetica", 8, CouponLine)/2),240,CouponLine),      
+    eg_pdf_lib:moveAndShow(PDF, 277 - round(eg_pdf:get_string_width(PDF, "Helvetica", 8, CouponLine)/2),240,CouponLine),      
 
     eg_pdf:image(PDF, "../testing/comcast_logo.jpg",{50,200},{height,20}),
     
     eg_pdf:set_font(PDF,"Helvetica", 8),    
-    moveAndShow(PDF, 80,180,"27800 FRANKLIN RD"),  
-    moveAndShow(PDF, 80,170,"SOUTHFIELD MI 48034-2363"),
+    eg_pdf_lib:moveAndShow(PDF, 80,180,"27800 FRANKLIN RD"),  
+    eg_pdf_lib:moveAndShow(PDF, 80,170,"SOUTHFIELD MI 48034-2363"),
     
-    moveAndShow(PDF, 55,150,"------- manifest line -------"),
-    moveAndShow(PDF, 55,130,"SERVICE LEVEL CORP"),
-    moveAndShow(PDF, 55,120,"7006 SUNCREST DRIVE"),
-    moveAndShow(PDF, 55,110,"SALINE MI 48176-9102"),
+    eg_pdf_lib:moveAndShow(PDF, 55,150,"------- manifest line -------"),
+    eg_pdf_lib:moveAndShow(PDF, 55,130,"SERVICE LEVEL CORP"),
+    eg_pdf_lib:moveAndShow(PDF, 55,120,"7006 SUNCREST DRIVE"),
+    eg_pdf_lib:moveAndShow(PDF, 55,110,"SALINE MI 48176-9102"),
     
     eg_pdf:set_font(PDF,"Helvetica-Bold", 10),
-    moveAndShow(PDF, 330,220,"Account Number"),
-    moveAndShow(PDF, 450,220,"09588 234102-01-7"),    
-    moveAndShow(PDF, 330,200,"Payment Due by"),
-    moveAndShow(PDF, 450,200,"04/15/10"),    
-    moveAndShow(PDF, 330,180,"Total Amount Due"),
-    moveAndShow(PDF, 450,180,"$99.95"),    
-    moveAndShow(PDF, 330,150,"Amount Enclosed"),
-    moveAndShow(PDF, 450,150,"$"),    
+    eg_pdf_lib:moveAndShow(PDF, 330,220,"Account Number"),
+    eg_pdf_lib:moveAndShow(PDF, 450,220,"09588 234102-01-7"),    
+    eg_pdf_lib:moveAndShow(PDF, 330,200,"Payment Due by"),
+    eg_pdf_lib:moveAndShow(PDF, 450,200,"04/15/10"),    
+    eg_pdf_lib:moveAndShow(PDF, 330,180,"Total Amount Due"),
+    eg_pdf_lib:moveAndShow(PDF, 450,180,"$99.95"),    
+    eg_pdf_lib:moveAndShow(PDF, 330,150,"Amount Enclosed"),
+    eg_pdf_lib:moveAndShow(PDF, 450,150,"$"),    
     
     eg_pdf:set_dash(PDF, solid),
     eg_pdf:set_stroke_color(PDF,black),
@@ -203,14 +199,14 @@ run_test_()->
     eg_pdf:line(PDF, 455,145,550,145),   
     
     eg_pdf:set_font(PDF,"Helvetica", 10),
-    moveAndShow(PDF, 330, 130,"Make checks payable to Comcast"), 
-    moveAndShow(PDF, 350,90,"COMCAST"),
-    moveAndShow(PDF, 350,81,"PO BOX 3005"),
-    moveAndShow(PDF, 350,72,"SOUTHEASTERN PA"), 
-    moveAndShow(PDF, 350,63,"19398-3005"), 
+    eg_pdf_lib:moveAndShow(PDF, 330, 130,"Make checks payable to Comcast"), 
+    eg_pdf_lib:moveAndShow(PDF, 350,90,"COMCAST"),
+    eg_pdf_lib:moveAndShow(PDF, 350,81,"PO BOX 3005"),
+    eg_pdf_lib:moveAndShow(PDF, 350,72,"SOUTHEASTERN PA"), 
+    eg_pdf_lib:moveAndShow(PDF, 350,63,"19398-3005"), 
     
     eg_pdf:set_font(PDF,"OCR-A-Digits", 10),
-    moveAndShow(PDF, 280,15,"09588   234102 01 7         0       013135"),
+    eg_pdf_lib:moveAndShow(PDF, 280,15,"09588   234102 01 7         0       013135"),
     
     eg_pdf:new_page(PDF),
     
@@ -223,65 +219,65 @@ run_test_()->
     eg_pdf:set_font(PDF,"Helvetica", 10),
     Base = 760,
     Increment = 12,
-    moveAndShow(PDF, 370,Base,                    "Account Number"),
-    moveAndShow(PDF, 370,Base - Increment,        "Billing Date"),
-    moveAndShow(PDF, 370,Base - (2 * Increment),  "Total Amount Due"),
-    moveAndShow(PDF, 370,Base - (3 * Increment),  "Payment Due by"),
-    moveAndShow(PDF, 470,Base,                    "09588 355496-01-5"),
-    moveAndShow(PDF, 470,Base - Increment,        "02/28/10"),
-    moveAndShow(PDF, 470,Base - (2 * Increment),  "$99.95"),
-    moveAndShow(PDF, 470,Base - (3 * Increment),  "Page 2 of 2"),  
+    eg_pdf_lib:moveAndShow(PDF, 370,Base,                    "Account Number"),
+    eg_pdf_lib:moveAndShow(PDF, 370,Base - Increment,        "Billing Date"),
+    eg_pdf_lib:moveAndShow(PDF, 370,Base - (2 * Increment),  "Total Amount Due"),
+    eg_pdf_lib:moveAndShow(PDF, 370,Base - (3 * Increment),  "Payment Due by"),
+    eg_pdf_lib:moveAndShow(PDF, 470,Base,                    "09588 355496-01-5"),
+    eg_pdf_lib:moveAndShow(PDF, 470,Base - Increment,        "02/28/10"),
+    eg_pdf_lib:moveAndShow(PDF, 470,Base - (2 * Increment),  "$99.95"),
+    eg_pdf_lib:moveAndShow(PDF, 470,Base - (3 * Increment),  "Page 2 of 2"),  
     
     eg_pdf:set_dash(PDF, solid),
     eg_pdf:set_stroke_color(PDF,dodgerblue),
     eg_pdf:set_line_width(PDF,2),
     eg_pdf:line(PDF, 25,700,570,700), 
-    
+    ?debugMsg("Before Image"),
     eg_pdf:image(PDF, "../testing/comcast_logo.jpg",{25,760},{height,20}),
 
     eg_pdf:set_fill_gray(PDF, 0.0),
     eg_pdf:set_font(PDF,"Helvetica-Bold", 10),
-    moveAndShow(PDF, 30, 705,  "Contact us:"),  
-    moveAndShow(PDF, 110,705,  "www.comcast.com"),  
-    moveAndShow(PDF, 220,705,  "1-800-391-3000"),  
+    eg_pdf_lib:moveAndShow(PDF, 30, 705,  "Contact us:"),  
+    eg_pdf_lib:moveAndShow(PDF, 110,705,  "www.comcast.com"),  
+    eg_pdf_lib:moveAndShow(PDF, 220,705,  "1-800-391-3000"),  
     
-    moveAndShow(PDF, 25,735,"Service Details"),
-    
+    eg_pdf_lib:moveAndShow(PDF, 25,735,"Service Details"),
+    ?debugMsg("Before Image"),
     eg_pdf:image(PDF, "../testing/HighSpeedInternet.jpg",{25,665},{height,25}),    
-    
+    ?debugMsg("After Image"),
     eg_pdf:save_state(PDF),
     eg_pdf:set_fill_color(PDF,orange),
     eg_pdf:round_rect(PDF, {50,665},{250,20}, 10),
     eg_pdf:path(PDF, fill),
     eg_pdf:restore_state(PDF), 
-    
+    ?debugMsg("After restore state"),
     eg_pdf:set_fill_gray(PDF, 1.0),
     eg_pdf:set_font(PDF,"Helvetica", 12),
-    moveAndShow(PDF, 55,670,"Comcast High-Speed Internet"),
+    eg_pdf_lib:moveAndShow(PDF, 55,670,"Comcast High-Speed Internet"),
     eg_pdf:set_fill_gray(PDF, 0.0),
     
     eg_pdf:set_font(PDF,"Helvetica", 10),    
-    moveAndShow(PDF, 25,650,  "Internet Preferred"),  
-    moveAndShow(PDF, 40,640,  "Internet Preferred with"),     
-    moveAndShow(PDF, 40,630,  "Microsoft Communication"),     
-    moveAndShow(PDF, 40,620,  "Services,"),     
-    moveAndShow(PDF, 40,610,  "4 web access E-mailboxes,"),     
-    moveAndShow(PDF, 40,600,  "domain name,"),     
-    moveAndShow(PDF, 40,590,  "starter website,"),
-    moveAndShow(PDF, 25,560,  "CCO Static IP"),
-    moveAndShow(PDF, 25,545,  "PRO Modem"),    
+    eg_pdf_lib:moveAndShow(PDF, 25,650,  "Internet Preferred"),  
+    eg_pdf_lib:moveAndShow(PDF, 40,640,  "Internet Preferred with"),     
+    eg_pdf_lib:moveAndShow(PDF, 40,630,  "Microsoft Communication"),     
+    eg_pdf_lib:moveAndShow(PDF, 40,620,  "Services,"),     
+    eg_pdf_lib:moveAndShow(PDF, 40,610,  "4 web access E-mailboxes,"),     
+    eg_pdf_lib:moveAndShow(PDF, 40,600,  "domain name,"),     
+    eg_pdf_lib:moveAndShow(PDF, 40,590,  "starter website,"),
+    eg_pdf_lib:moveAndShow(PDF, 25,560,  "CCO Static IP"),
+    eg_pdf_lib:moveAndShow(PDF, 25,545,  "PRO Modem"),    
     
-    moveAndShow(PDF, 180,650,  "03/08 - 04/07"), 
-    moveAndShow(PDF, 180,560,  "03/08 - 04/07"), 
-    moveAndShow(PDF, 180,545,  "03/08 - 04/07"), 
+    eg_pdf_lib:moveAndShow(PDF, 180,650,  "03/08 - 04/07"), 
+    eg_pdf_lib:moveAndShow(PDF, 180,560,  "03/08 - 04/07"), 
+    eg_pdf_lib:moveAndShow(PDF, 180,545,  "03/08 - 04/07"), 
     
-    moveAndShow(PDF, 300 - eg_pdf:get_string_width(PDF, "Helvetica", 10, "89.95"),650, "89.95"),
-    moveAndShow(PDF, 300 - eg_pdf:get_string_width(PDF, "Helvetica", 10, "10.00"),560, "10.00"),
-    moveAndShow(PDF, 300 - eg_pdf:get_string_width(PDF, "Helvetica", 10, "0.00"),545, "0.00"),
+    eg_pdf_lib:moveAndShow(PDF, 300 - eg_pdf:get_string_width(PDF, "Helvetica", 10, "89.95"),650, "89.95"),
+    eg_pdf_lib:moveAndShow(PDF, 300 - eg_pdf:get_string_width(PDF, "Helvetica", 10, "10.00"),560, "10.00"),
+    eg_pdf_lib:moveAndShow(PDF, 300 - eg_pdf:get_string_width(PDF, "Helvetica", 10, "0.00"),545, "0.00"),
 
     eg_pdf:set_font(PDF,"Helvetica-Bold", 10),
-    moveAndShow(PDF, 25,525,  "Total Comcast High-Speed Internet"),  
-    moveAndShow(PDF, 300 - eg_pdf:get_string_width(PDF, "Helvetica-Bold", 10, "$99.95"),545, "$99.95"),
+    eg_pdf_lib:moveAndShow(PDF, 25,525,  "Total Comcast High-Speed Internet"),  
+    eg_pdf_lib:moveAndShow(PDF, 300 - eg_pdf:get_string_width(PDF, "Helvetica-Bold", 10, "$99.95"),545, "$99.95"),
 
     eg_pdf:set_dash(PDF, dot),
     eg_pdf:set_stroke_color(PDF,black),
@@ -297,20 +293,21 @@ run_test_()->
     
 %%    eg_test3:zap(PDF, xml(caption), 310, 235, 40, 9, 12, 20, ragged),    
     PtSize9 = 9,
-
+    ?debugMsg("Before eg_xml2richText"),
     TagMap9 = eg_xml2richText:default_tagMap(PtSize9),
-
+    ?debugMsg("After eg_xml2richText"),
 
     eg_block:block(PDF, xml(online), 25, 235, 240, PtSize9, 12, 20, ragged, TagMap9),
     
     eg_block:block(PDF, xml(caption), 310, 235, 240, PtSize9, 12, 20, ragged, TagMap9),    
-                                                          
     {Serialised, _PageNo} = eg_pdf:export(PDF),
-    ok = file:write_file("../testing/comcast_bill.pdf",[Serialised]),
+    Pwd = filename:absname(""),
+    ok = file:write_file("comcast_bill.pdf",[Serialised]),
+    ?debugMsg("After File write"),
     eg_pdf:delete(PDF),
     Stop = now(),
-    io:format("Duration ~p  microseconds~n",[timer:now_diff( Stop, Start)]),
-    bill_output.
+    io:format(user, "Duration ~p  microseconds~n",[timer:now_diff( Stop, Start)]),
+    ?debugMsg("Test Complete").
 
 
 

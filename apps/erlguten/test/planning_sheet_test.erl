@@ -28,13 +28,13 @@
 %% =====================================================================
 
 -module(planning_sheet_test).
--import(eg_pdf_op, [n2s/1]).
--import(eg_pdf_lib, [showGrid/2, moveAndShow/4]).
+-include_lib("eunit/include/eunit.hrl").
 
 %%
 %%  This produces a planning sheet for a selected size paper.
 %%
-run_test_()->
+run_test()->
+    ?debugMsg("Begin Test"),
     SheetSize = io:get_line("Sheet Size (see eg_pdf:pagesize) : "),
     SheetName = string:to_lower(string:strip(SheetSize -- "\n")),
     Size = list_to_atom(SheetName),
@@ -42,9 +42,9 @@ run_test_()->
     eg_pdf:set_pagesize(PDF,Size),
     {0,0,Width,Height} = eg_pdf:pagesize(Size),
     eg_pdf:set_page(PDF,1),
-    showGrid(PDF, Size),
+    eg_pdf_lib:showGrid(PDF, Size),
     
-    TestString = "Width = " ++ n2s(Width) ++ " -- Height = " ++ n2s(Height),
+    TestString = "Width = " ++ eg_pdf_op:n2s(Width) ++ " -- Height = " ++ eg_pdf_op:n2s(Height),
     LabelString = SheetName ++ " template planning sheet-",
     Stringsize = eg_pdf:get_string_width(PDF, "Times-Roman", 36, TestString),
     TargetSize = 24,
@@ -52,9 +52,9 @@ run_test_()->
     FontSize = round(TargetSize * (((Width - (2 * Indent)) / Stringsize ))),
     eg_pdf:set_font(PDF,"Times-Roman", FontSize),
     Base = round(Height * 0.71),
-    moveAndShow(PDF, Indent,Base, LabelString),
+    eg_pdf_lib:moveAndShow(PDF, Indent,Base, LabelString),
 
-    moveAndShow(PDF, Indent, Base - (FontSize + 4), TestString),
+    eg_pdf_lib:moveAndShow(PDF, Indent, Base - (FontSize + 4), TestString),
     {Serialised, _PageNo} = eg_pdf:export(PDF),
     CustomName = "../testing/" ++ SheetName ++ "_planning_sheet.pdf",
     io:format("Output to ~s~n",[CustomName]),

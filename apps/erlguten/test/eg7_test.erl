@@ -33,7 +33,8 @@
 %% This test mostly producess the same output as eg_test1.erl, but doesn't 
 %% have any images.
 %%
-run_test_()->
+run_test()->
+    ?debugMsg("Begin Test"),
     %% create needed pdf "objects"
 
     Info = [{"Author", "Mikael Karlsson"},

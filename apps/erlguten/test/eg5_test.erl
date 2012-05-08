@@ -25,7 +25,8 @@
 -include_lib("eunit/include/eunit.hrl").
 
 
-run_test_() ->
+run_test() ->
+    ?debugMsg("Begin Test"),
     test(9).
 
 test(1) -> 

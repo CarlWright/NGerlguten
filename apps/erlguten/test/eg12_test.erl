@@ -29,7 +29,8 @@
 
 %% ============================================================================
 
-run_test_()->
+run_test()->
+    ?debugMsg("Begin Test"),
     PDF = eg_pdf:new(),
     eg_pdf:set_pagesize(PDF,a4),
     eg_pdf:set_page(PDF,1),

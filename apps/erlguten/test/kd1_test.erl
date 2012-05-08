@@ -29,7 +29,8 @@
 -define(OCRFONT, "OCR-B-Digits").
 -define(OCRSIZE, 10).
 
-run_test_() ->
+run_test() ->
+    ?debugMsg("Begin Test"),
     OCR = "25042950342",
     INr = OCR,
     IDate = "2004-12-28",

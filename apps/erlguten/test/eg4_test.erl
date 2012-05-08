@@ -35,7 +35,8 @@
 -define(BLOCK_H, 104). % LINE_H + LINE_Hs * 6 (4 lines + top & bottom pad)
 
 
-run_test_()->
+run_test()->
+    ?debugMsg("Begin Test"),
     PDF = eg_pdf:new(),
     eg_pdf:set_pagesize(PDF,a4),
     eg_pdf:set_page(PDF,1),

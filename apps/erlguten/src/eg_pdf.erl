@@ -898,15 +898,17 @@ this_dir() ->
 
 font_dir() ->
     case code:priv_dir(erlguten) of
+    %% TODO: Don't think this is correct
 	{error, bad_name} ->
-	    filename:join(this_dir(), "../priv/src");
+        io:format(user,"no priv dir:~n",[]),
+	    filename:join(this_dir(), "../priv/fonts");
 	N ->
-	    filename:join(N, "priv/src")
+	    filename:join(N, "fonts")
     end.
 
 get_font_program(Handler) ->
     File = filename:join(font_dir(), atom_to_list(Handler) ++ ".pfb"),
-    %% io:format("reading Font from:~s~n",[File]),
+    io:format(user,"reading Font from:~s~n",[File]),
     P = eg_embed:parse_pfb(File),
     case P of
 	[{_,L1,B1},{_,L2,B2},{_,L3,B3}|_] ->
