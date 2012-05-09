@@ -26,10 +26,13 @@
 
 -module(eg12_test).
 -include_lib("eunit/include/eunit.hrl").
+-define(IMAGE_DIR, "../test/images/").
 
 %% ============================================================================
+run_test() ->
+  {timeout, 100, [fun report/0]}.
 
-run_test()->
+report()->
     ?debugMsg("Begin Test"),
     PDF = eg_pdf:new(),
     eg_pdf:set_pagesize(PDF,a4),
@@ -43,7 +46,7 @@ run_test()->
     eg_pdf:set_fill_color(PDF,gainsboro),
     eg_pdf:rectangle(PDF, 50,35,240,320, fill),
     io:format("Patience, this takes a bit.",[]),
-    case eg_pdf:image(PDF,"../testing/images/dice.png",{50,35}, {240,320}) of
+    case eg_pdf:image(PDF,?IMAGE_DIR ++ "dice.png",{50,35}, {240,320}) of
 	{error, Reason} -> 
 	    io:format("Image processing error with file ~s~n",[Reason]);
 	ok -> 

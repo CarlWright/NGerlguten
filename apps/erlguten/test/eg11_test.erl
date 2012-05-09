@@ -26,11 +26,11 @@
 
 -module(eg11_test).
 -include_lib("eunit/include/eunit.hrl").
-
+-define(IMAGE_DIR, "../test/images/").
 %% ============================================================================
 
 run_test()->
-    ?debugMsg(""),
+    ?debugMsg("Test Begin"),
     PDF = eg_pdf:new(),
     eg_pdf:set_pagesize(PDF,a4),
     eg_pdf:set_page(PDF,1),
@@ -45,7 +45,7 @@ run_test()->
     eg_pdf:save_state(PDF),
     eg_pdf:set_fill_color(PDF,red),
     eg_pdf:rectangle(PDF, 340,480,56,56, fill),
-    eg_pdf:image(PDF,"../testing/images/page_white_text.png", {350,500},{height,16}),
+    eg_pdf:image(PDF,?IMAGE_DIR ++ "page_white_text.png", {350,500},{height,16}),
     eg_pdf:restore_state(PDF),
     
     {Serialised, _PageNo} = eg_pdf:export(PDF),

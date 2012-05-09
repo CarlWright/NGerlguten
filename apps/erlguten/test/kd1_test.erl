@@ -25,6 +25,7 @@
 
 -module(kd1_test).
 -include_lib("eunit/include/eunit.hrl").
+-define(IMAGE_DIR, "../test/images/").
 
 -define(OCRFONT, "OCR-B-Digits").
 -define(OCRSIZE, 10).
@@ -161,7 +162,7 @@ test(Address, Nr, Date, PNr, ONr, ODate, ByDate, Items,
 
 
 their_logo(PDF, X, Y) ->
-    eg_pdf:image(PDF,'../testing/ebutik.jpg',{X,Y},{width, 150}).
+    eg_pdf:image(PDF,?IMAGE_DIR ++ 'ebutik.jpg',{X,Y},{width, 150}).
 
 
 our_logo(PDF, X, Y) ->

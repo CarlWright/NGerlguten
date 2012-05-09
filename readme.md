@@ -13,6 +13,8 @@ ErlGuten uses rebar to build, it also has a Makefile wrapper around the rebar ta
 
 1. Run `make check`
 
+The pdf output from the tests are located in the `eunit` directory `<project root>/apps/erlguten/.eunit`
+
 ### The tests 
 
 `comcast_bill`

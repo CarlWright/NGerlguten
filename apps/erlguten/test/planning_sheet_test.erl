@@ -35,12 +35,13 @@
 %%
 run_test()->
     ?debugMsg("Begin Test"),
-    SheetSize = io:get_line("Sheet Size (see eg_pdf:pagesize) : "),
-    SheetName = string:to_lower(string:strip(SheetSize -- "\n")),
+%    SheetSize = io:get_line("Sheet Size (see eg_pdf:pagesize) : "),
+%    SheetName = string:to_lower(string:strip(SheetSize -- "\n")),
+    SheetName = "a4",
     Size = list_to_atom(SheetName),
     PDF = eg_pdf:new(),
-    eg_pdf:set_pagesize(PDF,Size),
-    {0,0,Width,Height} = eg_pdf:pagesize(Size),
+    eg_pdf:set_pagesize(PDF,a4),
+    {0,0,Width,Height} = eg_pdf:pagesize(a4),
     eg_pdf:set_page(PDF,1),
     eg_pdf_lib:showGrid(PDF, Size),
     
@@ -56,8 +57,8 @@ run_test()->
 
     eg_pdf_lib:moveAndShow(PDF, Indent, Base - (FontSize + 4), TestString),
     {Serialised, _PageNo} = eg_pdf:export(PDF),
-    CustomName = "../testing/" ++ SheetName ++ "_planning_sheet.pdf",
-    io:format("Output to ~s~n",[CustomName]),
+    CustomName = "./" ++ SheetName ++ "_planning_sheet.pdf",
+    ?debugFmt("Output to ~s~n",[CustomName]),
     ok = file:write_file(CustomName,[Serialised]),
     eg_pdf:delete(PDF).
 

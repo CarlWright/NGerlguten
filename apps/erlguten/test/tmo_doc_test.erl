@@ -27,6 +27,7 @@
 -module(tmo_doc_test).
 -include_lib("eunit/include/eunit.hrl").
 -define(FONT_SIZE, 10).
+-define(XML_DIR, "../test/template/").
 
 -record(doc_info, {system    = " ",
                    type      = " ",
@@ -53,7 +54,7 @@ run_test() ->
   file().
   
 file() ->
-    file("./process.xml").
+    file(?XML_DIR ++ "process.xml").
 
 file(File_name) ->
     Outfile = "./" ++ filename:rootname(filename:basename(File_name)) ++ ".pdf",

@@ -29,11 +29,12 @@
 
 -module(comcast_bill_test).
 -include_lib("eunit/include/eunit.hrl").
+-define(IMAGE_DIR, "../test/images/").
 %%
 %%  This produces an example Comcast bill.
 %%
 run_test()->
-  ?debugMsg(""),
+  ?debugMsg("Test Begin"),
   Start = now(),
     PDF = eg_pdf:new(),
     eg_pdf:set_pagesize(PDF,letter),
@@ -59,9 +60,7 @@ run_test()->
     eg_pdf:set_stroke_color(PDF,dodgerblue),
     eg_pdf:set_line_width(PDF,2),
     eg_pdf:line(PDF, 25,700,570,700), 
-    ?debugMsg("Before Image"),
-    eg_pdf:image(PDF, "../testing/comcast_logo.jpg",{25,760},{height,20}),
-    ?debugMsg("After Image"),
+    eg_pdf:image(PDF, ?IMAGE_DIR ++ "comcast_logo.jpg",{25,760},{height,20}),
     eg_pdf:set_fill_gray(PDF, 0.0),
     eg_pdf:set_font(PDF,"Helvetica", 10),
     eg_pdf_lib:moveAndShow(PDF, 30, 705,  "Contact us:"),  
@@ -106,7 +105,7 @@ run_test()->
     eg_pdf:path(PDF, fill),
     eg_pdf:restore_state(PDF),  
     
-    eg_pdf:image(PDF, "../testing/HighSpeedInternet.jpg",{322,543},{height,15}), 
+    eg_pdf:image(PDF, ?IMAGE_DIR ++ "high_speed_internet.jpg",{322,543},{height,15}), 
     
     eg_pdf:set_fill_gray(PDF, 1.0),
     eg_pdf:set_font(PDF,"Helvetica", 14),
@@ -158,9 +157,7 @@ run_test()->
  
     eg_pdf:set_fill_gray(PDF, 0.0),
     eg_pdf:set_font(PDF,"Helvetica", 8),
-    ?debugMsg("Before moveAndShowRot"),
     eg_pdf_lib:moveAndShowRot(PDF, 585, 500, "016604 1/1", 90),
-    ?debugMsg("After moveAndShowRot"),
     
     eg_pdf:set_dash(PDF, dot),
     eg_pdf:set_stroke_color(PDF,black),
@@ -170,7 +167,7 @@ run_test()->
     CouponLine = "Detach and enclose this coupon with your payment. Please write your account number on your check or money order. Do not send cash.",
     eg_pdf_lib:moveAndShow(PDF, 277 - round(eg_pdf:get_string_width(PDF, "Helvetica", 8, CouponLine)/2),240,CouponLine),      
 
-    eg_pdf:image(PDF, "../testing/comcast_logo.jpg",{50,200},{height,20}),
+    eg_pdf:image(PDF, ?IMAGE_DIR ++ "comcast_logo.jpg",{50,200},{height,20}),
     
     eg_pdf:set_font(PDF,"Helvetica", 8),    
     eg_pdf_lib:moveAndShow(PDF, 80,180,"27800 FRANKLIN RD"),  
@@ -232,8 +229,7 @@ run_test()->
     eg_pdf:set_stroke_color(PDF,dodgerblue),
     eg_pdf:set_line_width(PDF,2),
     eg_pdf:line(PDF, 25,700,570,700), 
-    ?debugMsg("Before Image"),
-    eg_pdf:image(PDF, "../testing/comcast_logo.jpg",{25,760},{height,20}),
+    eg_pdf:image(PDF, ?IMAGE_DIR ++ "comcast_logo.jpg",{25,760},{height,20}),
 
     eg_pdf:set_fill_gray(PDF, 0.0),
     eg_pdf:set_font(PDF,"Helvetica-Bold", 10),
@@ -242,15 +238,12 @@ run_test()->
     eg_pdf_lib:moveAndShow(PDF, 220,705,  "1-800-391-3000"),  
     
     eg_pdf_lib:moveAndShow(PDF, 25,735,"Service Details"),
-    ?debugMsg("Before Image"),
-    eg_pdf:image(PDF, "../testing/HighSpeedInternet.jpg",{25,665},{height,25}),    
-    ?debugMsg("After Image"),
+    eg_pdf:image(PDF, ?IMAGE_DIR ++ "high_speed_internet.jpg",{25,665},{height,25}),    
     eg_pdf:save_state(PDF),
     eg_pdf:set_fill_color(PDF,orange),
     eg_pdf:round_rect(PDF, {50,665},{250,20}, 10),
     eg_pdf:path(PDF, fill),
     eg_pdf:restore_state(PDF), 
-    ?debugMsg("After restore state"),
     eg_pdf:set_fill_gray(PDF, 1.0),
     eg_pdf:set_font(PDF,"Helvetica", 12),
     eg_pdf_lib:moveAndShow(PDF, 55,670,"Comcast High-Speed Internet"),
@@ -293,9 +286,7 @@ run_test()->
     
 %%    eg_test3:zap(PDF, xml(caption), 310, 235, 40, 9, 12, 20, ragged),    
     PtSize9 = 9,
-    ?debugMsg("Before eg_xml2richText"),
     TagMap9 = eg_xml2richText:default_tagMap(PtSize9),
-    ?debugMsg("After eg_xml2richText"),
 
     eg_block:block(PDF, xml(online), 25, 235, 240, PtSize9, 12, 20, ragged, TagMap9),
     
@@ -303,10 +294,9 @@ run_test()->
     {Serialised, _PageNo} = eg_pdf:export(PDF),
     Pwd = filename:absname(""),
     ok = file:write_file("comcast_bill.pdf",[Serialised]),
-    ?debugMsg("After File write"),
     eg_pdf:delete(PDF),
     Stop = now(),
-    io:format(user, "Duration ~p  microseconds~n",[timer:now_diff( Stop, Start)]),
+    ?debugFmt("Test duration ~p  microseconds~n",[timer:now_diff( Stop, Start)]),
     ?debugMsg("Test Complete").
 
 

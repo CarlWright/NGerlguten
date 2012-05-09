@@ -4,3 +4,4 @@ deps/*
 apps/erlguten/ebin
 dev/*
 rel/erlguten
+.DS_Store

@@ -26,31 +26,35 @@
 
 -module(eg10_test).
 -include_lib("eunit/include/eunit.hrl").
+-define(IMAGE_DIR, "../test/images/").
 
 %% ============================================================================
+run_test() ->
+  {timeout, 100, [fun report/0]}.
 
-run_test()->
+report()->
     ?debugMsg("Begin Test"),
     PDF = eg_pdf:new(),
     eg_pdf:set_pagesize(PDF,a4),
     eg_pdf:set_page(PDF,1),
 
-    io:format("Patience, this takes a bit.",[]),    
+    ?debugMsg("Setting font Victorias-Secret, this takes a while"),    
     eg_pdf:set_font(PDF, "Victorias-Secret", 14),
+    ?debugMsg("Font Victorias-Secret set"), 
     eg_pdf_lib:moveAndShow(PDF, 100, 685, "Type 0"),
-    eg_pdf:image(PDF,"../testing/images/web-links.png", {100,700},{height,21}),
+    eg_pdf:image(PDF,?IMAGE_DIR ++ "web-links.png", {100,700},{height,21}),
     
     eg_pdf_lib:moveAndShow(PDF, 150, 685, "Type 2"),
-    eg_pdf:image(PDF,"../testing/images/ruport.png", {150,700},{width,258}),
+    eg_pdf:image(PDF,?IMAGE_DIR ++ "ruport.png", {150,700},{width,258}),
     
     eg_pdf_lib:moveAndShow(PDF, 100, 485, "Type 3"),
-    eg_pdf:image(PDF,"../testing/images/rails.png", {100,500},{height,50}),
+    eg_pdf:image(PDF,?IMAGE_DIR ++ "rails.png", {100,500},{height,50}),
     
     eg_pdf_lib:moveAndShow(PDF, 350, 185, "Type 4"),
-    eg_pdf:image(PDF,"../testing/images/page_white_text.png", {350,500},{height,16}),
+    eg_pdf:image(PDF,?IMAGE_DIR ++ "page_white_text.png", {350,500},{height,16}),
     
     eg_pdf_lib:moveAndShow(PDF, 50, 20, "Type 6"),
-    eg_pdf:image(PDF,"../testing/images/dice.png",{50,35}, {height,320}),
+    eg_pdf:image(PDF,?IMAGE_DIR ++ "dice.png",{50,35}, {height,320}),
     
     {Serialised, _PageNo} = eg_pdf:export(PDF),
     file:write_file("./eg_test10.pdf",[Serialised]),

@@ -27,6 +27,7 @@
 
 -module(eg9_test).
 -include_lib("eunit/include/eunit.hrl").
+-define(IMAGE_DIR, "../test/images/").
 
 run_test()->
     ?debugMsg("Begin Test"),
@@ -42,9 +43,9 @@ run_test()->
     draft(PDF),
 
     eg_pdf:set_page(PDF,1),
-    eg_pdf:image(PDF,'../testing/joenew.png',{390,440},{height,140}),
-    eg_pdf:image(PDF,'../testing/joenew.png',{390,200},{width,140}),
-    eg_pdf:image(PDF,'../testing/joenew.png',{190,300},{140,140}),
+    eg_pdf:image(PDF, ?IMAGE_DIR ++ 'joenew.png',{390,440},{height,140}),
+    eg_pdf:image(PDF, ?IMAGE_DIR ++ 'joenew.png',{390,200},{width,140}),
+    eg_pdf:image(PDF, ?IMAGE_DIR ++ 'joenew.png',{190,300},{140,140}),
     eg_pdf:begin_text(PDF),
     eg_pdf:set_font(PDF, "Times-Italic", 240),
     eg_pdf:set_text_pos(PDF, 60,600),

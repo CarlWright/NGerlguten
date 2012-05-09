@@ -27,6 +27,7 @@
 -module(eg3_test).
 -include("eg.hrl").
 -include_lib("eunit/include/eunit.hrl").
+-define(IMAGE_DIR, "../test/images/").
 -import(eg_pdf, [picas/1]).
 
 %% ============================================================================
@@ -68,7 +69,7 @@ run_test() ->
     TagMap8 = eg_xml2richText:default_tagMap(PtSize8),
     eg_block:block(PDF, azure, xml(narrow), 280, 650, picas(16), PtSize8,10, 38, justified, TagMap8),
     
-    eg_pdf:image(PDF,'../testing/joenew.jpg',{50, 650},{width,200}),
+    eg_pdf:image(PDF,?IMAGE_DIR ++ 'joenew.jpg',{50, 650},{width,200}),
     {Serialised, _PageNo} = eg_pdf:export(PDF),
     file:write_file("./eg_test3.pdf",[Serialised]),
     eg_pdf:delete(PDF).
