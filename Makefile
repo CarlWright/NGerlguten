@@ -15,13 +15,4 @@ dependencies:
 compile: dependencies
 	@./rebar compile
 
-distclean:
-	@rm -r rel/$(app)
-
-dist: compile
-	@./rebar generate force=1
-	@chmod 755 rel/$(app)/bin/$(app)
-
 include install.mk
-install: dist
-	@cp -R rel/$(app) $(prefix)
